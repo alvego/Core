@@ -59,18 +59,6 @@ function ns.StrContains(str, sub)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.tContainsKey(table, key)
-    local result = false
-    for name, value in pairs(table) do
-        if key == name then
-            result = true
-            break
-        end
-    end
-    return result
-end
-
-------------------------------------------------------------------------------------------------------------------
 local toStrBuffer = {}
 function ns.ToStr(...)
     local n = select('#', ...)

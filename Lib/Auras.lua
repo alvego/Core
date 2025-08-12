@@ -31,7 +31,7 @@ function ns.HasBuff(buffName, unit, last, my, method)
     unit = unit or 'player'
     if buffName then
         if last == nil then
-            last = 0.05
+            last = ns.advance
         end
         if method == nil then
             method = UnitBuff

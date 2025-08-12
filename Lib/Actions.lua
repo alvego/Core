@@ -78,7 +78,7 @@ function ns.CanUseSlot(slot)
     if ActionHasRange(slot) and IsActionInRange(slot) == 0 then
         return false, '!range'
     end
-    if ns.GetSlotCooldownLeft(slot) > 0.05 then
+    if ns.GetSlotCooldownLeft(slot) > ns.advance then
         return false, '!ready'
     end
     return true, ''
@@ -125,6 +125,7 @@ function ns.UseAction(action, info)
         lastSlot = slot
         if slot ~= 0 and slot <= 72 then -- 12 * 6
             ns.State.lastAction = action
+            ns.TimerStart(action)
             local icon = GetActionTexture(slot)
             ns.Log(format('%s %s, %s', icon and "|T" .. icon .. ":24:24:0:-6|t" or "", action or '-', info or '...'))
         end
@@ -136,7 +137,7 @@ end
 ------------------------------------------------------------------------------------------------------------------
 function ns.IsReadyAction(action)
     local slot = ns.GetSlot(action)
-    return ns.GetSlotCooldownLeft(slot) < 0.05
+    return ns.GetSlotCooldownLeft(slot) < ns.advance
 end
 
 ------------------------------------------------------------------------------------------------------------------

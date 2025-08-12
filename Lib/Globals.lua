@@ -9,4 +9,5 @@ ns.playerClass = select(1, UnitClass('player'))
 ns.playerGUID  = UnitGUID('player')
 ns.playerName = UnitName('player')
 ns.IsDebug = GetCVar('scriptErrors') == '1'
+ns.advance = 0.05
 ------------------------------------------------------------------------------------------------------------------

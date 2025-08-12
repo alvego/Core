@@ -80,11 +80,11 @@ function ns:GetAction()
     local dist10 = CheckInteractDistance('target', 3) == 1
     local fireSpell = "Огненный шар"
 
-    if not dist10 and ns.State.still and not ns.HasMyDebuff(fireSpell) and not ns.State.combatTarget then
+    if not dist10 and ns.State.still and ns.TimerMore(fireSpell, 3) and not ns.HasMyDebuff(fireSpell) and not ns.State.combatTarget then
         return fireSpell, 'пока не сагрил'
     end
 
-    if IsUsableSpell("Живая бомба") and ns.State.lastAction ~= "Живая бомба" and not ns.HasMyDebuff("Живая бомба") then
+    if IsUsableSpell("Живая бомба") and ns.TimerMore("Живая бомба", 2) and not ns.HasMyDebuff("Живая бомба") then
         return "Живая бомба", 'bomb'
     end
 
@@ -109,7 +109,7 @@ function ns:GetAction()
             return "Чародейский взрыв", 'слив маны'
         end
     end
-    if ns.State.still and not scorch and ns.State.lastAction ~= "Ожог" then
+    if ns.State.still and not scorch and ns.TimerMore("Ожог", 2) then
         return "Ожог", 'scorch'
     end
 
