@@ -10,10 +10,11 @@ ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 function ns:GetAction()
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'занят, кастую ' .. ns.State.playerCasting
+        return 'none', 'занят, кастую [' .. ns.State.playerCasting .. ']'
     end
 
-    if ns.State.gcd then return 'none', 'гкд' end
+    if ns.State.gcd then return 'none', 'глобальный кулдаун' end
+    if ns.State.playerHP100 < 60 then return 'Омоложение', 'хилимся hp < 60%' end
     if ns.State.playerHP100 < 40 then return 'Целительное прикосновение', 'хилимся hp < 40%' end
     if not ns.HasBuff('дикой природы') then return 'Знак дикой природы', 'обмазываемся природой' end
     if not ns.HasBuff('Шипы') then return 'Шипы', 'распределяем колючки' end

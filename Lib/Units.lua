@@ -62,7 +62,7 @@ function ns.IsInvalidTarget(unit)
     unit = unit or 'target'
     if not UnitExists(unit) then return 'остутствует ' .. unit end
     if not UnitCanAttack("player", unit) then return 'не могу бить ' .. unit end
-    if UnitIsDeadOrGhost(unit) and not ns.HasBuff('Притвориться мертвым', unit) then return unit .. 'мертв' end
+    if UnitIsDeadOrGhost(unit) and not ns.HasBuff('Притвориться мертвым', unit) then return unit .. ' мертв' end
     return false
 end
 

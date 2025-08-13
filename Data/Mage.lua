@@ -26,7 +26,7 @@ function ns:GetAction()
     end
 
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую ' .. ns.State.playerCasting
+        return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
 
     ---- AOE

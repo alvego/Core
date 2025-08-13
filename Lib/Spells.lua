@@ -14,6 +14,7 @@ local GetSpellLink = GetSpellLink
 local IsSpellInRange = IsSpellInRange
 local GetSpellCooldown = GetSpellCooldown
 local IsUsableSpell = IsUsableSpell
+local format = format
 local div1000 = 0.001 -- 1 / 1000
 ------------------------------------------------------------------------------------------------------------------
 function ns.UnitCasting(unit)
@@ -114,22 +115,38 @@ function ns.IsUsableSpell(spell, unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+local lastErrorSpell
+local function spellError(spell, msg)
+    ns.DebugChatNoSpam(
+        format('        [%s] %s', spell or 'Ошибка', msg or 'Что-то пошло не так'),
+        'ff0000')
+end
 local function onEvent(event, ...)
     if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
-        local _, eventType, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName = select(
-            1, ...)
-        if (sourceGUID == ns.State.playerGUID and (eventType:match("^SPELL_CAST") or eventType == 'SPELL_SUMMON')) then
-            --print('CLEU', eventType, sourceName, destName, spellName)
+        local timestamp, type, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellId, spellName, spellSchool, amount, info = ...
+        if sourceGUID ~= ns.State.playerGUID then return end
+        if type:match("^SPELL_CAST") then
             ns.TimerStart(spellName)
+            if type:match("SPELL_CAST_FAILED") then
+                spellError(spellName, amount)
+            else
+                lastErrorSpell = nil
+            end
         end
         return
+    end
+    if event:match("UI_ERROR_MESSAGE") then
+        local message = ...
+        spellError(lastErrorSpell, message)
+        return
+    end
+    local source, spellName = select(1, ...)
+    if source ~= 'player' then return end
+    ns.TimerStart(spellName)
+    if event:match('UNIT_SPELLCAST_FAILED') then
+        lastErrorSpell = spellName
     else
-        local source, spellName = select(1, ...)
-        if source == 'player' then
-            --print(event, source, spellName)
-            ns.TimerStart(spellName)
-        end
-        return
+        lastErrorSpell = nil
     end
 end
 ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onEvent)
@@ -142,7 +159,9 @@ ns.AttachEvent('UNIT_SPELLCAST_INTERRUPTED', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_START', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
+ns.AttachEvent('UI_ERROR_MESSAGE', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_INTERRUPTED', onEvent)
+
 
 
 -- if ns.TimerMore('Удар грома', 3) then
@@ -152,4 +171,6 @@ ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_INTERRUPTED', onEvent)
 -- if ns.TimerLess('Удар грома', 3) then
 --     print('Удар грома был и был менее 3 секунд назад')
 -- end
+
+
 ------------------------------------------------------------------------------------------------------------------

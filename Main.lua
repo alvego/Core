@@ -28,7 +28,7 @@ local function getAction()
   if btn then
     local btnName = ns.GetSlotName(btn)
     btnName = btnName and ' [' .. btnName .. ']' or ''
-    return 'none', 'Button' .. btn .. btnName .. ' зажата'
+    return 'none', 'зажата Button' .. btn .. btnName
   end
   if GetCurrentKeyBoardFocus() then
     return 'none', 'чат'
@@ -59,7 +59,7 @@ function ns.TryTarget()
   end
 
   if not ns.State.attack and not (ns.State.combatTarget or ns.State.autoattack) then
-    return 'none', 'Цель не в бою, не нажата атака и не вкл автоатака'
+    return 'none', 'цель не в бою, не нажата атака и не вкл автоатака'
   end
 
   if ns.State.autoattack then
