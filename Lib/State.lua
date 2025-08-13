@@ -4,7 +4,6 @@
 local _, ns = ...
 ------------------------------------------------------------------------------------------------------------------
 local UnitGUID = UnitGUID
-local GetCVar = GetCVar
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
 local IsInInstance = IsInInstance
@@ -20,7 +19,6 @@ local GetUnitSpeed = GetUnitSpeed
 local IsFalling = IsFalling
 ------------------------------------------------------------------------------------------------------------------
 ns.State = {}
-ns.State.debug = true
 
 local playerClass, playerColor = ns.UnitClassName()
 ns.State.playerClass = playerClass
@@ -39,10 +37,10 @@ local function duelUpdate(event)
 end
 ns.AttachEvent('DUEL_REQUESTED', duelUpdate)
 ns.AttachEvent('DUEL_FINISHED', duelUpdate)
-
 ------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 function ns.UpdateState()
-    ns.State.debug = GetCVar('scriptErrors') == '1'
+    ns.State.debug = ns.UpdateDebugState()
     ns.State.attack = ns.IsMouse(4)
     ns.State.stop = ns.IsMouse(5)
     ns.State.pressedButton = ns.ButtonIsPressed()

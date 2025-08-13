@@ -8,18 +8,20 @@
 Lib\Globals.lua
 Lib\Timers.lua
 Lib\Misc.lua
-Lib\Log.lua
 Lib\Data.lua
 Lib\Events.lua
+Lib\Debug.lua
 Lib\Semaphore.lua
+Lib\Log.lua
 Lib\Chat.lua
+Lib\Telemetry.lua
 Lib\Units.lua
 Lib\Modificators.lua
 Lib\Actions.lua
 Lib\Spells.lua
 Lib\Auras.lua
 Lib\State.lua
-Lib\Telemetry.lua
+
 
 Data\DeathKnight.lua
 Data\Druid.lua

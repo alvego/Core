@@ -11,6 +11,7 @@ local GetActionInfo = GetActionInfo
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
+local GetActionTexture = GetActionTexture
 ------------------------------------------------------------------------------------------------------------------
 function ns.GetSlotName(slot)
     local name = nil
@@ -29,10 +30,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 local actions = {}
-local updateActions = function(event, ...)
-    if event == 'ADDON_LOADED' and select(1, ...) ~= name then
-        return
-    end
+local updateActions = function()
     wipe(actions)
     for slot = 1, 36 do -- 12 x 3
         local name = ns.GetSlotName(slot)
@@ -41,7 +39,6 @@ local updateActions = function(event, ...)
         end
     end
 end
-ns.AttachEvent('ADDON_LOADED', updateActions)
 ns.AttachEvent('ACTIONBAR_SLOT_CHANGED', updateActions)
 ns.AttachEvent('PLAYER_ENTERING_WORLD', updateActions)
 
@@ -105,7 +102,12 @@ function ns.GetSlot(action)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+local function formatIcon(icon)
+    return icon and "|T" .. icon .. ":24:24:0:0|t" or ""
+end
+------------------------------------------------------------------------------------------------------------------
 local lastSlot = 0
+local lastLog = ''
 function ns.UseAction(action, info)
     if action == nil then
         error("action can't be nil")
@@ -116,8 +118,19 @@ function ns.UseAction(action, info)
     local slot = ns.GetSlot(action)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
 
-    ns.State.telemetry = format('%s, %s %s', action or '-', info or '-', canuseinfo or '')
+    --ns.State.telemetry = format('%s, %s %s', action or '-', info or '-', canuseinfo or '')
 
+    local log = format('        [%s] %s %s', action or '...', info or '???', canuseinfo or '')
+    if log ~= lastLog then
+        lastLog = log
+        local hex = 'ffff88'
+        if slot == 0 then
+            hex = '888888'
+        elseif not canuse then
+            hex = 'ff8888'
+        end
+        ns.DebugChatNoSpam(log, hex)
+    end
     if not canuse then slot = 0 end
 
     if lastSlot ~= slot then
@@ -127,10 +140,10 @@ function ns.UseAction(action, info)
             ns.State.lastAction = action
             ns.TimerStart(action)
             local icon = GetActionTexture(slot)
-            ns.Log(format('%s %s, %s', icon and "|T" .. icon .. ":24:24:0:-6|t" or "", action or '-', info or '...'))
+            ns.DebugChat(
+                format('%s [%s] %s', formatIcon(icon), action or '...', info or '???'),
+                '00BFFF')
         end
-    else
-        --ns.Chat(ns.State.telemetry)
     end
 end
 
@@ -151,7 +164,7 @@ function ns.ButtonIsPressed()
     for i = 1, 72 do -- 12 x 6
         local btn = _G['BT4Button' .. i]
         if btn and btn:GetButtonState() == 'PUSHED' and lastSlot ~= i then
-            return 'Button' .. i
+            return i
         end
     end
     return nil

@@ -10,6 +10,7 @@ local tostring = tostring;
 local select = select
 local table_concat = table.concat
 local wipe = wipe
+local format = format
 ------------------------------------------------------------------------------------------------------------------
 local hexCache = {}
 function ns.Hex2Rgb(hex)

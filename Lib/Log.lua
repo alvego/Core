@@ -21,13 +21,14 @@ frame:SetMaxLines(MAX_MESSAGES)                    -- Максимум сооб�
 frame:SetSpacing(3)                                -- Расстояние между строками
 frame:SetInsertMode("TOP")                         -- Новые сообщения сверху
 ------------------------------------------------------------------------------------------------------------------
-function ns.UpdateLog()
+local function updateLogVisibility()
     if ns.State.debug then
         if not frame:IsVisible() then frame:Show() end
         return
     end
     if frame:IsVisible() then frame:Hide() end
 end
+ns.AttachUpdateDebugState(updateLogVisibility)
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.Log(text, hex)

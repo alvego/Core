@@ -15,18 +15,23 @@ frame:SetPoint('TOPLEFT', 110, 0)
 frame:SetScale(1);
 frame:SetAlpha(1)
 ------------------------------------------------------------------------------------------------------------------
-local _telemetry = ''
-function ns.UpdateTelemetry()
+local function updateTelemetryVisibility()
     if not ns.State.debug then
         if frame:IsVisible() then frame:Hide() end
         return
     end
-    local telemetry = ns.State.telemetry or ''
     if not frame:IsVisible() then frame:Show() end
+end
+ns.AttachUpdateDebugState(updateTelemetryVisibility)
+------------------------------------------------------------------------------------------------------------------
+
+local _telemetry = ''
+function ns.UpdateTelemetry()
+    local telemetry = ns.State.telemetry or ''
     if telemetry ~= _telemetry then
         _telemetry = telemetry
         frame.text:SetText(telemetry)
     end
 end
-------------------------------------------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------------------------------------------

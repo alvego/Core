@@ -26,7 +26,9 @@ local function getAction()
   end
   local btn = ns.State.pressedButton
   if btn then
-    return 'none', btn .. ' pressed'
+    local btnName = ns.GetSlotName(btn)
+    btnName = btnName and ' [' .. btnName .. ']' or ''
+    return 'none', 'Button' .. btn .. btnName .. ' pressed'
   end
   if GetCurrentKeyBoardFocus() then
     return 'none', 'chat'
@@ -76,7 +78,6 @@ end
 ------------------------------------------------------------------------------------------------------------------
 function ns.Idle()
   ns.UpdateState()
-  ns.UpdateLog()
   local action, info = getAction();
   ns.UseAction(action, info)
   ns.UpdateTelemetry()

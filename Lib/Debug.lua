@@ -3,7 +3,24 @@
 ------------------------------------------------------------------------------------------------------------------
 local _, ns = ...
 ------------------------------------------------------------------------------------------------------------------
-if Paused == nil then Paused = false end
+local GetCVar = GetCVar
 ------------------------------------------------------------------------------------------------------------------
-ns.advance = 0.05
+local funcList = {}
+function ns.AttachUpdateDebugState(func)
+    if nil == func then error("Func can't be nil") end
+    tinsert(funcList, func)
+end
 ------------------------------------------------------------------------------------------------------------------
+local state = nil
+function ns.UpdateDebugState()
+    local scriptErrors = GetCVar('scriptErrors') == '1'
+    if state ~= scriptErrors then
+        state = scriptErrors
+        for i = 1, #funcList do
+            funcList[i](state)
+        end
+    end
+    return state
+end
+------------------------------------------------------------------------------------------------------------------
+
