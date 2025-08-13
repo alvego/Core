@@ -19,6 +19,7 @@ Lib\Modificators.lua
 Lib\Actions.lua
 Lib\Spells.lua
 Lib\Auras.lua
+Lib\Latency.lua
 Lib\State.lua
 
 

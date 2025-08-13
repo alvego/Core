@@ -28,6 +28,7 @@ function ns.UnitCasting(unit)
     end
     if spell == nil or not startTime or not endTime then return nil end
     local left = endTime * div1000 - GetTime()
+    if left < ns.State.latency then return nil end
     local canInterrupt = not notInterruptible
     local duration = (endTime - startTime) * div1000
     return spell, left, duration, channel, canInterrupt
@@ -100,7 +101,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.IsReadySpell(spell)
-    return ns.getSpellCooldownLeft(spell) < ns.advance
+    return ns.getSpellCooldownLeft(spell) < ns.State.latency
 end
 
 ------------------------------------------------------------------------------------------------------------------

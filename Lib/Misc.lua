@@ -97,3 +97,7 @@ function ns.IsChanged(key, value)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+function ns.Round(number, decimals)
+    local multiplier = 10 ^ decimals
+    return math.floor(number * multiplier + 0.5) / multiplier
+end

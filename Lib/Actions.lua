@@ -75,7 +75,7 @@ function ns.CanUseSlot(slot)
     if ActionHasRange(slot) and IsActionInRange(slot) == 0 then
         return false, '!range'
     end
-    if ns.GetSlotCooldownLeft(slot) > ns.advance then
+    if ns.GetSlotCooldownLeft(slot) > ns.State.latency then
         return false, '!ready'
     end
     return true, ''
@@ -148,7 +148,7 @@ end
 ------------------------------------------------------------------------------------------------------------------
 function ns.IsReadyAction(action)
     local slot = ns.GetSlot(action)
-    return ns.GetSlotCooldownLeft(slot) < ns.advance
+    return ns.GetSlotCooldownLeft(slot) < ns.State.latency
 end
 
 ------------------------------------------------------------------------------------------------------------------

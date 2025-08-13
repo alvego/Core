@@ -16,6 +16,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitLevel = UnitLevel
 local UnitGUID = UnitGUID
 local UnitThreatSituation = UnitThreatSituation
+local UnitAffectingCombat = UnitAffectingCombat
 ------------------------------------------------------------------------------------------------------------------
 local classHex = {
     ['ROGUE'] = 'FFF468',

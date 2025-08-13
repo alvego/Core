@@ -31,7 +31,7 @@ function ns.HasBuff(buffName, unit, last, my, method)
     unit = unit or 'player'
     if buffName then
         if last == nil then
-            last = ns.advance
+            last = ns.State.latency
         end
         if method == nil then
             method = UnitBuff

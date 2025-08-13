@@ -77,6 +77,8 @@ function ns:GetAction()
         end
     end
 
+    if ns.State.gcd then return 'none', 'gcd' end
+
     local dist10 = CheckInteractDistance('target', 3) == 1
     local fireSpell = "Огненный шар"
 

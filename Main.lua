@@ -14,30 +14,30 @@ end
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if Paused then
-    return 'none', 'paused'
+    return 'none', 'пауза'
   end
 
   if UnitIsDeadOrGhost("player") then
-    return 'none', 'RIP'
+    return 'none', 'ты мертв'
   end
 
   if SpellIsTargeting() then
-    return 'mouse1', 'spell targeting' -- left mouse click
+    return 'mouse1', 'делаем выбор области' -- left mouse click
   end
   local btn = ns.State.pressedButton
   if btn then
     local btnName = ns.GetSlotName(btn)
     btnName = btnName and ' [' .. btnName .. ']' or ''
-    return 'none', 'Button' .. btn .. btnName .. ' pressed'
+    return 'none', 'Button' .. btn .. btnName .. ' зажата'
   end
   if GetCurrentKeyBoardFocus() then
-    return 'none', 'chat'
+    return 'none', 'чат'
   end
   if ns.State.mount or ns.State.vehicle then
     if ns.State.attack then
-      return 'dismount', 'mount attack'
+      return 'dismount', 'спешится, зажата атака'
     end
-    return 'none', 'mount'
+    return 'none', 'верхом'
   end
   if not ns.State.attack and ns.State.playerEat then
     return 'none', ns.State.playerEat
@@ -50,27 +50,27 @@ function ns.TryTarget()
   if ns.State.invalidTarget then
     if ns.State.combatMode or ns.State.attack then
       if ns.State.pvp then
-        return 'tarpvp', 'select pvp target'
+        return 'tarpvp', 'выбор цели-игрока'
       end
-      return 'tar', 'select target'
+      return 'tar', 'выбор цели'
     end
 
     return 'none', ns.State.invalidTarget
   end
 
-  if not ns.State.attack and not ns.State.combatTarget then
-    return 'none', 'target !combat & !attack'
+  if not ns.State.attack and not (ns.State.combatTarget or ns.State.autoattack) then
+    return 'none', 'Цель не в бою, не нажата атака и не вкл автоатака'
   end
 
   if ns.State.autoattack then
     if not ns.State.attack then
       local debuff = ns.HasDebuff(stopAttackDebuff)
       if debuff then
-        return 'stopattack', '!attack ' .. debuff
+        return 'stopattack', 'не бъем в ' .. debuff
       end
     end
   else
-    return 'startattack', 'attack'
+    return 'startattack', 'автоатака'
   end
   return false, ''
 end

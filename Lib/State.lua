@@ -76,6 +76,9 @@ function ns.UpdateState()
     ns.State.speed = GetUnitSpeed('player')
     ns.State.still = ns.State.speed == 0 and not IsFalling()
 
+    ns.State.latency = ns.GetLatency()
+    ns.State.gcd = not ns.IsReadySpell(61304)
+
     if Paused then
         if ns.State.attack then
             Paused = false
@@ -85,25 +88,6 @@ function ns.UpdateState()
             Paused = true
         end
     end
-
-    ns.State.telemetry = format(
-        'RUN: %s, SPD: %s, PVP: %s',
-        Paused and '0' or '1',
-        ns.State.speed,
-        ns.State.pvp and '1' or '0'
-    )
 end
 
 ------------------------------------------------------------------------------------------------------------------
--- local function onEvent(event, ...)
---     if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
---         local _, eventType, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName = select(
---             1, ...)
---         if (sourceGUID == ns.State.playerGUID and eventType:match("^SPELL_CAST")) then
---             --print(eventType, sourceName, destName, spellName)
---             ns.State.lastUsed = spellName
---         end
---         return
---     end
--- end
--- ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onEvent)

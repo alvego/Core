@@ -121,10 +121,8 @@ ns.AttachEvent("PLAYER_LOGIN", CreateDebugChatTab)
 ------------------------------------------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений
 function ns.DebugChat(msg, hex)
-    if not ns.State.debug then
-        return
-    end
-
+    if not ns.State.debug then return end
+    if msg == nil then return end
     local chatFrame = getDebugChatFrame()
     if not chatFrame then return end
     local r, g, b = ns.Hex2Rgb(hex or '88FF88')
@@ -161,6 +159,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.Chat(msg, hexColor)
+    if msg == nil then return end
     hexColor = hexColor or '88FF88'
     local key = 'ns.Chat:' .. hexColor
     if not ns.IsChanged(key, msg) and ns.TimerLess(key, 2) then return end
@@ -171,6 +170,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.Echo(msg) -- Показ сообщения в UIErrorsFrame
+    if msg == nil then return end
     UIErrorsFrame:Clear()
     UIErrorsFrame:AddMessage(msg, 0.0, 1.0, 0.0, 53, 2);
 end
