@@ -10,20 +10,9 @@ local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
 local ChatFrame_RemoveAllChannels = ChatFrame_RemoveAllChannels
 local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
+local FCF_SelectDockFrame = FCF_SelectDockFrame
 local GetCVar = GetCVar
 local format = format
-------------------------------------------------------------------------------------------------------------------
-local cache = {}
-function ns.Chat(msg, hexColor)
-    hexColor = hexColor or '88FF88'
-    local timerName = 'chat' .. hexColor
-    if cache[timerName] == msg and ns.TimerLess(timerName, 2) then return end
-    local r, g, b = ns.Hex2Rgb(hexColor)
-    DEFAULT_CHAT_FRAME:AddMessage(msg, r, g, b);
-    ns.TimerStart(timerName)
-    cache[timerName] = msg
-end
-
 ------------------------------------------------------------------------------------------------------------------
 -- Имя новой вкладки чата
 local DEBUG_TAB_NAME = "Debug"
@@ -42,37 +31,13 @@ local function getDebugChatFrame()
     return debugChatFrame, tab
 end
 
--- Функция для вывода отладочных сообщений
-function ns.DebugChat(msg, hex)
-    if not ns.State.debug then
-        return
-    end
-
-    local chatFrame = getDebugChatFrame()
-    if not chatFrame then return end
-    local r, g, b = ns.Hex2Rgb(hex or '88FF88')
-    chatFrame:AddMessage(msg, r, g, b)
-end
-
--- Функция для вывода отладочных сообщений  без спама
-local last = nil
-function ns.DebugChatNoSpam(msg, hex)
-    local current = msg .. hex
-    if last == current then
-        return
-    end
-    last = current
-    ns.DebugChat(msg, hex)
-end
-
 -- Функция для управления видимостью вкладки
-local function updateDebugTabVisibility()
-    local showErrors = GetCVar("scriptErrors") == "1"
+local function updateDebugTabVisibility(visible)
     local chatFrame, tab = getDebugChatFrame()
 
     if chatFrame then
         if tab:IsShown() then
-            if not showErrors then
+            if not visible then
                 if chatFrame.isDocked and chatFrame:IsShown() then
                     local firstChatFrame = _G["ChatFrame1"]
                     if firstChatFrame then
@@ -82,7 +47,7 @@ local function updateDebugTabVisibility()
                 chatFrame:Hide()
                 tab:Hide()
             end
-        elseif showErrors then
+        elseif visible then
             tab:Show()
             if chatFrame.isDocked then
                 FCF_SelectDockFrame(chatFrame)
@@ -153,6 +118,61 @@ local function CreateDebugChatTab()
 end
 ns.AttachEvent("PLAYER_LOGIN", CreateDebugChatTab)
 
+------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода отладочных сообщений
+function ns.DebugChat(msg, hex)
+    if not ns.State.debug then
+        return
+    end
 
--- Пример использования
---ns.DebugMsg("Тестовое отладочное сообщение!", 1, 1, 0)
+    local chatFrame = getDebugChatFrame()
+    if not chatFrame then return end
+    local r, g, b = ns.Hex2Rgb(hex or '88FF88')
+    chatFrame:AddMessage(msg, r, g, b)
+end
+
+------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода отладочных сообщений  без спама
+function ns.DebugChatNoSpam(msg, hex)
+    if not ns.IsChanged('ns.DebugChatNoSpam', msg .. hex) then
+        return
+    end
+    ns.DebugChat(msg, hex)
+end
+
+------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода отладочных сообщений без частого спама
+function ns.Log(...)
+    local log = ns.ToStr(...)
+    if not ns.IsChanged('ns.Log', log) and ns.TimerLess('ns.Log', 1) then
+        return
+    end
+    ns.TimerStart('ns.Log')
+    ns.DebugChat(format('[%s]: %s', ns.GetCurrentTime(), log), '0066AA')
+end
+
+------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода сообщений об ошибках без спама
+function ns.Error(...)
+    local error = ns.ToStr(...)
+    if not ns.IsChanged('ns.Error', error) then return end
+    ns.DebugChat('Ошибка: ' .. error, 'FF0000')
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.Chat(msg, hexColor)
+    hexColor = hexColor or '88FF88'
+    local key = 'ns.Chat:' .. hexColor
+    if not ns.IsChanged(key, msg) and ns.TimerLess(key, 2) then return end
+    local r, g, b = ns.Hex2Rgb(hexColor)
+    DEFAULT_CHAT_FRAME:AddMessage(msg, r, g, b);
+    ns.TimerStart(key)
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.Echo(msg) -- Показ сообщения в UIErrorsFrame
+    UIErrorsFrame:Clear()
+    UIErrorsFrame:AddMessage(msg, 0.0, 1.0, 0.0, 53, 2);
+end
+
+------------------------------------------------------------------------------------------------------------------

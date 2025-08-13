@@ -20,6 +20,7 @@ function ns.AttachEvent(event, func)
     tinsert(funcList, func)
     eventList[event] = funcList
 end
+
 ------------------------------------------------------------------------------------------------------------------
 -- Выполняем обработчики соответсвующего события
 local function onEvent(self, event, ...)
@@ -33,7 +34,7 @@ local function onEvent(self, event, ...)
 end
 frame:SetScript("OnEvent", onEvent)
 ------------------------------------------------------------------------------------------------------------------
-local busy = false
+local busy = false -- we don't use ns.IsChnaged for speed reasons
 local function lockedIdle()
     busy = true
     if type(ns.Idle) == 'function' then ns.Idle() end
@@ -51,4 +52,3 @@ local function onUpdate(frame, elapsed)
 end
 frame:SetScript("OnUpdate", onUpdate)
 ------------------------------------------------------------------------------------------------------------------
-

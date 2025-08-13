@@ -11,6 +11,7 @@ local select = select
 local table_concat = table.concat
 local wipe = wipe
 local format = format
+local time = time
 ------------------------------------------------------------------------------------------------------------------
 local hexCache = {}
 function ns.Hex2Rgb(hex)
@@ -67,15 +68,32 @@ function ns.ToStr(...)
     for i = 1, n do
         toStrBuffer[i] = tostring(select(i, ...))
     end
-    local str = table_concat(toStrBuffer)
+    local str = table_concat(toStrBuffer, ' ')
     wipe(toStrBuffer)
     return str
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.Echo(msg) -- Показ сообщения в UIErrorsFrame
-    UIErrorsFrame:Clear()
-    UIErrorsFrame:AddMessage(msg, 0.0, 1.0, 0.0, 53, 2);
+function ns.GetCurrentTime()
+    -- Получаем локальное время в секундах
+    local t = time()
+    -- Вычисляем часы, минуты, секунды
+    local hours = math.floor(t / 3600) % 24
+    local minutes = math.floor(t / 60) % 60
+    local seconds = math.floor(t % 60)
+    -- Форматируем результат в hh:mm:ss
+    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
+end
+
+------------------------------------------------------------------------------------------------------------------
+local lastValues = {}
+function ns.IsChanged(key, value)
+    local lastValue = lastValues[key]
+    if lastValue == value then
+        return false -- value not changed
+    end
+    lastValues[key] = value
+    return true -- value changed
 end
 
 ------------------------------------------------------------------------------------------------------------------

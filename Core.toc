@@ -12,7 +12,6 @@ Lib\Data.lua
 Lib\Events.lua
 Lib\Debug.lua
 Lib\Semaphore.lua
-Lib\Log.lua
 Lib\Chat.lua
 Lib\Telemetry.lua
 Lib\Units.lua

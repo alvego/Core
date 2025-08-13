@@ -87,7 +87,7 @@ function ns.GetSlot(action)
         return 0
     end
     if not action then
-        ns.Log('Неверное действие. Используй none для бездействия.', 'FF0000');
+        ns.Error('Неверное действие. Используй none для бездействия.');
         return 0
     end
     if action == 'mouse1' then
@@ -95,7 +95,7 @@ function ns.GetSlot(action)
     end
     local slot = actions[action]
     if not slot then
-        ns.Log(action .. ' не найдено на панели.', 'FF0000');
+        ns.Error('Не могу найти на панели [' .. action .. ']');
         return 0
     end
     return slot
@@ -113,12 +113,10 @@ function ns.UseAction(action, info)
         error("action can't be nil")
     end
     if info == nil then
-        ns.Log(action .. " can have info!")
+        ns.Error(action .. " can have info!")
     end
     local slot = ns.GetSlot(action)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
-
-    --ns.State.telemetry = format('%s, %s %s', action or '-', info or '-', canuseinfo or '')
 
     local log = format('        [%s] %s %s', action or '...', info or '???', canuseinfo or '')
     if log ~= lastLog then
@@ -134,8 +132,8 @@ function ns.UseAction(action, info)
     if not canuse then slot = 0 end
 
     if lastSlot ~= slot then
-        ns.Semaphore(slot)
         lastSlot = slot
+        ns.Semaphore(slot)
         if slot ~= 0 and slot <= 72 then -- 12 * 6
             ns.State.lastAction = action
             ns.TimerStart(action)

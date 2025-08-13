@@ -4,23 +4,23 @@
 local _, ns = ...
 ------------------------------------------------------------------------------------------------------------------
 local GetCVar = GetCVar
+local tinsert = tinsert
 ------------------------------------------------------------------------------------------------------------------
 local funcList = {}
-function ns.AttachUpdateDebugState(func)
+function ns.AttachUpdateDebugState(func) -- not use ns.State.debug in func
     if nil == func then error("Func can't be nil") end
     tinsert(funcList, func)
 end
+
 ------------------------------------------------------------------------------------------------------------------
-local state = nil
-function ns.UpdateDebugState()
+function ns.UpdateDebugState() -- call all subscribers
     local scriptErrors = GetCVar('scriptErrors') == '1'
-    if state ~= scriptErrors then
-        state = scriptErrors
+    if ns.IsChanged('scriptErrors', scriptErrors) then
         for i = 1, #funcList do
-            funcList[i](state)
+            funcList[i](scriptErrors)
         end
     end
-    return state
+    return scriptErrors
 end
-------------------------------------------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------------------------------------------

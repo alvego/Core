@@ -78,15 +78,20 @@ function ns.UpdateState()
 
     if Paused then
         if ns.State.attack then
-            ns.Echo('Attack')
             Paused = false
         end
     else
         if ns.State.stop then
-            ns.Echo('Stop')
             Paused = true
         end
     end
+
+    ns.State.telemetry = format(
+        'RUN: %s, SPD: %s, PVP: %s',
+        Paused and '0' or '1',
+        ns.State.speed,
+        ns.State.pvp and '1' or '0'
+    )
 end
 
 ------------------------------------------------------------------------------------------------------------------
