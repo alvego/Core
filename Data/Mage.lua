@@ -18,15 +18,15 @@ function ns:GetAction()
     local aoe = ns.IsCtr()
 
     if aoe and ns.State.playerCasting and not tContains(aoeCast, ns.State.playerCasting) then
-        return 'stopcast', 'aoe, stop: ' .. ns.State.playerCasting
+        return 'stopcast', 'нужно aoe, стопаем: ' .. ns.State.playerCasting
     end
 
     if ns.State.playerCasting == "Огненная глыба" then
-        return 'stopcast', 'только по проку, stop: ' .. ns.State.playerCasting
+        return 'stopcast', 'только по проку, не кастим: ' .. ns.State.playerCasting
     end
 
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'casting ' .. ns.State.playerCasting
+        return 'none', 'кастую ' .. ns.State.playerCasting
     end
 
     ---- AOE
@@ -38,17 +38,17 @@ function ns:GetAction()
         if ns.State.lastAction ~= "Снежная буря" then
             return "Снежная буря", 'aoe: морозим'
         end
-        return 'none', 'aoe'
+        return 'none', 'нечем болше aoe-шить'
     end
 
 
     ---- buffs
     if not ns.State.existsTarget and not ns.State.attack then
         if not ns.HasBuff("Морозный доспех") then
-            return "Морозный доспех", 'buff1'
+            return "Морозный доспех", 'доспех ннадда'
         end
         if not ns.HasBuff(intBuff) then
-            return "Чародейский интеллект", 'buff2'
+            return "Чародейский интеллект", 'обмазываемся интеллектом'
         end
     end
 
@@ -68,11 +68,11 @@ function ns:GetAction()
     if force then
         if ns.State.pvp then
             if ns.IsReadyAction("Возгорание") then
-                return "Возгорание", 'force pvp'
+                return "Возгорание", 'бурст pvp'
             end
         else
             if ns.IsReadyAction("Власть Огня") then
-                return "Власть Огня", 'force'
+                return "Власть Огня", 'бурст'
             end
         end
     end
@@ -83,17 +83,17 @@ function ns:GetAction()
     local fireSpell = "Огненный шар"
 
     if not dist10 and ns.State.still and ns.TimerMore(fireSpell, 3) and not ns.HasMyDebuff(fireSpell) and not ns.State.combatTarget then
-        return fireSpell, 'пока не сагрил'
+        return fireSpell, 'пока не сагрил, можно что-то долгое кастануть'
     end
 
     if IsUsableSpell("Живая бомба") and ns.TimerMore("Живая бомба", 2) and not ns.HasMyDebuff("Живая бомба") then
-        return "Живая бомба", 'bomb'
+        return "Живая бомба", 'вешаем бомбу'
     end
 
     local scorch = ns.HasDebuff("Улучшенный ожог", 'target', 1)
 
     if not ns.State.pvp and ns.CanUseAction("Реактивный снаряд") then
-        return "Реактивный снаряд", 'rocket'
+        return "Реактивный снаряд", 'рпг'
     end
 
     if ns.CanUseAction("Огненный взрыв") then
@@ -102,17 +102,17 @@ function ns:GetAction()
 
     if dist10 and not ns.State.still then
         if (ns.State.speed > 0 and ns.State.speed < 7) and ns.CanUseAction("Конус холода") then
-            return "Конус холода", 'конус'
+            return "Конус холода", 'продувка по курсу'
         end
         if ns.CanUseAction("Кольцо льда") then
-            return "Кольцо льда", 'ring'
+            return "Кольцо льда", 'подмараживаем по кругу'
         end
         if ns.CanUseAction("Чародейский взрыв") then
             return "Чародейский взрыв", 'слив маны'
         end
     end
     if ns.State.still and not scorch and ns.TimerMore("Ожог", 2) then
-        return "Ожог", 'scorch'
+        return "Ожог", 'наладываем улучшенный ожог'
     end
 
     if ns.State.still then
