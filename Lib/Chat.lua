@@ -98,7 +98,6 @@ local function CreateDebugChatTab()
     -- Проверяем, не существует ли уже вкладка с именем "Debug"
     local chatFrame = getDebugChatFrame()
     if chatFrame then
-        updateDebugTabVisibility()
         return
     end
 
@@ -110,11 +109,6 @@ local function CreateDebugChatTab()
         return
     end
     configureDebugChatFrame(chatFrameIndex)
-
-    -- Обновляем видимость вкладки на основе scriptErrors
-    updateDebugTabVisibility()
-
-    --print("Отладочная вкладка '" .. DEBUG_TAB_NAME .. "' создана в ChatFrame" .. chatFrameIndex .. "!")
 end
 ns.AttachEvent("PLAYER_LOGIN", CreateDebugChatTab)
 

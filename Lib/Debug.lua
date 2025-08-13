@@ -13,14 +13,17 @@ function ns.AttachUpdateDebugState(func) -- not use ns.State.debug in func
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.UpdateDebugState() -- call all subscribers
+function ns.UpdateDebugState(func) -- call all subscribers
     local scriptErrors = GetCVar('scriptErrors') == '1'
     if ns.IsChanged('scriptErrors', scriptErrors) then
+        if type(func) == 'function' then
+            func(scriptErrors)
+        end
+
         for i = 1, #funcList do
             funcList[i](scriptErrors)
         end
     end
-    return scriptErrors
 end
 
 ------------------------------------------------------------------------------------------------------------------

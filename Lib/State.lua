@@ -40,7 +40,9 @@ ns.AttachEvent('DUEL_FINISHED', duelUpdate)
 ------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
 function ns.UpdateState()
-    ns.State.debug = ns.UpdateDebugState()
+    ns.UpdateDebugState(function(state)
+        ns.State.debug = state
+    end)
     ns.State.attack = ns.IsMouse(4)
     ns.State.stop = ns.IsMouse(5)
     ns.State.pressedButton = ns.ButtonIsPressed()
