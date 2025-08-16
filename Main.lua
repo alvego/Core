@@ -80,7 +80,6 @@ function ns.Idle()
   ns.UpdateState()
   local action, info = getAction();
   ns.UseAction(action, info)
-  ns.UpdateTelemetry()
 end
 
 ------------------------------------------------------------------------------------------------------------------

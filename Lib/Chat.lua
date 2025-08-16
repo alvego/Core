@@ -115,7 +115,7 @@ ns.AttachEvent("PLAYER_LOGIN", CreateDebugChatTab)
 ------------------------------------------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений
 function ns.DebugChat(msg, hex)
-    if not ns.State.debug then return end
+    if not ns.Debug then return end
     if msg == nil then return end
     local chatFrame = getDebugChatFrame()
     if not chatFrame then return end

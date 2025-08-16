@@ -29,18 +29,21 @@ end
 ns.AttachUpdateDebugState(updateTelemetryVisibility)
 ------------------------------------------------------------------------------------------------------------------
 
-function ns.UpdateTelemetry()
+local function updateTelemetry()
     local telemetry = format(
-        'RUN: %s, PVP: %s, LAG: %sms, GCD: %s, ATK: %s',
+        'RUN: %s, PVP: %s, LAG: %sms, GCD: %s, ATK: %s, TAR: %s',
         Paused and '0' or '1',
         ns.State.pvp and '1' or '0',
         ns.Round(ns.State.latency, 3) * 1000,
         ns.State.gcd and '1' or '0',
-        ns.State.autoattack and '1' or '0'
+        ns.State.autoattack and '1' or '0',
+        ns.State.numTargets
     )
     if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)
+        local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
+        frame:SetWidth(textWidth)
     end
 end
-
+ns.AttachAfterIdle(updateTelemetry)
 ------------------------------------------------------------------------------------------------------------------

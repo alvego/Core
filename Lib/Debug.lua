@@ -7,23 +7,19 @@ local GetCVar = GetCVar
 local tinsert = tinsert
 ------------------------------------------------------------------------------------------------------------------
 local funcList = {}
-function ns.AttachUpdateDebugState(func) -- not use ns.State.debug in func
-    if nil == func then error("Func can't be nil") end
+function ns.AttachUpdateDebugState(func)
+    if type(func) ~= 'function' then error("Wrong type") end
     tinsert(funcList, func)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.UpdateDebugState(func) -- call all subscribers
-    local scriptErrors = GetCVar('scriptErrors') == '1'
-    if ns.IsChanged('scriptErrors', scriptErrors) then
-        if type(func) == 'function' then
-            func(scriptErrors)
-        end
-
+local function updateDebugState() -- call all subscribers
+    ns.Debug = GetCVar('scriptErrors') == '1'
+    if ns.IsChanged('ns.Debug', ns.Debug) then
         for i = 1, #funcList do
-            funcList[i](scriptErrors)
+            funcList[i](ns.Debug)
         end
     end
 end
-
+ns.AttachBeforeIdle(updateDebugState)
 ------------------------------------------------------------------------------------------------------------------

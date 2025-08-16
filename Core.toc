@@ -15,6 +15,7 @@ Lib\Semaphore.lua
 Lib\Chat.lua
 Lib\Telemetry.lua
 Lib\Units.lua
+Lib\Targets.lua
 Lib\Modificators.lua
 Lib\Actions.lua
 Lib\Spells.lua

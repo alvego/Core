@@ -115,12 +115,11 @@ function ns.IsUsableSpell(spell, unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-local lastErrorSpell
+
 local function spellError(spell, msg)
-    ns.DebugChatNoSpam(
-        format('        [%s] %s', spell or 'Ошибка', msg or 'Что-то пошло не так'),
-        'ff0000')
+    ns.ActionLog(nil, spell or 'Ошибка', msg or 'Что-то пошло не так', 'ff0000')
 end
+local lastErrorSpell = nil
 local function onEvent(event, ...)
     if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
         local timestamp, type, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellId, spellName, spellSchool, amount, info = ...

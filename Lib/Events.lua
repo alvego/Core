@@ -10,7 +10,7 @@ local frame = CreateFrame("Frame", name .. "Events", UIParent)
 -- Список событие -> обработчики
 local eventList = {}
 function ns.AttachEvent(event, func)
-    if nil == func then error("Func can't be nil") end
+    if type(func) ~= 'function' then error("Wrong type") end
     local funcList = eventList[event]
     if nil == funcList then
         funcList = {}
@@ -33,11 +33,30 @@ local function onEvent(self, event, ...)
     end
 end
 frame:SetScript("OnEvent", onEvent)
+
+------------------------------------------------------------------------------------------------------------------
+local listBeforeIdle = {}
+function ns.AttachBeforeIdle(func)
+    if type(func) ~= 'function' then error("Wrong type") end
+    tinsert(listBeforeIdle, func)
+end
+------------------------------------------------------------------------------------------------------------------
+local listAfterIdle = {}
+function ns.AttachAfterIdle(func)
+    if type(func) ~= 'function' then error("Wrong type") end
+    tinsert(listAfterIdle, func)
+end
 ------------------------------------------------------------------------------------------------------------------
 local busy = false -- we don't use ns.IsChnaged for speed reasons
 local function lockedIdle()
     busy = true
+    for i = 1, #listBeforeIdle do
+        listBeforeIdle[i]()
+    end
     if type(ns.Idle) == 'function' then ns.Idle() end
+    for i = 1, #listAfterIdle do
+        listAfterIdle[i]()
+    end
     busy = false
 end
 ------------------------------------------------------------------------------------------------------------------

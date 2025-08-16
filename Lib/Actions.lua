@@ -103,11 +103,15 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 local function formatIcon(icon)
-    return icon and "|T" .. icon .. ":24:24:0:0|t" or ""
+    return icon and "|T" .. icon .. ":24:24:0:0|t" or "       "
 end
+
+function ns.ActionLog(icon, action, info, hex)
+    format('%s [%s] %s %s', formatIcon(icon), action or '...', info or '???', hex or 'FFFFFF')
+end
+
 ------------------------------------------------------------------------------------------------------------------
 local lastSlot = 0
-local lastLog = ''
 function ns.UseAction(action, info)
     if action == nil then
         error("action can't be nil")
@@ -118,17 +122,11 @@ function ns.UseAction(action, info)
     local slot = ns.GetSlot(action)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
 
-    local log = format('        [%s] %s %s', action or '...', info or '???', canuseinfo or '')
-    if log ~= lastLog then
-        lastLog = log
-        local hex = 'ffff88'
-        if slot == 0 then
-            hex = '888888'
-        elseif not canuse then
-            hex = 'ff8888'
-        end
-        ns.DebugChatNoSpam(log, hex)
-    end
+
+
+    local hex = slot == 0 and '888888' or (canuse and 'ffff88' or 'ff8888')
+    ns.ActionLog(nil, action, info .. ' ' .. canuseinfo, hex)
+
     if not canuse then slot = 0 end
 
     if lastSlot ~= slot then
@@ -138,9 +136,7 @@ function ns.UseAction(action, info)
             ns.State.lastAction = action
             ns.TimerStart(action)
             local icon = GetActionTexture(slot)
-            ns.DebugChat(
-                format('%s [%s] %s', formatIcon(icon), action or '...', info or '???'),
-                '00BFFF')
+            ns.ActionLog(icon, action, info, '00BFFF')
         end
     end
 end

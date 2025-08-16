@@ -17,6 +17,7 @@ local UnitAffectingCombat = UnitAffectingCombat
 local IsCurrentSpell = IsCurrentSpell
 local GetUnitSpeed = GetUnitSpeed
 local IsFalling = IsFalling
+local format = format
 ------------------------------------------------------------------------------------------------------------------
 ns.State = {}
 
@@ -26,23 +27,9 @@ ns.State.playerColor = playerColor
 ns.State.playerGUID = UnitGUID('player')
 
 local eatBuff = { "Пища", "Питье" }
-
-local function startDuel()
-    ns.State.duel = true
-end
-hooksecurefunc("StartDuel", startDuel);
-
-local function duelUpdate(event)
-    ns.State.duel = event == 'DUEL_REQUESTED'
-end
-ns.AttachEvent('DUEL_REQUESTED', duelUpdate)
-ns.AttachEvent('DUEL_FINISHED', duelUpdate)
 ------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
 function ns.UpdateState()
-    ns.UpdateDebugState(function(state)
-        ns.State.debug = state
-    end)
     ns.State.attack = ns.IsMouse(4)
     ns.State.stop = ns.IsMouse(5)
     ns.State.pressedButton = ns.ButtonIsPressed()
@@ -54,6 +41,11 @@ function ns.UpdateState()
     ns.State.playerMana100 = ns.UnitMana100()
     ns.State.existsTarget = UnitExists('target')
     ns.State.invalidTarget = ns.IsInvalidTarget()
+    ns.State.duel = ns.IsInDuel()
+    ns.State.numTargets = ns.GetNumTargets()
+    if ns.IsChanged('ns.State.numTargets', ns.State.numTargets) then
+        ns.DebugChat(format('Кол-во целей %s', ns.State.numTargets))
+    end
 
     local inInstance, instanceType = IsInInstance()
     ns.State.instance = inInstance ~= nil and instanceType ~= "pvp" and instanceType ~= "arena"
@@ -72,8 +64,8 @@ function ns.UpdateState()
         ns.TimerStart('CombatTarget')
     end
 
-    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('CombatTarget', 2)
     ns.State.autoattack = IsCurrentSpell('Автоматическая атака')
+    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('CombatTarget', 2)
 
     ns.State.speed = GetUnitSpeed('player')
     ns.State.still = ns.State.speed == 0 and not IsFalling()

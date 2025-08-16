@@ -98,3 +98,20 @@ function ns.UnitThreat(u, t)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+local inDuel = false
+local function startDuel()
+    inDuel = true
+end
+hooksecurefunc("StartDuel", startDuel);
+
+local function duelUpdate(event)
+    inDuel = event == 'DUEL_REQUESTED'
+end
+ns.AttachEvent('DUEL_REQUESTED', duelUpdate)
+ns.AttachEvent('DUEL_FINISHED', duelUpdate)
+
+function ns.IsInDuel()
+    return inDuel
+end
+
+------------------------------------------------------------------------------------------------------------------
