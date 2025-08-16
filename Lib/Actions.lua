@@ -107,7 +107,7 @@ local function formatIcon(icon)
 end
 
 function ns.ActionLog(icon, action, info, hex)
-    format('%s [%s] %s %s', formatIcon(icon), action or '...', info or '???', hex or 'FFFFFF')
+    ns.DebugChatNoSpam(format('%s [%s] %s', formatIcon(icon), action or '...', info or '???'), hex or 'FFFFFF')
 end
 
 ------------------------------------------------------------------------------------------------------------------

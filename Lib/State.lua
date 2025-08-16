@@ -69,7 +69,9 @@ function ns.UpdateState()
     ns.State.combatMode = ns.State.combatLock or ns.TimerLess('CombatTarget', 2)
 
     ns.State.speed = GetUnitSpeed('player')
-    ns.State.still = ns.State.speed == 0 and not IsFalling()
+    ns.State.falling = IsFalling()
+    ns.TimerToggle('Falling', ns.State.falling)
+    ns.State.still = ns.State.speed == 0 and not ns.State.falling
 
     ns.State.latency = ns.GetLatency()
     ns.State.gcd = not ns.IsReadySpell(61304)

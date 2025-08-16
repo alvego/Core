@@ -3,7 +3,9 @@
 ------------------------------------------------------------------------------------------------------------------
 local name, ns = ...
 local format = format
-local GetFramerate = GetFramerate
+local tinsert = tinsert
+local wipe = wipe
+local table_concat = table.concat
 ------------------------------------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame", name .. "Telemetry", UIParent)
 frame:ClearAllPoints()
@@ -30,16 +32,31 @@ end
 ns.AttachUpdateDebugState(updateTelemetryVisibility)
 ------------------------------------------------------------------------------------------------------------------
 
+local list = {}
+function ns.AttachTelemetry(fn)
+    if type(fn) ~= "function" then error("Telemetry fn must be a getter function") end
+    tinsert(list, fn)
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.TelemetryBool(value)
+    return value and '1' or '0'
+end
+
+------------------------------------------------------------------------------------------------------------------
+
+local data = {}
+local function createTelemetryMessage()
+    for _, fn in pairs(list) do
+        tinsert(data, fn())
+    end
+    local label = table_concat(data, ', ')
+    wipe(data)
+    return label
+end
+------------------------------------------------------------------------------------------------------------------
 local function updateTelemetry()
-    local telemetry = format(
-        'RUN: %s, PVP: %s, TAR: %s, BSS: %s, TTD: %sсек., FRZ: %s',
-        Paused and '0' or '1',
-        ns.State.pvp and '1' or '0',
-        ns.State.numTargets,
-        ns.State.bossTarget and '1' or '0',
-        ns.Round(ns.State.ttd, 2),
-        ns.DotedTargetsCount('Окоченение')
-    )
+    local telemetry = createTelemetryMessage()
     if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)
         local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
@@ -48,3 +65,23 @@ local function updateTelemetry()
 end
 ns.AttachAfterIdle(updateTelemetry)
 ------------------------------------------------------------------------------------------------------------------
+
+ns.AttachTelemetry(function()
+    return format('RUN: %s', ns.TelemetryBool(not Paused))
+end)
+
+ns.AttachTelemetry(function()
+    return format('PVP: %s', ns.TelemetryBool(ns.State.pvp))
+end)
+
+ns.AttachTelemetry(function()
+    return format('TAR: %s', ns.State.numTargets)
+end)
+
+ns.AttachTelemetry(function()
+    return format('BSS: %s', ns.TelemetryBool(ns.State.bossTarget))
+end)
+
+ns.AttachTelemetry(function()
+    return format('TTD: %ss', ns.Round(ns.State.ttd, 2))
+end)
