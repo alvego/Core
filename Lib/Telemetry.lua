@@ -32,14 +32,13 @@ ns.AttachUpdateDebugState(updateTelemetryVisibility)
 
 local function updateTelemetry()
     local telemetry = format(
-        'RUN: %s, PVP: %s, TAR: %s, BSS: %s, TTD: %sсек., TPL: %s, FPS: %s',
+        'RUN: %s, PVP: %s, TAR: %s, BSS: %s, TTD: %sсек., FRZ: %s',
         Paused and '0' or '1',
         ns.State.pvp and '1' or '0',
         ns.State.numTargets,
         ns.State.bossTarget and '1' or '0',
         ns.Round(ns.State.ttd, 2),
-        ns.TablePoolGetSize(),
-        ns.Round(GetFramerate())
+        ns.DotedTargetsCount('Окоченение')
     )
     if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)

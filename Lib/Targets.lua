@@ -61,7 +61,7 @@ local function killVictim(guid)
     end
 end
 ------------------------------------------------------------------------------------------------------------------
-local function OnCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     -- Какое-то время уже не в бою
     if not updateTargets() then return end
@@ -81,11 +81,11 @@ local function OnCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     elseif subEvent == "SPELL_MISSED" or subEvent == "RANGE_MISSED" or
         subEvent == "SWING_MISSED" or subEvent == "SPELL_PERIODIC_MISSED" then
         updateVictim(sourceGUID, destGUID, 0)
-    elseif subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL" then
+    elseif subEvent == "UNIT_DIED" then
         killVictim(destGUID)
     end
 end
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', OnCombatLogEvent)
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 ------------------------------------------------------------------------------------------------------------------
 local uniqueTargets = {}
 function ns.GetNumTargets(unit)
