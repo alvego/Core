@@ -3,6 +3,7 @@
 ------------------------------------------------------------------------------------------------------------------
 local name, ns = ...
 local format = format
+local GetFramerate = GetFramerate
 ------------------------------------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame", name .. "Telemetry", UIParent)
 frame:ClearAllPoints()
@@ -31,13 +32,14 @@ ns.AttachUpdateDebugState(updateTelemetryVisibility)
 
 local function updateTelemetry()
     local telemetry = format(
-        'RUN: %s, PVP: %s, LAG: %sms, GCD: %s, ATK: %s, TAR: %s',
+        'RUN: %s, PVP: %s, TAR: %s, BSS: %s, TTD: %sсек., TPL: %s, FPS: %s',
         Paused and '0' or '1',
         ns.State.pvp and '1' or '0',
-        ns.Round(ns.State.latency, 3) * 1000,
-        ns.State.gcd and '1' or '0',
-        ns.State.autoattack and '1' or '0',
-        ns.State.numTargets
+        ns.State.numTargets,
+        ns.State.bossTarget and '1' or '0',
+        ns.Round(ns.State.ttd, 2),
+        ns.TablePoolGetSize(),
+        ns.Round(GetFramerate())
     )
     if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)

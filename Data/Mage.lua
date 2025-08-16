@@ -63,7 +63,7 @@ function ns:GetAction()
         return "Огненная глыба", instantFireBuff
     end
 
-    local force = ns.IsAlt()
+    local force = ns.IsAlt() or ns.State.targetHard
 
     if force then
         if ns.State.pvp then

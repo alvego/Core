@@ -6,6 +6,7 @@
 ## SavedVariables: Paused
 
 Lib\Globals.lua
+Lib\TablePool.lua
 Lib\Timers.lua
 Lib\Misc.lua
 Lib\Data.lua

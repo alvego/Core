@@ -43,9 +43,6 @@ function ns.UpdateState()
     ns.State.invalidTarget = ns.IsInvalidTarget()
     ns.State.duel = ns.IsInDuel()
     ns.State.numTargets = ns.GetNumTargets()
-    if ns.IsChanged('ns.State.numTargets', ns.State.numTargets) then
-        ns.DebugChat(format('Кол-во целей %s', ns.State.numTargets))
-    end
 
     local inInstance, instanceType = IsInInstance()
     ns.State.instance = inInstance ~= nil and instanceType ~= "pvp" and instanceType ~= "arena"
@@ -58,7 +55,11 @@ function ns.UpdateState()
     ns.group = ns.State.party or ns.State.raid
 
     ns.State.combatLock = InCombatLockdown()
-    ns.State.combatTarget = UnitAffectingCombat('target')
+    ns.State.combatTarget = ns.State.existsTarget and UnitAffectingCombat('target')
+    ns.State.bossTarget = ns.State.existsTarget and ns.UnitIsBoss('target')
+    ns.State.targetPlayer = ns.State.existsTarget and UnitIsPlayer('target')
+    ns.State.ttd = ns.TimeToDie('target')
+    ns.State.targetHard = ns.State.bossTarget or ns.State.targetPlayer or ns.State.ttd > 10
 
     if not ns.State.invalidTarget and ns.State.combatTarget then
         ns.TimerStart('CombatTarget')

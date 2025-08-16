@@ -109,6 +109,7 @@ end
 -- @param decimals (number) Количество десятичных знаков, до которых нужно округлить число.
 -- @return (number) Округленное число.
 function ns.Round(number, decimals)
+    decimals = decimals or 0
     local multiplier = 10 ^
         decimals                                              -- Множитель для преобразования числа к целому типу после умножения
     return math.floor(number * multiplier + 0.5) / multiplier -- Округление и возвращение результата

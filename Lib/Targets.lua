@@ -6,8 +6,9 @@ local _, ns = ... -- namespace
 local GetTime = GetTime
 local bit = bit
 local wipe = wipe
-local InCombatLockdown = InCombatLockdown
 local UnitGUID = UnitGUID
+local UnitHealth = UnitHealth
+
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 ------------------------------------------------------------------------------------------------------------------
@@ -20,9 +21,13 @@ local function updateTargets()
     if ns.State.attack then return true end            -- зажата атака
     if not ns.State.invalidTarget then return true end -- есть валидный таргет
     if (next(db) ~= nil) then
-        ns.DebugChat('Вайпаем врагов', 'ff0000')
+        -- Возвращаем все таблицы в пул перед очисткой db
+        for guid, victim in pairs(db) do
+            ns.TablePoolRelease(victim.attackers)
+            ns.TablePoolRelease(victim)
+        end
+        wipe(db)
     end
-    wipe(db)
     return false
 end
 ns.AttachBeforeIdle(updateTargets)
@@ -30,25 +35,29 @@ ns.AttachBeforeIdle(updateTargets)
 local function updateVictim(srcGuid, guid, amount)
     -- Берем по гуиду, запоминаем начало боя и суммируем весь входящий в таргет урон, потом делим на время с начала
     local victim = db[guid]
-    if victim then
-        victim.amount = victim.amount + amount
-        victim.attackers[srcGuid] = GetTime()
-    else
-        victim = {}
+    if not victim then
+        victim = ns.TablePoolAcquire()
         victim.amount = amount
         victim.startTime = GetTime()
-        victim.attackers = {}
-        victim.attackers[srcGuid] = GetTime()
+        victim.attackers = ns.TablePoolAcquire()
         db[guid] = victim
+    else
+        victim.amount = victim.amount + amount
     end
+    victim.attackers[srcGuid] = GetTime()
 end
-
+------------------------------------------------------------------------------------------------------------------
 local function killVictim(guid)
-    -- забиваем всех, кто бил моба
-    db[guid] = nil
-    -- и всех, кого бил моб
-    for _, victim in pairs(db) do
-        victim.attackers[guid] = nil
+    local victim = db[guid]
+    if victim then
+        -- забиваем всех, кто бил моба
+        ns.TablePoolRelease(victim.attackers)
+        ns.TablePoolRelease(victim)
+        db[guid] = nil
+    end
+    -- и всех, кого бил мобa
+    for _, v in pairs(db) do
+        v.attackers[guid] = nil
     end
 end
 ------------------------------------------------------------------------------------------------------------------
@@ -69,8 +78,7 @@ local function OnCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     elseif subEvent == "SPELL_DAMAGE" or subEvent == "RANGE_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" then
         amount = select(4, ...)
         updateVictim(sourceGUID, destGUID, amount)
-    elseif subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_CAST_SUCCESS" or
-        subEvent == "SPELL_MISSED" or subEvent == "RANGE_MISSED" or
+    elseif subEvent == "SPELL_MISSED" or subEvent == "RANGE_MISSED" or
         subEvent == "SWING_MISSED" or subEvent == "SPELL_PERIODIC_MISSED" then
         updateVictim(sourceGUID, destGUID, 0)
     elseif subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL" then
@@ -79,7 +87,7 @@ local function OnCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
 end
 ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', OnCombatLogEvent)
 ------------------------------------------------------------------------------------------------------------------
-local guids = {}
+local uniqueTargets = {}
 function ns.GetNumTargets(unit)
     unit = unit and unit or "targettarget"
     local guid = UnitGUID(unit)             -- скорее всего я, или танк
@@ -88,32 +96,40 @@ function ns.GetNumTargets(unit)
 
     -- проверка на target
     if not ns.State.invalidTarget then
-        guids[UnitGUID('target')] = true
+        uniqueTargets[UnitGUID('target')] = true
     end
 
     -- т.к. нам надо считать и тех, кто атакует цель цели и тех, кого я, то сначала запоминаем гуиды, а потом делаем дистинкт
-    if victim then -- считаем кто бьем меня или танка
+    if victim then                             -- считаем кто бьем меня или танка
         for attackerGuid, attackTime in pairs(victim.attackers) do
-            if GetTime() - attackTime < 5 then
-                guids[attackerGuid] = true
+            if GetTime() - attackTime < 5 then -- стукнули менее 5 секунд назад
+                uniqueTargets[attackerGuid] = true
             end
         end
     end
 
-    for g, vict in pairs(db) do                                      -- бежим по всем
-        if g ~= ns.State.playerGUID then
-            for attackerGuid, attackTime in pairs(vict.attackers) do -- ищем тек кого бью я
-                if attackerGuid == ns.State.playerGUID and GetTime() - attackTime < 8 then
-                    guids[g] = true
-                end
+    -- бежим по всем
+    for g, vict in pairs(db) do
+        for attackerGuid, attackTime in pairs(vict.attackers) do -- ищем тех, кого бью я
+            if attackerGuid == ns.State.playerGUID and GetTime() - attackTime < 8 then
+                uniqueTargets[g] = true                          -- я ударил менее 8 секунд назад
             end
         end
     end
 
     local numTargets = 0
-    for k, v in pairs(guids) do numTargets = numTargets + 1 end
-    wipe(guids)
+    for _ in pairs(uniqueTargets) do numTargets = numTargets + 1 end
+    wipe(uniqueTargets)
     return numTargets
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.TimeToDie(unit)
+    unit = unit and unit or "target"
+    local guid = UnitGUID(unit)
+    if not guid then return 0 end
+    local enemy = db[guid]
+    return enemy and UnitHealth(unit) / (enemy.amount / math.max(GetTime() - enemy.startTime, 2)) or 0
 end
 
 ------------------------------------------------------------------------------------------------------------------
