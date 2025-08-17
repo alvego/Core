@@ -17,6 +17,8 @@ local UnitLevel = UnitLevel
 local UnitGUID = UnitGUID
 local UnitThreatSituation = UnitThreatSituation
 local hooksecurefunc = hooksecurefunc
+local GetNumTalents = GetNumTalents
+local GetTalentInfo = GetTalentInfo
 ------------------------------------------------------------------------------------------------------------------
 local classHex = {
     ['ROGUE'] = 'FFF468',
@@ -135,21 +137,22 @@ function ns.UnitIsMagicImmune(unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-local function resetLogData()
+local function resetTimers()
     ns.TimerReset('notBehind')
     ns.TimerReset('notVisible')
 end
-
-ns.AttachEvent("PLAYER_TARGET_CHANGED", resetLogData)
-
+ns.AttachEvent("PLAYER_TARGET_CHANGED", resetTimers)
+------------------------------------------------------------------------------------------------------------------
 function ns.IsLOS()
     return ns.TimerLess('notVisible', 0.5)
 end
 
+------------------------------------------------------------------------------------------------------------------
 function ns.IsNotBehind()
     return ns.TimerLess('notBehind', 0.5)
 end
 
+------------------------------------------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if sourceGUID ~= ns.State.playerGUID then return end
@@ -163,3 +166,39 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     end
 end
 ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+------------------------------------------------------------------------------------------------------------------
+function ns.HasTalent(talent)
+    local found = false;
+    for i = 1, 7 do
+        for j = 1, 3 do
+            local id, n, x, sel = GetTalentInfo(i, j, GetActiveSpecGroup());
+            if (id == talent or n == talent) and sel then
+                found = true;
+            end
+        end
+    end
+    return found;
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.GetCurrentSpecID()
+    local maxPoints = 0
+    local specID = 0
+
+    for tab = 1, 3 do
+        local points = 0
+        for i = 1, GetNumTalents(tab) do
+            local _, _, _, _, currentRank = GetTalentInfo(tab, i)
+            points = points + currentRank
+        end
+
+        if points > maxPoints then
+            maxPoints = points
+            specID = tab
+        end
+    end
+
+    return specID
+end
+
+------------------------------------------------------------------------------------------------------------------
