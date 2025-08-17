@@ -8,7 +8,6 @@ if ns.State.playerClass ~= 'MAGE' then return end
 ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 local tContains             = tContains
-local format                = format
 local IsUsableSpell         = IsUsableSpell
 local CheckInteractDistance = CheckInteractDistance
 

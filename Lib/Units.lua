@@ -16,7 +16,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitLevel = UnitLevel
 local UnitGUID = UnitGUID
 local UnitThreatSituation = UnitThreatSituation
-local UnitAffectingCombat = UnitAffectingCombat
+local hooksecurefunc = hooksecurefunc
 ------------------------------------------------------------------------------------------------------------------
 local classHex = {
     ['ROGUE'] = 'FFF468',
@@ -135,3 +135,31 @@ function ns.UnitIsMagicImmune(unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+local function resetLogData()
+    ns.TimerReset('notBehind')
+    ns.TimerReset('notVisible')
+end
+
+ns.AttachEvent("PLAYER_TARGET_CHANGED", resetLogData)
+
+function ns.IsLOS()
+    return ns.TimerLess('notVisible', 0.5)
+end
+
+function ns.IsNotBehind()
+    return ns.TimerLess('notBehind', 0.5)
+end
+
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+                                destFlags, ...)
+    if sourceGUID ~= ns.State.playerGUID then return end
+    if subEvent == "SPELL_CAST_FAILED" then
+        local reason = select(4, ...)
+        if reason == "Вы должны находиться позади цели." then
+            ns.TimerStart('notBehind')
+        elseif reason == "Цель вне поля зрения." then
+            ns.TimerStart('notVisible')
+        end
+    end
+end
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)

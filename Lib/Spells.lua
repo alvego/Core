@@ -14,7 +14,8 @@ local GetSpellLink = GetSpellLink
 local IsSpellInRange = IsSpellInRange
 local GetSpellCooldown = GetSpellCooldown
 local IsUsableSpell = IsUsableSpell
-local format = format
+local UnitLevel = UnitLevel
+local math_random = math.random
 local div1000 = 0.001 -- 1 / 1000
 ------------------------------------------------------------------------------------------------------------------
 function ns.UnitCasting(unit)
@@ -30,16 +31,32 @@ function ns.UnitCasting(unit)
     if spell == nil or not startTime or not endTime then return nil end
     local left = endTime * div1000 - GetTime()
     if left < ns.State.latency then return nil end
-    local canInterrupt = not notInterruptible
     local duration = (endTime - startTime) * div1000
-    return spell, left, duration, channel, canInterrupt
+    return spell, left, duration, channel, notInterruptible
+end
+
+------------------------------------------------------------------------------------------------------------------
+function ns.UnitNeedKick(unit, kickByStun) -- cбивалка, проверяет название, сбиваемость и время сбивания
+    unit = unit or 'target'
+    if kickByStun and UnitLevel(unit) == -1 then return false end
+    local spell, left, duration, channel, notinterrupt = ns.UnitCasting(unit)
+    if not spell then return false end
+    if not notinterrupt and not kickByStun then return false end
+
+    if left < 0.1 then return false end
+    local salt = math_random() * 0.3                            -- [0 .. 0.3]
+    if channel then
+        if left > duration * (0.9 - salt) then return false end -- нет смысла, еще больше 60% .. 90% каста
+    else
+        if left > duration * (0.1 + salt) then return false end -- нет смысла, еще больше 10% .. 40% каста
+    end
+    return true
 end
 
 ------------------------------------------------------------------------------------------------------------------
 local bookSpellIds = {}
 local function refreshBookSpells()
     local bookType = "spell"
-
     local maxIndex = 0
     local maxTabs = GetNumSpellTabs()
     for i = 1, maxTabs do
@@ -76,6 +93,8 @@ local function refreshBookSpells()
         end
     end
 end
+ns.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
+ns.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
 
 function ns.IsSpellInRange(spell, unit)
     if next(bookSpellIds) == nil then refreshBookSpells() end
@@ -115,40 +134,33 @@ function ns.IsUsableSpell(spell, unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-
-local function spellError(spell, msg)
-    ns.ActionLog(nil, spell or 'Ошибка', msg or 'Что-то пошло не так', 'ff0000')
-end
-local lastErrorSpell = nil
-local function onEvent(event, ...)
-    if event == 'COMBAT_LOG_EVENT_UNFILTERED' then
-        local timestamp, type, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellId, spellName, spellSchool, amount, info = ...
-        if sourceGUID ~= ns.State.playerGUID then return end
-        if type:match("^SPELL_CAST") then
-            ns.TimerStart(spellName)
-            if type:match("SPELL_CAST_FAILED") then
-                spellError(spellName, amount)
-            else
-                lastErrorSpell = nil
-            end
+local lastUsedSpell = nil
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+                                destFlags, ...)
+    if sourceGUID ~= ns.State.playerGUID then return end
+    if subEvent:match("^SPELL_CAST") then
+        local spellName = select(2, ...)
+        lastUsedSpell = spellName
+        ns.TimerStart(spellName)
+        if subEvent == "SPELL_CAST_FAILED" then
+            local reason = select(4, ...)
+            ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', '880000')
         end
-        return
     end
-    if event:match("UI_ERROR_MESSAGE") then
-        local message = ...
-        spellError(lastErrorSpell, message)
-        return
-    end
+end
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+
+local failedSpell = nil
+local function onEvent(event, ...)
     local source, spellName = select(1, ...)
     if source ~= 'player' then return end
     ns.TimerStart(spellName)
-    if event:match('UNIT_SPELLCAST_FAILED') then
-        lastErrorSpell = spellName
-    else
-        lastErrorSpell = nil
+    lastUsedSpell = spellName
+    if event == 'UNIT_SPELLCAST_FAILED' then
+        failedSpell = spellName
+        ns.TimerStart('failedSpell')
     end
 end
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_START', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_STOP', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
@@ -158,10 +170,20 @@ ns.AttachEvent('UNIT_SPELLCAST_INTERRUPTED', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_START', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
 ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
-ns.AttachEvent('UI_ERROR_MESSAGE', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_INTERRUPTED', onEvent)
 
 
+local function onUIErrorMessage(event, ...)
+    local action = 'Ошибка'
+    if failedSpell and ns.TimerLess('failedSpell', 0.5) then action = failedSpell end
+    local message = ...
+    ns.ActionLog(nil, action, message or 'Что-то пошло не так', '880000')
+end
+ns.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
+
+
+function ns.LastUsedSpell()
+    return lastUsedSpell
+end
 
 -- if ns.TimerMore('Удар грома', 3) then
 --     print('Удар грома не был или был более 3 секунд назад')

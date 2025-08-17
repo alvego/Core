@@ -74,16 +74,18 @@ ns.AttachTelemetry(function()
 end)
 
 ns.AttachTelemetry(function()
-    return ns.TelemetryBool('PVP', ns.State.pvp)
+    return ns.TelemetryBool('BOSS', ns.State.bossTarget)
 end)
+
+-- ns.AttachTelemetry(function()
+--     return ns.TelemetryBool('PVP', ns.State.pvp)
+-- end)
 
 ns.AttachTelemetry(function()
     return format('TAR: %s', ns.State.numTargets)
 end)
 
-ns.AttachTelemetry(function()
-    return ns.TelemetryBool('BOSS', ns.State.bossTarget)
-end)
+
 
 ns.AttachTelemetry(function()
     return format('TTD: %ss', ns.Round(ns.State.ttd, 2))

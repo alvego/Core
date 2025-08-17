@@ -13,7 +13,7 @@ if type(ns.GetAction) ~= 'function' then
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
-  if Paused then
+  if ns.IsPaused() then
     return 'none', 'пауза'
   end
 
@@ -58,8 +58,8 @@ function ns.TryTarget()
     return 'none', ns.State.invalidTarget
   end
 
-  if not ns.State.attack and not (ns.State.combatTarget or ns.State.autoattack) then
-    return 'none', 'цель не в бою, не нажата атака и не вкл автоатака'
+  if not ns.State.attack and not ns.State.combatTarget and not ns.State.autoattack then
+    return 'none', 'цель не в бою, не нажата атака, не вкл автоатака'
   end
 
   if ns.State.autoattack then
@@ -78,6 +78,7 @@ end
 ------------------------------------------------------------------------------------------------------------------
 function ns.Idle()
   ns.UpdateState()
+  ns.TogglePause(ns.State.attack, ns.State.stop)
   local action, info = getAction();
   ns.UseAction(action, info)
 end

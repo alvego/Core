@@ -62,6 +62,8 @@ function ns.UpdateState()
     ns.State.targetHard = ns.State.bossTarget or ns.State.targetPlayer or ns.State.ttd > 30
     ns.State.targetImmune = ns.State.invalidTarget or ns.UnitIsImmune('target')
     ns.State.targetImmuneMagic = ns.State.targetImmune or ns.UnitIsMagicImmune('target')
+    ns.State.targetVisible = ns.State.existsTarget and not ns.IsLOS()
+    ns.State.targetBehind = ns.State.existsTarget and not ns.IsNotBehind()
 
     if not ns.State.invalidTarget and ns.State.combatTarget then
         ns.TimerStart('CombatTarget')
@@ -77,16 +79,7 @@ function ns.UpdateState()
 
     ns.State.latency = ns.GetLatency()
     ns.State.gcd = not ns.IsReadySpell(61304)
-
-    if Paused then
-        if ns.State.attack then
-            Paused = false
-        end
-    else
-        if ns.State.stop then
-            Paused = true
-        end
-    end
+    ns.State.lastUsedSpell = ns.LastUsedSpell()
 end
 
 ------------------------------------------------------------------------------------------------------------------
