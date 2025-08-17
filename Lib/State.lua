@@ -59,7 +59,9 @@ function ns.UpdateState()
     ns.State.bossTarget = ns.State.existsTarget and ns.UnitIsBoss('target')
     ns.State.targetPlayer = ns.State.existsTarget and UnitIsPlayer('target')
     ns.State.ttd = ns.TimeToDie('target')
-    ns.State.targetHard = ns.State.bossTarget or ns.State.targetPlayer or ns.State.ttd > 10
+    ns.State.targetHard = ns.State.bossTarget or ns.State.targetPlayer or ns.State.ttd > 30
+    ns.State.targetImmune = ns.State.invalidTarget or ns.UnitIsImmune('target')
+    ns.State.targetImmuneMagic = ns.State.targetImmune or ns.UnitIsMagicImmune('target')
 
     if not ns.State.invalidTarget and ns.State.combatTarget then
         ns.TimerStart('CombatTarget')

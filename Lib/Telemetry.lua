@@ -10,7 +10,7 @@ local table_concat = table.concat
 local frame = CreateFrame("Frame", name .. "Telemetry", UIParent)
 frame:ClearAllPoints()
 frame:SetHeight(10)
-frame:SetWidth(210)
+frame:SetWidth(10)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
 frame.text:SetAllPoints()
 frame:SetPoint('TOPLEFT', 20, 0)
@@ -39,8 +39,9 @@ function ns.AttachTelemetry(fn)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.TelemetryBool(value)
-    return value and '1' or '0'
+
+function ns.TelemetryBool(label, value)
+    return value and '|cff00ff00' .. label .. '|r' or '|cff888888' .. label .. '|r'
 end
 
 ------------------------------------------------------------------------------------------------------------------
@@ -60,18 +61,20 @@ local function updateTelemetry()
     if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)
         local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
+        local textHeight = frame.text:GetStringHeight()
         frame:SetWidth(textWidth)
+        frame:SetHeight(textHeight)
     end
 end
 ns.AttachAfterIdle(updateTelemetry)
 ------------------------------------------------------------------------------------------------------------------
 
 ns.AttachTelemetry(function()
-    return format('RUN: %s', ns.TelemetryBool(not Paused))
+    return ns.TelemetryBool('RUN', not Paused)
 end)
 
 ns.AttachTelemetry(function()
-    return format('PVP: %s', ns.TelemetryBool(ns.State.pvp))
+    return ns.TelemetryBool('PVP', ns.State.pvp)
 end)
 
 ns.AttachTelemetry(function()
@@ -79,7 +82,7 @@ ns.AttachTelemetry(function()
 end)
 
 ns.AttachTelemetry(function()
-    return format('BSS: %s', ns.TelemetryBool(ns.State.bossTarget))
+    return ns.TelemetryBool('BOSS', ns.State.bossTarget)
 end)
 
 ns.AttachTelemetry(function()

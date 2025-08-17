@@ -7,19 +7,15 @@ if ns.State.playerClass ~= 'MAGE' then return end
 ------------------------------------------------------------------------------------------------------------------
 ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
-local tContains = tContains
---local format = format
-local IsUsableSpell = IsUsableSpell
+local tContains             = tContains
+local format                = format
+local IsUsableSpell         = IsUsableSpell
 local CheckInteractDistance = CheckInteractDistance
 
-local aoeCast = { "Огненный столб", "Снежная буря" }
-local intBuff = { "Чародейская гениальность", "Чародейский интеллект" }
-local fireBuff = { "Власть Огня", "Путь огня" }
+local aoeCast               = { "Огненный столб", "Снежная буря" }
+local intBuff               = { "Чародейская гениальность", "Чародейский интеллект" }
+local fireBuff              = { "Власть Огня", "Путь огня" }
 
-
--- ns.AttachTelemetry(function()
---     return format('fall: %s %s', ns.State.falling and 'true' or 'false', IsFalling() and 'true' or 'false')
--- end)
 ------------------------------------------------------------------------------------------------------------------
 function ns:GetAction()
     local aoe = ns.IsCtr()
@@ -48,30 +44,32 @@ function ns:GetAction()
         return 'none', 'нечем болше aoe-шить'
     end
 
-
-    ---- buffs
-    if not ns.State.existsTarget and not ns.State.attack and not ns.State.gcd and not ns.State.falling then
-        if not ns.HasBuff("Морозный доспех") then
-            return "Морозный доспех", 'доспех ннадда'
+    if not ns.State.gcd then
+        ---- buffs
+        if not ns.State.existsTarget and not ns.State.attack and not ns.State.falling then
+            if not ns.HasBuff("Морозный доспех") then
+                return "Морозный доспех", 'доспех ннадда'
+            end
+            if not ns.HasBuff(intBuff) then
+                return "Чародейский интеллект", 'обмазываемся интеллектом'
+            end
         end
-        if not ns.HasBuff(intBuff) then
-            return "Чародейский интеллект", 'обмазываемся интеллектом'
+        --- falling
+        if ns.State.falling and not ns.HasBuff("Замедленное падение") and ns.TimerMore('Falling', 2) then
+            return "Замедленное падение", 'чтоб не разбиться'
         end
     end
-
-    if ns.State.falling and not ns.HasBuff("Замедленное падение") and ns.TimerMore('Falling', 2) then
-        return "Замедленное падение", 'чтоб не разбиться'
-    end
-
 
     local tarcmd, tarinfo = ns.TryTarget()
     if tarcmd then
         return tarcmd, tarinfo
     end
 
-    local instantFireBuff = ns.HasBuff(fireBuff)
-    if instantFireBuff then
-        return "Огненная глыба", instantFireBuff
+    if not ns.State.gcd then
+        local instantFireBuff = ns.HasBuff(fireBuff)
+        if instantFireBuff then
+            return "Огненная глыба", instantFireBuff
+        end
     end
 
     local force = ns.IsAlt() or ns.State.targetHard

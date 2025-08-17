@@ -115,3 +115,23 @@ function ns.IsInDuel()
 end
 
 ------------------------------------------------------------------------------------------------------------------
+local immuneList = { "Божественный щит", "Ледяная глыба", "Сдерживание" }
+function ns.UnitIsImmune(unit)
+    unit = unit or 'target'
+    local aura = ns.HasBuff(immuneList, unit)
+    if aura then
+        return aura
+    end
+    aura = ns.HasDebuff("Смерч", unit)
+    return aura and aura or false
+end
+
+------------------------------------------------------------------------------------------------------------------
+local magicList = { "Отражение заклинания", "Антимагический панцирь", "Рунический покров", "Эффект тотема заземления" }
+function ns.UnitIsMagicImmune(unit)
+    unit = unit or 'target'
+    local aura = ns.HasBuff(magicList, unit)
+    return aura and aura or false
+end
+
+------------------------------------------------------------------------------------------------------------------
