@@ -20,6 +20,8 @@ Lib\Targets.lua
 Lib\Modificators.lua
 Lib\Actions.lua
 Lib\Spells.lua
+Lib\Range.lua
+Lib\Kick.lua
 Lib\Auras.lua
 Lib\Latency.lua
 Lib\State.lua

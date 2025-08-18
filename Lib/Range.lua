@@ -1,0 +1,67 @@
+------------------------------------------------------------------------------------------------------------------
+-- By by Unknown Coder
+------------------------------------------------------------------------------------------------------------------
+local _, ns = ...
+------------------------------------------------------------------------------------------------------------------
+local GetNumSpellTabs = GetNumSpellTabs
+local GetSpellTabInfo = GetSpellTabInfo
+local GetSpellBookItemInfo = GetSpellBookItemInfo
+local GetSpellBookItemName = GetSpellBookItemName
+local IsSpellInRange = IsSpellInRange
+------------------------------------------------------------------------------------------------------------------
+local bookSpellIds = {}
+local function refreshBookSpells()
+    local bookType = 'spell'
+    local maxIndex = 0
+    local maxTabs = GetNumSpellTabs()
+    for i = 1, maxTabs do
+        local _, _, offs, numspells, _, specId = GetSpellTabInfo(i)
+        if specId == 0 then
+            maxIndex = offs + numspells
+        end
+    end
+
+    for spellBookId = 1, maxIndex do
+        local spellType, baseSpellId = GetSpellBookItemInfo(spellBookId, bookType)
+
+        if spellType == 'SPELL' then
+            local currentSpellName = GetSpellBookItemName(spellBookId, bookType)
+            local currentSpellId = ns.GetSpellId(currentSpellName)
+
+            if currentSpellName and not bookSpellIds[currentSpellName] then
+                bookSpellIds[currentSpellName] = spellBookId
+            end
+            if currentSpellId and not bookSpellIds[currentSpellId] then
+                bookSpellIds[currentSpellId] = spellBookId
+            end
+
+            if baseSpellId then
+                local baseSpellName = GetSpellInfo(baseSpellId)
+                if baseSpellName and not bookSpellIds[baseSpellName] then
+                    bookSpellIds[baseSpellName] = spellBookId
+                end
+                if not bookSpellIds[baseSpellId] then
+                    bookSpellIds[baseSpellId] = spellBookId
+                end
+            end
+        end
+    end
+end
+ns.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
+ns.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
+------------------------------------------------------------------------------------------------------------------
+function ns.IsSpellInRange(spell, unit)
+    if next(bookSpellIds) == nil then refreshBookSpells() end
+    if spell == nil then return false end
+    if unit == nil then unit = 'target' end
+    local inRange = IsSpellInRange(spell, unit)
+    if inRange == nil then
+        local spellBookId = bookSpellIds[spell]
+        if spellBookId then
+            return IsSpellInRange(spellBookId, 'spell', unit) == 1
+        end
+    end
+    return inRange == 1
+end
+
+------------------------------------------------------------------------------------------------------------------

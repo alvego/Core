@@ -19,7 +19,7 @@ local function getSpec1Action()
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
-    return '', 'пока всё'
+    return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getSpec2Action()
@@ -34,7 +34,7 @@ local function getSpec2Action()
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
-    return '', 'пока всё'
+    return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getSpec3Action()
@@ -49,7 +49,7 @@ local function getSpec3Action()
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
-    return '', 'пока всё'
+    return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getSpec1Action, getSpec2Action, getSpec3Action }

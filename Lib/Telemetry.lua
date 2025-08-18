@@ -12,6 +12,7 @@ frame:ClearAllPoints()
 frame:SetHeight(10)
 frame:SetWidth(10)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
+frame.text:SetFont("Fonts\\ARIALN.TTF", 10) -- Альтернативный шрифт
 frame.text:SetAllPoints()
 frame:SetPoint('TOPLEFT', 20, 0)
 frame:SetScale(1);
@@ -77,15 +78,13 @@ ns.AttachTelemetry(function()
     return ns.TelemetryBool('BOSS', ns.State.bossTarget)
 end)
 
--- ns.AttachTelemetry(function()
---     return ns.TelemetryBool('PVP', ns.State.pvp)
--- end)
+ns.AttachTelemetry(function()
+    return ns.TelemetryBool('PVP', ns.State.pvp)
+end)
 
 ns.AttachTelemetry(function()
     return format('TAR: %s', ns.State.numTargets)
 end)
-
-
 
 ns.AttachTelemetry(function()
     return format('TTD: %ss', ns.Round(ns.State.ttd, 2))

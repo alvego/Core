@@ -133,8 +133,6 @@ function ns.UseAction(action, info)
         lastSlot = slot
         ns.Semaphore(slot)
         if slot ~= 0 and slot <= 72 then -- 12 * 6
-            ns.State.lastAction = action
-            ns.TimerStart(action)
             local icon = GetActionTexture(slot)
             ns.ActionLog(icon, action, info, '00BFFF')
         end

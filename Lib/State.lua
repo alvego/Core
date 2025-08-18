@@ -52,7 +52,7 @@ function ns.UpdateState()
         (not ns.State.invalidTarget and UnitIsPlayer('target'))
     ns.State.party = GetNumPartyMembers() > 0
     ns.State.raid = GetNumRaidMembers() > 0
-    ns.group = ns.State.party or ns.State.raid
+    ns.State.group = ns.State.party or ns.State.raid
 
     ns.State.combatLock = InCombatLockdown()
     ns.State.combatTarget = ns.State.existsTarget and UnitAffectingCombat('target')

@@ -14,6 +14,10 @@ end
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if ns.IsPaused() then
+    if ns.State.autoattack then
+      return 'stopattack', 'выкл автоатаку - пауза'
+    end
+
     return 'none', 'пауза'
   end
 

@@ -34,10 +34,10 @@ function ns:GetAction()
     ---- AOE
 
     if aoe then
-        if ns.State.lastAction ~= 'Огненный столб' then
+        if ns.State.lastUsedSpell ~= 'Огненный столб' then
             return 'Огненный столб', 'aoe: поджигаем'
         end
-        if ns.State.lastAction ~= 'Снежная буря' then
+        if ns.State.lastUsedSpell ~= 'Снежная буря' then
             return 'Снежная буря', 'aoe: морозим'
         end
         return 'none', 'нечем болше aoe-шить'

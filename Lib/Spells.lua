@@ -6,16 +6,9 @@ local _, ns = ...
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local GetTime = GetTime
-local GetNumSpellTabs = GetNumSpellTabs
-local GetSpellTabInfo = GetSpellTabInfo
-local GetSpellBookItemInfo = GetSpellBookItemInfo
-local GetSpellBookItemName = GetSpellBookItemName
 local GetSpellLink = GetSpellLink
-local IsSpellInRange = IsSpellInRange
 local GetSpellCooldown = GetSpellCooldown
 local IsUsableSpell = IsUsableSpell
-local UnitLevel = UnitLevel
-local math_random = math.random
 local div1000 = 0.001 -- 1 / 1000
 ------------------------------------------------------------------------------------------------------------------
 function ns.UnitCasting(unit)
@@ -36,78 +29,23 @@ function ns.UnitCasting(unit)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.UnitNeedKick(unit, kickByStun) -- cбивалка, проверяет название, сбиваемость и время сбивания
-    unit = unit or 'target'
-    if kickByStun and UnitLevel(unit) == -1 then return false end
-    local spell, left, duration, channel, notinterrupt = ns.UnitCasting(unit)
-    if not spell then return false end
-    if not notinterrupt and not kickByStun then return false end
-
-    if left < 0.1 then return false end
-    local salt = math_random() * 0.3                            -- [0 .. 0.3]
-    if channel then
-        if left > duration * (0.9 - salt) then return false end -- нет смысла, еще больше 60% .. 90% каста
-    else
-        if left > duration * (0.1 + salt) then return false end -- нет смысла, еще больше 10% .. 40% каста
+local spellToIdList = {}
+function ns.GetSpellId(name, rank)
+    local spellGUID = name
+    if rank then
+        spellGUID = name .. rank
     end
-    return true
-end
-
-------------------------------------------------------------------------------------------------------------------
-local bookSpellIds = {}
-local function refreshBookSpells()
-    local bookType = 'spell'
-    local maxIndex = 0
-    local maxTabs = GetNumSpellTabs()
-    for i = 1, maxTabs do
-        local _, _, offs, numspells, _, specId = GetSpellTabInfo(i)
-        if specId == 0 then
-            maxIndex = offs + numspells
+    local result = spellToIdList[spellGUID]
+    if nil == result then
+        local link = GetSpellLink(name, rank)
+        if not link then
+            result = 0
+        else
+            result = 0 + link:match("spell:%d+"):match("%d+")
         end
+        spellToIdList[spellGUID] = result
     end
-
-    for spellBookId = 1, maxIndex do
-        local spellType, baseSpellID = GetSpellBookItemInfo(spellBookId, bookType)
-
-        if spellType == 'SPELL' then
-            local currentSpellName = GetSpellBookItemName(spellBookId, bookType)
-            local link = GetSpellLink(currentSpellName)
-            local currentSpellID = tonumber(link and link:gsub('|', '||'):match('spell:(%d+)'))
-
-            if currentSpellName and not bookSpellIds[currentSpellName] then
-                bookSpellIds[currentSpellName] = spellBookId
-            end
-            if currentSpellID and not bookSpellIds[currentSpellID] then
-                bookSpellIds[currentSpellID] = spellBookId
-            end
-
-            if baseSpellID then
-                local baseSpellName = GetSpellInfo(baseSpellID)
-                if baseSpellName and not bookSpellIds[baseSpellName] then
-                    bookSpellIds[baseSpellName] = spellBookId
-                end
-                if not bookSpellIds[baseSpellID] then
-                    bookSpellIds[baseSpellID] = spellBookId
-                end
-            end
-        end
-    end
-end
-ns.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
-ns.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
-
-function ns.IsSpellInRange(spell, unit)
-    if next(bookSpellIds) == nil then refreshBookSpells() end
-    if spell == nil then return false end
-    if unit == nil then unit = 'target' end
-    local inRange = IsSpellInRange(spell, unit)
-    if inRange == nil then
-        local spellBookId = bookSpellIds[spell]
-        if spellBookId then
-            return IsSpellInRange(spellBookId, 'spell', unit) == 1
-        end
-    end
-    return inRange == 1
+    return result
 end
 
 ------------------------------------------------------------------------------------------------------------------
@@ -141,7 +79,6 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     if subEvent:match('^SPELL_CAST') then
         local spellName = select(2, ...)
         lastUsedSpell = spellName
-        ns.TimerStart(spellName)
         if subEvent == 'SPELL_CAST_FAILED' then
             local reason = select(4, ...)
             ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', '880000')
@@ -154,8 +91,14 @@ local failedSpell = nil
 local function onEvent(event, ...)
     local source, spellName = select(1, ...)
     if source ~= 'player' then return end
-    ns.TimerStart(spellName)
+
     lastUsedSpell = spellName
+    if event == 'UNIT_SPELLCAST_SUCCEEDED' then
+        ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00') -- TODO: Debug
+        ns.TimerStart(spellName)
+        return
+    end
+
     if event == 'UNIT_SPELLCAST_FAILED' then
         failedSpell = spellName
         ns.TimerStart('failedSpell')
