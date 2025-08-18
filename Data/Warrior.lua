@@ -62,51 +62,44 @@ local function checkThreatAndAct(unit, rage, stance)
     local reason = nil
     local rangeInfo = nil
 
+    local dist10 = CheckInteractDistance(unit, 3)
+
     if threat == 3 then return false end
+    -- Проверка удара грома (10 метров, вне АОЕ)
 
     -- Проверка удара грома (10 метров, вне АОЕ)
-    if not spellUsed and IsUsableSpell('Удар грома') and rage >= 16 and stance ~= 3 and ns.CanUseAction('Удар грома') then
-        if CheckInteractDistance(unit, 3) and use('Удар грома') then
-            spellUsed = 'Удар грома'
-            reason = 'Цель не агрит игрока, угроза < 3'
-            rangeInfo = '10м'
-        end
+    if not spellUsed and rage >= 16 and stance ~= 3 and dist10 and ns.CanUseAction('Удар грома') then
+        spellUsed = 'Удар грома'
+        reason = 'Цель не агрит игрока, угроза < 3'
+        rangeInfo = '10м'
     end
 
     -- Проверка дразнящего удара (мили)
-    if not spellUsed and IsUsableSpell('Дразнящий удар') and ns.CanUseAction('Дразнящий удар') then
-        if IsSpellInRange('Кровопускание', unit) == 1 and use(unit == 'mouseover' and 'Дразнящий М' or 'Дразнящий удар') then
-            spellUsed = 'Дразнящий удар'
-            reason = 'Цель не агрит игрока, угроза < 3'
-            rangeInfo = 'мили'
-        end
+    if not spellUsed and ns.IsSpellInRange('Кровопускание', unit) and ns.CanUseAction('Дразнящий удар') then
+        spellUsed = (unit == 'mouseover' and 'Дразнящий М' or 'Дразнящий удар')
+        reason = 'Цель не агрит игрока, угроза < 3'
+        rangeInfo = 'мили'
     end
 
     -- Проверка раскола брони (мили)
-    if not spellUsed and IsUsableSpell('Раскол брони') and rage >= 15 and stance == 2 and ns.CanUseAction('Раскол брони') then
-        if IsSpellInRange('Кровопускание', unit) == 1 and use(unit == 'mouseover' and 'Раскол брони МО' or 'Раскол брони') then
-            spellUsed = 'Раскол брони'
-            reason = 'Цель не агрит игрока'
-            rangeInfo = 'мили'
-        end
+    if not spellUsed and rage >= 15 and stance == 2 and ns.IsSpellInRange('Кровопускание', unit) and ns.CanUseAction('Раскол брони') then
+        spellUsed = (unit == 'mouseover' and 'Раскол брони МО' or 'Раскол брони')
+        reason = 'Цель не агрит игрока'
+        rangeInfo = 'мили'
     end
 
     -- Проверка провокации (30 метров)
-    if not spellUsed and IsUsableSpell('Провокация') and ns.CanUseAction('Провокация') then
-        if not CheckInteractDistance(unit, 3) and IsSpellInRange('Провокация', unit) == 1 and use(unit == 'mouseover' and 'Провокация МО' or 'Провокация') then
-            spellUsed = 'Провокация'
-            reason = 'Цель не агрит игрока, угроза < 3'
-            rangeInfo = '30м'
-        end
+    if not spellUsed and not dist10 and ns.CanUseAction('Провокация') and ns.IsSpellInRange('Провокация', unit) then
+        spellUsed = (unit == 'mouseover' and 'Провокация МО' or 'Провокация')
+        reason = 'Цель не агрит игрока, угроза < 3'
+        rangeInfo = '30м'
     end
 
     -- Проверка вызывающего крика (10 метров, вне АОЕ)
-    if not spellUsed and IsUsableSpell('Вызывающий крик') and ns.CanUseAction('Вызывающий крик') and rage >= 10 then
-        if CheckInteractDistance(unit, 3) and use('Вызывающий крик') then
-            spellUsed = 'Вызывающий крик'
-            reason = 'Цель не агрит игрока, угроза < 3'
-            rangeInfo = '10м'
-        end
+    if not spellUsed and dist10 and IsUsableSpell('Вызывающий крик') and ns.CanUseAction('Вызывающий крик') and rage >= 10 then
+        spellUsed = 'Вызывающий крик'
+        reason = 'Цель не агрит игрока, угроза < 3'
+        rangeInfo = '10м'
     end
 
     -- Логирование для агро-способностей
