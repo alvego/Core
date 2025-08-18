@@ -55,6 +55,7 @@ function ns.UpdateState()
     ns.State.group = ns.State.party or ns.State.raid
 
     ns.State.combatLock = InCombatLockdown()
+    ns.TimerToggle('combatLock', ns.State.combatLock)
     ns.State.combatTarget = ns.State.existsTarget and UnitAffectingCombat('target')
     ns.State.bossTarget = ns.State.existsTarget and ns.UnitIsBoss('target')
     ns.State.targetPlayer = ns.State.existsTarget and UnitIsPlayer('target')
@@ -66,11 +67,11 @@ function ns.UpdateState()
     ns.State.targetBehind = ns.State.existsTarget and not ns.IsNotBehind()
 
     if not ns.State.invalidTarget and ns.State.combatTarget then
-        ns.TimerStart('CombatTarget')
+        ns.TimerStart('combatTarget')
     end
 
     ns.State.autoattack = IsCurrentSpell('Автоматическая атака')
-    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('CombatTarget', 2)
+    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('combatTarget', 2)
 
     ns.State.speed = GetUnitSpeed('player')
     ns.State.falling = IsFalling()

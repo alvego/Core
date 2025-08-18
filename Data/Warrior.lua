@@ -7,7 +7,9 @@ if ns.State.playerClass ~= 'WARRIOR' then return end
 ------------------------------------------------------------------------------------------------------------------
 ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
-local function getSpec1Action()
+local UnitMana = UnitMana
+------------------------------------------------------------------------------------------------------------------
+local function getArmsAction()
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
         return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
@@ -22,7 +24,7 @@ local function getSpec1Action()
     return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
-local function getSpec2Action()
+local function getFuryAction()
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
         return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
@@ -37,7 +39,94 @@ local function getSpec2Action()
     return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
-local function getSpec3Action()
+-- Новая функция для проверки состояния цели и логирования
+local function getTargetInfo(unit)
+    local unitTargetName = 'Нет цели'
+    local threat = UnitThreatSituation('player', unit) or 0 -- 0: нет угрозы, 1: есть угроза, 2: овертаунт, 3: танк
+    local targetUnit = unit .. 'target'
+    if UnitExists(targetUnit) then
+        unitTargetName = UnitName(targetUnit)
+    end
+    return unitTargetName, threat
+end
+------------------------------------------------------------------------------------------------------------------
+-- Новая функция для обработки агро-способностей
+local function checkThreatAndAct(unit, rage, stance)
+    if not UnitExists(unit) or UnitIsDeadOrGhost(unit) or not UnitCanAttack('player', unit) then
+        return false
+    end
+
+    local unitName = UnitName(unit)
+    local unitTargetName, threat = getTargetInfo(unit)
+    local spellUsed = nil
+    local reason = nil
+    local rangeInfo = nil
+
+    if threat == 3 then return false end
+
+    -- Проверка удара грома (10 метров, вне АОЕ)
+    if not spellUsed and IsUsableSpell('Удар грома') and rage >= 16 and stance ~= 3 and ns.CanUseAction('Удар грома') then
+        if CheckInteractDistance(unit, 3) and use('Удар грома') then
+            spellUsed = 'Удар грома'
+            reason = 'Цель не агрит игрока, угроза < 3'
+            rangeInfo = '10м'
+        end
+    end
+
+    -- Проверка дразнящего удара (мили)
+    if not spellUsed and IsUsableSpell('Дразнящий удар') and ns.CanUseAction('Дразнящий удар') then
+        if IsSpellInRange('Кровопускание', unit) == 1 and use(unit == 'mouseover' and 'Дразнящий М' or 'Дразнящий удар') then
+            spellUsed = 'Дразнящий удар'
+            reason = 'Цель не агрит игрока, угроза < 3'
+            rangeInfo = 'мили'
+        end
+    end
+
+    -- Проверка раскола брони (мили)
+    if not spellUsed and IsUsableSpell('Раскол брони') and rage >= 15 and stance == 2 and ns.CanUseAction('Раскол брони') then
+        if IsSpellInRange('Кровопускание', unit) == 1 and use(unit == 'mouseover' and 'Раскол брони МО' or 'Раскол брони') then
+            spellUsed = 'Раскол брони'
+            reason = 'Цель не агрит игрока'
+            rangeInfo = 'мили'
+        end
+    end
+
+    -- Проверка провокации (30 метров)
+    if not spellUsed and IsUsableSpell('Провокация') and ns.CanUseAction('Провокация') then
+        if not CheckInteractDistance(unit, 3) and IsSpellInRange('Провокация', unit) == 1 and use(unit == 'mouseover' and 'Провокация МО' or 'Провокация') then
+            spellUsed = 'Провокация'
+            reason = 'Цель не агрит игрока, угроза < 3'
+            rangeInfo = '30м'
+        end
+    end
+
+    -- Проверка вызывающего крика (10 метров, вне АОЕ)
+    if not spellUsed and IsUsableSpell('Вызывающий крик') and ns.CanUseAction('Вызывающий крик') and rage >= 10 then
+        if CheckInteractDistance(unit, 3) and use('Вызывающий крик') then
+            spellUsed = 'Вызывающий крик'
+            reason = 'Цель не агрит игрока, угроза < 3'
+            rangeInfo = '10м'
+        end
+    end
+
+    -- Логирование для агро-способностей
+    if not spellUsed then
+        return false
+    end
+
+    return spellUsed, string.format(
+        '[TANK] %s на %s (%s): %s. Угроза: %d, Цель цели: %s, Дистанция: %s',
+        spellUsed,
+        unitName,
+        unit,
+        reason,
+        threat,
+        unitTargetName,
+        rangeInfo
+    )
+end
+------------------------------------------------------------------------------------------------------------------
+local function getProtoAction()
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
         return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
@@ -45,10 +134,10 @@ local function getSpec3Action()
     local rage = UnitMana('player')
     local stance = GetShapeshiftForm()
 
-    if stance ~= 2 and ns.State.combatLock and ns.CanUseAction('Оборонительная стойка') then
-         return 'Оборонительная стойка', 'свитч в дэфстэнс в бою'
+    if stance ~= 2 and ns.State.combatLock then --ns.CanUseAction('Оборонительная стойка')
+        return 'Оборонительная стойка', 'свитч в дэфстэнс в бою'
     end
-  
+
     local tarcmd, tarinfo = ns.TryTarget()
     if tarcmd then
         return tarcmd, tarinfo
@@ -56,22 +145,126 @@ local function getSpec3Action()
 
     local inMelee = ns.IsSpellInRange('Кровопускание')
 
-    -- Инициация боя: Рывок
-    if ns.State.attack and ns.CanUseAction('Рывок') and ns.TimerMore('Перехват', 1.5) then
-        return 'Рывок', 'Рывок'
+
+    local isRecentlyCharged = ns.TimerLess('Перехват', 1.5) or ns.TimerLess('Рывок', 1.5) or
+        ns.TimerLess('Вмешательство', 1.5)
+
+    if ns.State.attack and not isRecentlyCharged then
+        -- Инициация боя: Рывок
+        if ns.CanUseAction('Рывок') then
+            return 'Рывок', 'прыгаем [Рывок]'
+        end
+        -- Или Перехват
+        if ns.CanUseAction('Перехват') then
+            return 'Перехват', 'прыгаем [Перехват]'
+        end
+        -- Или Вмешательство
+        -- if ns.CanUseAction('Вмешательство') then
+        --     return 'Вмешательство', 'пригаем [Вмешательство] target-target'
+        -- end
     end
-    -- Или Перехват
-    if ns.State.attack and ns.CanUseAction('Перехват') and ns.TimerMore('Рывок', 1.5) then
-        return 'Перехват', 'Перехват'
+
+    if IsUsableSpell('Реванш') and inMelee and ns.CanUseAction('Сверхусилие') then
+        return 'Сверхусилие', 'реванш доступен, [Сверхусилие]'
     end
 
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
+
+    -- Генерация ярости: Кровавая ярость
+    if ns.State.combatLock and rage < 30 and inMelee and ns.CanUseAction('Кровавая ярость') then
+        return 'Кровавая ярость', 'генерация ярости'
+    end
+
+    -- Защита: Блок щитом, при низком здоровье Глухая оборона
+    if ns.State.playerHP100 < 80 and rage >= 10 and ns.CanUseAction('Блок щитом') then
+        return 'Блок щитом', 'защита при hp < 80%'
+    end
+    if ns.State.playerHP100 < 35 and rage >= 10 and ns.CanUseAction('Глухая оборона') then
+        return 'Глухая оборона', 'деф при hp < 35%'
+    end
+
+    local dist10 = CheckInteractDistance('target', 3)
+
+    -- Пуллтайм ротация
+    local isPull = ns.TimerLess('combatLock', 3) -- Первые 3 секунды боя
+    if isPull and ns.State.group then            -- только в группе
+        if ns.CanUseAction('Удар грома') and rage >= 16 and inMelee then
+            return 'Удар грома', 'пулл в мили'
+        end
+
+        if ns.CanUseAction('Ударная волна') and dist10 and not ns.IsReadySpell('Удар грома') and rage >= 15 then
+            return 'Ударная волна', 'пулл 10м'
+        end
+
+        return 'none', 'завершаем ротацию, чтобы не переходить к основной'
+    end
+
+    local aoe = ns.IsShift()
+    local ctrl = ns.IsCtr()
+
+    if ns.State.combatLock and ns.State.group then
+        -- Деморализующий крик в АОЕ
+        if aoe and dist10 and ns.CanUseAction('Деморализующий крик') and rage >= 10 and not ns.HasMyDebuff('Деморализующий крик') then
+            return 'Деморализующий крик', 'aoe крик'
+        end
+
+        local aSpell, aReason
+        -- Проверка агро для маусовер-цели
+        if UnitExists('mouseover') and UnitCanAttack('player', 'mouseover') then
+            aSpell, aReason = checkThreatAndAct('mouseover', rage, stance)
+            if aSpell then
+                return aSpell, aReason
+            end
+        end
+
+        -- Проверка агро для текущей цели
+        aSpell, aReason = checkThreatAndAct('target', rage, stance)
+
+        if aSpell then
+            return aSpell, aReason
+        end
+    end
+
+    -- Основные атакующие способности
+    if IsUsableSpell('Реванш') and inMelee and ns.CanUseAction('Реванш') then
+        return 'Реванш', 'реванш по доступности'
+    end
+
+    if inMelee and ns.CanUseAction('Мощный удар щитом') and ns.HasMyBuff('Щит и меч') then
+        return 'Мощный удар щитом', 'по проку бъем щитом'
+    end
+
+    if rage >= 16 and inMelee and ns.CanUseAction('Удар грома') then
+        return 'Удар грома', 'гром в мили'
+    end
+
+    if dist10 and not ns.IsReadySpell('Удар грома') and rage >= 17 and ns.CanUseAction('Ударная волна') then
+        return 'Ударная волна', 'волна в 10м'
+    end
+    if rage >= 36 and stance == 2 and inMelee and ns.CanUseAction('Мощный удар щитом') then
+        return 'Мощный удар щитом', 'сливаем рагу щитом'
+    end
+    if not aoe and IsUsableSpell('Сокрушение') and not ns.HasMyBuff('Щит и меч') and rage >= 20 and inMelee then
+        return 'Сокрушение', 'крушим вместо щита'
+    end
+    -- раскол по контролу на боса
+    if ctrl and ns.CanUseAction('Раскол брони') and not ns.HasMyDebuff('Раскол брони') then
+        return 'Раскол брони', 'раскол по ctrl'
+    end
+    if aoe and not IsCurrentSpell('Рассекающий удар') and ns.CanUseAction('Рассекающий удар') and rage >= 20 and inMelee then
+        return 'Рассекающий удар', 'aoe заполнитель'
+    end
+    -- Использование Удара героя только по прокам Символа реванша
+    if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and (ns.HasMyBuff('Символ реванша') or rage >= 80) then
+        return 'Удар героя', 'соло заполнитель'
+    end
+
     return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
-local rotations = { getSpec1Action, getSpec2Action, getSpec3Action }
+local rotations = { getArmsAction, getFuryAction, getProtoAction }
 function ns:GetAction()
     local spec = ns.GetCurrentSpecID()
     local rotation = rotations[spec]

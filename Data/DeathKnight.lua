@@ -9,6 +9,7 @@ ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 local GetRuneCooldown = GetRuneCooldown
 local GetRuneType = GetRuneType
+local GetTalentInfo = GetTalentInfo
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
 ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
