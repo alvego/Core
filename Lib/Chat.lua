@@ -15,16 +15,16 @@ local GetCVar = GetCVar
 local format = format
 ------------------------------------------------------------------------------------------------------------------
 -- Имя новой вкладки чата
-local DEBUG_TAB_NAME = "Debug"
+local DEBUG_TAB_NAME = 'Debug'
 
 
 local function getDebugChatFrame()
     local debugChatFrame, tab
     -- Находим чат-фрейм с нашей вкладкой
     for i = 1, NUM_CHAT_WINDOWS do
-        tab = _G["ChatFrame" .. i .. "Tab"]
+        tab = _G['ChatFrame' .. i .. 'Tab']
         if tab and tab:GetText() == DEBUG_TAB_NAME then
-            debugChatFrame = _G["ChatFrame" .. i]
+            debugChatFrame = _G['ChatFrame' .. i]
             break
         end
     end
@@ -39,7 +39,7 @@ local function updateDebugTabVisibility(visible)
         if tab:IsShown() then
             if not visible then
                 if chatFrame.isDocked and chatFrame:IsShown() then
-                    local firstChatFrame = _G["ChatFrame1"]
+                    local firstChatFrame = _G['ChatFrame1']
                     if firstChatFrame then
                         FCF_SelectDockFrame(firstChatFrame)
                     end
@@ -63,8 +63,8 @@ ns.AttachUpdateDebugState(updateDebugTabVisibility)
 local function getFreeChatIndex()
     local frame, tab
     for i = 1, NUM_CHAT_WINDOWS do
-        frame = _G["ChatFrame" .. i]
-        tab = _G["ChatFrame" .. i .. "Tab"]
+        frame = _G['ChatFrame' .. i]
+        tab = _G['ChatFrame' .. i .. 'Tab']
         -- Проверяем, что фрейм не используется (нет имени вкладки или вкладка скрыта и не настроена)
 
         if frame and tab and not tab:IsShown() and not frame:IsShown() then --and tab:GetText() == format(CHAT_NAME_TEMPLATE, i)
@@ -95,21 +95,21 @@ end
 
 -- Функция для создания вкладки чата
 local function createDebugChatTab()
-    -- Проверяем, не существует ли уже вкладка с именем "Debug"
+    -- Проверяем, не существует ли уже вкладка с именем 'Debug'
     local chatFrame = getDebugChatFrame()
     if chatFrame then return end -- уже есть
 
     -- Находим свободный чат-фрейм, который не используется
     chatFrame = getFreeChatIndex()
     if not chatFrame then
-        ns.Chat("Нет свободных чат-фреймов для создания вкладки Debug! Закройте или удалите существующие вкладки.",
+        ns.Chat('Нет свободных чат-фреймов для создания вкладки Debug! Закройте или удалите существующие вкладки.',
             'FF0000')
         return
     end
     print(1, chatFrame == nil)
     configureDebugChatFrame(chatFrame)
 end
-ns.AttachEvent("PLAYER_LOGIN", createDebugChatTab)
+ns.AttachEvent('PLAYER_LOGIN', createDebugChatTab)
 
 ------------------------------------------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений

@@ -64,7 +64,7 @@ end
 local toStrBuffer = {}
 function ns.ToStr(...)
     local n = select('#', ...)
-    if n == 0 then return "" end
+    if n == 0 then return '' end
     for i = 1, n do
         toStrBuffer[i] = tostring(select(i, ...))
     end
@@ -84,7 +84,7 @@ function ns.GetCurrentTime()
     local minutes = math.floor(t / 60) % 60
     local seconds = math.floor(t % 60)
     -- Форматируем результат в hh:mm:ss
-    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
+    return string.format('%02d:%02d:%02d', hours, minutes, seconds)
 end
 
 ------------------------------------------------------------------------------------------------------------------

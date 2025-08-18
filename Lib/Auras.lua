@@ -119,9 +119,9 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     -- Обрабатываем тошлько мои ауры
     if sourceGUID ~= ns.State.playerGUID then return end
     local spellName = select(2, ...)
-    if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" then -- or subEvent == "SPELL_CAST_SUCCESS"
+    if subEvent == 'SPELL_AURA_APPLIED' or subEvent == 'SPELL_AURA_REFRESH' then -- or subEvent == 'SPELL_CAST_SUCCESS'
         addDotedTarget(destGUID, spellName)
-    elseif subEvent == "SPELL_AURA_REMOVED" then
+    elseif subEvent == 'SPELL_AURA_REMOVED' then
         removeDotedTarget(destGUID, spellName)
     end
 end

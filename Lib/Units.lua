@@ -63,7 +63,7 @@ end
 function ns.IsInvalidTarget(unit)
     unit = unit or 'target'
     if not UnitExists(unit) then return 'остутствует ' .. unit end
-    if not UnitCanAttack("player", unit) then return 'не могу бить ' .. unit end
+    if not UnitCanAttack('player', unit) then return 'не могу бить ' .. unit end
     if UnitIsDeadOrGhost(unit) and not ns.HasBuff('Притвориться мертвым', unit) then return unit .. ' мертв' end
     return false
 end
@@ -84,7 +84,7 @@ end
 function ns.UnitIsBoss(unit)
     unit = unit or 'target'
     local lvl = UnitLevel(unit)
-    return lvl == -1 or lvl > UnitLevel("player") + 3
+    return lvl == -1 or lvl > UnitLevel('player') + 3
 end
 
 ------------------------------------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ local inDuel = false
 local function startDuel()
     inDuel = true
 end
-hooksecurefunc("StartDuel", startDuel);
+hooksecurefunc('StartDuel', startDuel);
 
 local function duelUpdate(event)
     inDuel = event == 'DUEL_REQUESTED'
@@ -117,19 +117,19 @@ function ns.IsInDuel()
 end
 
 ------------------------------------------------------------------------------------------------------------------
-local immuneList = { "Божественный щит", "Ледяная глыба", "Сдерживание" }
+local immuneList = { 'Божественный щит', 'Ледяная глыба', 'Сдерживание' }
 function ns.UnitIsImmune(unit)
     unit = unit or 'target'
     local aura = ns.HasBuff(immuneList, unit)
     if aura then
         return aura
     end
-    aura = ns.HasDebuff("Смерч", unit)
+    aura = ns.HasDebuff('Смерч', unit)
     return aura and aura or false
 end
 
 ------------------------------------------------------------------------------------------------------------------
-local magicList = { "Отражение заклинания", "Антимагический панцирь", "Рунический покров", "Эффект тотема заземления" }
+local magicList = { 'Отражение заклинания', 'Антимагический панцирь', 'Рунический покров', 'Эффект тотема заземления' }
 function ns.UnitIsMagicImmune(unit)
     unit = unit or 'target'
     local aura = ns.HasBuff(magicList, unit)
@@ -141,7 +141,7 @@ local function resetTimers()
     ns.TimerReset('notBehind')
     ns.TimerReset('notVisible')
 end
-ns.AttachEvent("PLAYER_TARGET_CHANGED", resetTimers)
+ns.AttachEvent('PLAYER_TARGET_CHANGED', resetTimers)
 ------------------------------------------------------------------------------------------------------------------
 function ns.IsLOS()
     return ns.TimerLess('notVisible', 0.5)
@@ -156,11 +156,11 @@ end
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if sourceGUID ~= ns.State.playerGUID then return end
-    if subEvent == "SPELL_CAST_FAILED" then
+    if subEvent == 'SPELL_CAST_FAILED' then
         local reason = select(4, ...)
-        if reason == "Вы должны находиться позади цели." then
+        if reason == 'Вы должны находиться позади цели.' then
             ns.TimerStart('notBehind')
-        elseif reason == "Цель вне поля зрения." then
+        elseif reason == 'Цель вне поля зрения.' then
             ns.TimerStart('notVisible')
         end
     end

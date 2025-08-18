@@ -5,7 +5,7 @@ local name, ns = ... -- namespace
 ------------------------------------------------------------------------------------------------------------------
 -- Инициализация скрытого фрейма для обработки событий
 local frame = CreateFrame('Frame', name .. 'Semaphore', UIParent)
-frame:SetFrameStrata('High')
+frame:SetFrameStrata('HIGH')
 frame:SetPoint('TOPLEFT', 0, 0)
 frame:SetWidth(1)
 frame:SetHeight(1)
@@ -13,8 +13,8 @@ frame:SetScale(1, 1)
 frame:SetAlpha(1)
 frame:Show()
 ------------------------------------------------------------------------------------------------------------------
-local texture = frame:CreateTexture('Texture', 'Background')
-texture:SetBlendMode('Disable')
+local texture = frame:CreateTexture('Texture', 'BACKGROUND')
+texture:SetBlendMode('DISABLE')
 texture:SetTexture(0, 0, 0)
 texture:SetAllPoints(frame)
 ------------------------------------------------------------------------------------------------------------------

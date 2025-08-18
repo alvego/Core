@@ -7,7 +7,7 @@ local tinsert = tinsert
 local wipe = wipe
 local table_concat = table.concat
 ------------------------------------------------------------------------------------------------------------------
-local frame = CreateFrame("Frame", name .. "Telemetry", UIParent)
+local frame = CreateFrame('Frame', name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
 frame:SetHeight(10)
 frame:SetWidth(10)
@@ -16,8 +16,8 @@ frame.text:SetAllPoints()
 frame:SetPoint('TOPLEFT', 20, 0)
 frame:SetScale(1);
 frame:SetAlpha(1)
-local texture = frame:CreateTexture('Texture', 'Background')
-texture:SetBlendMode('Disable')
+local texture = frame:CreateTexture('Texture', 'BACKGROUND')
+texture:SetBlendMode('DISABLE')
 texture:SetTexture(0, 0, 0)
 texture:SetAlpha(0.5)
 texture:SetAllPoints(frame)
@@ -34,7 +34,7 @@ ns.AttachUpdateDebugState(updateTelemetryVisibility)
 
 local list = {}
 function ns.AttachTelemetry(fn)
-    if type(fn) ~= "function" then error("Telemetry fn must be a getter function") end
+    if type(fn) ~= 'function' then error('Telemetry fn must be a getter function') end
     tinsert(list, fn)
 end
 

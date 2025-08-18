@@ -26,7 +26,7 @@ ns.State.playerClass = playerClass
 ns.State.playerColor = playerColor
 ns.State.playerGUID = UnitGUID('player')
 
-local eatBuff = { "Пища", "Питье" }
+local eatBuff = { 'Пища', 'Питье' }
 ------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
 function ns.UpdateState()
@@ -45,9 +45,9 @@ function ns.UpdateState()
     ns.State.numTargets = ns.GetNumTargets()
 
     local inInstance, instanceType = IsInInstance()
-    ns.State.instance = inInstance ~= nil and instanceType ~= "pvp" and instanceType ~= "arena"
-    ns.State.battleground = inInstance ~= nil and instanceType == "pvp"
-    ns.State.arena = inInstance ~= nil and instanceType == "arena"
+    ns.State.instance = inInstance ~= nil and instanceType ~= 'pvp' and instanceType ~= 'arena'
+    ns.State.battleground = inInstance ~= nil and instanceType == 'pvp'
+    ns.State.arena = inInstance ~= nil and instanceType == 'arena'
     ns.State.pvp = ns.State.arena or ns.State.battleground or ns.State.duel or
         (not ns.State.invalidTarget and UnitIsPlayer('target'))
     ns.State.party = GetNumPartyMembers() > 0

@@ -15,7 +15,7 @@ local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 local db = {}
 
 local function updateTargets()
-    -- Не чичтим если
+    -- Не чиcтим если
     if ns.State.combatMode then return true end        -- в бою
     if ns.State.autoattack then return true end        -- автоатака
     if ns.State.attack then return true end            -- зажата атака
@@ -72,16 +72,16 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     if bit.band(sourceFlags, destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
 
     local amount
-    if subEvent == "SWING_DAMAGE" then
+    if subEvent == 'SWING_DAMAGE' then
         amount = select(1, ...)
         updateVictim(sourceGUID, destGUID, amount)
-    elseif subEvent == "SPELL_DAMAGE" or subEvent == "RANGE_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" then
+    elseif subEvent == 'SPELL_DAMAGE' or subEvent == 'RANGE_DAMAGE' or subEvent == 'SPELL_PERIODIC_DAMAGE' then
         amount = select(4, ...)
         updateVictim(sourceGUID, destGUID, amount)
-    elseif subEvent == "SPELL_MISSED" or subEvent == "RANGE_MISSED" or
-        subEvent == "SWING_MISSED" or subEvent == "SPELL_PERIODIC_MISSED" then
+    elseif subEvent == 'SPELL_MISSED' or subEvent == 'RANGE_MISSED' or
+        subEvent == 'SWING_MISSED' or subEvent == 'SPELL_PERIODIC_MISSED' then
         updateVictim(sourceGUID, destGUID, 0)
-    elseif subEvent == "UNIT_DIED" then
+    elseif subEvent == 'UNIT_DIED' then
         killVictim(destGUID)
     end
 end
@@ -89,7 +89,7 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 ------------------------------------------------------------------------------------------------------------------
 local uniqueTargets = {}
 function ns.GetNumTargets(unit)
-    unit = unit and unit or "targettarget"
+    unit = unit and unit or 'targettarget'
     local guid = UnitGUID(unit)             -- скорее всего я, или танк
     local victim = guid and db[guid] or nil -- инфо о подвергнувшимся нападению
 
@@ -125,7 +125,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.TimeToDie(unit)
-    unit = unit and unit or "target"
+    unit = unit and unit or 'target'
     local guid = UnitGUID(unit)
     if not guid then return 0 end
     local enemy = db[guid]

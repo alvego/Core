@@ -56,7 +56,7 @@ end
 ------------------------------------------------------------------------------------------------------------------
 local bookSpellIds = {}
 local function refreshBookSpells()
-    local bookType = "spell"
+    local bookType = 'spell'
     local maxIndex = 0
     local maxTabs = GetNumSpellTabs()
     for i = 1, maxTabs do
@@ -69,10 +69,10 @@ local function refreshBookSpells()
     for spellBookId = 1, maxIndex do
         local spellType, baseSpellID = GetSpellBookItemInfo(spellBookId, bookType)
 
-        if spellType == "SPELL" then
+        if spellType == 'SPELL' then
             local currentSpellName = GetSpellBookItemName(spellBookId, bookType)
             local link = GetSpellLink(currentSpellName)
-            local currentSpellID = tonumber(link and link:gsub("|", "||"):match("spell:(%d+)"))
+            local currentSpellID = tonumber(link and link:gsub('|', '||'):match('spell:(%d+)'))
 
             if currentSpellName and not bookSpellIds[currentSpellName] then
                 bookSpellIds[currentSpellName] = spellBookId
@@ -99,12 +99,12 @@ ns.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
 function ns.IsSpellInRange(spell, unit)
     if next(bookSpellIds) == nil then refreshBookSpells() end
     if spell == nil then return false end
-    if unit == nil then unit = "target" end
+    if unit == nil then unit = 'target' end
     local inRange = IsSpellInRange(spell, unit)
     if inRange == nil then
         local spellBookId = bookSpellIds[spell]
         if spellBookId then
-            return IsSpellInRange(spellBookId, "spell", unit) == 1
+            return IsSpellInRange(spellBookId, 'spell', unit) == 1
         end
     end
     return inRange == 1
@@ -138,11 +138,11 @@ local lastUsedSpell = nil
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if sourceGUID ~= ns.State.playerGUID then return end
-    if subEvent:match("^SPELL_CAST") then
+    if subEvent:match('^SPELL_CAST') then
         local spellName = select(2, ...)
         lastUsedSpell = spellName
         ns.TimerStart(spellName)
-        if subEvent == "SPELL_CAST_FAILED" then
+        if subEvent == 'SPELL_CAST_FAILED' then
             local reason = select(4, ...)
             ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', '880000')
         end

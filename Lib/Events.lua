@@ -5,12 +5,12 @@ local name, ns = ... -- namespace
 ------------------------------------------------------------------------------------------------------------------
 local tinsert = tinsert
 -- Инициализация скрытого фрейма для обработки событий
-local frame = CreateFrame("Frame", name .. "Events", UIParent)
+local frame = CreateFrame('Frame', name .. 'Events', UIParent)
 ------------------------------------------------------------------------------------------------------------------
 -- Список событие -> обработчики
 local eventList = {}
 function ns.AttachEvent(event, func)
-    if type(func) ~= 'function' then error("Wrong type") end
+    if type(func) ~= 'function' then error('Wrong type') end
     local funcList = eventList[event]
     if nil == funcList then
         funcList = {}
@@ -32,20 +32,22 @@ local function onEvent(self, event, ...)
         end
     end
 end
-frame:SetScript("OnEvent", onEvent)
+frame:SetScript('OnEvent', onEvent)
 
 ------------------------------------------------------------------------------------------------------------------
 local listBeforeIdle = {}
 function ns.AttachBeforeIdle(func)
-    if type(func) ~= 'function' then error("Wrong type") end
+    if type(func) ~= 'function' then error('Wrong type') end
     tinsert(listBeforeIdle, func)
 end
+
 ------------------------------------------------------------------------------------------------------------------
 local listAfterIdle = {}
 function ns.AttachAfterIdle(func)
-    if type(func) ~= 'function' then error("Wrong type") end
+    if type(func) ~= 'function' then error('Wrong type') end
     tinsert(listAfterIdle, func)
 end
+
 ------------------------------------------------------------------------------------------------------------------
 local busy = false -- we don't use ns.IsChnaged for speed reasons
 local function lockedIdle()
@@ -69,5 +71,5 @@ local function onUpdate(frame, elapsed)
     update = 0
     lockedIdle();
 end
-frame:SetScript("OnUpdate", onUpdate)
+frame:SetScript('OnUpdate', onUpdate)
 ------------------------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@ local tinsert = tinsert
 ------------------------------------------------------------------------------------------------------------------
 local funcList = {}
 function ns.AttachUpdateDebugState(func)
-    if type(func) ~= 'function' then error("Wrong type") end
+    if type(func) ~= 'function' then error('Wrong type') end
     tinsert(funcList, func)
 end
 

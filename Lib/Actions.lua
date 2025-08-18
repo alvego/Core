@@ -103,7 +103,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 local function formatIcon(icon)
-    return icon and "|T" .. icon .. ":24:24:0:0|t" or "       "
+    return icon and '|T' .. icon .. ':24:24:0:0|t' or '       '
 end
 
 function ns.ActionLog(icon, action, info, hex)
@@ -114,10 +114,10 @@ end
 local lastSlot = 0
 function ns.UseAction(action, info)
     if action == nil then
-        error("action can't be nil")
+        error('action can be string')
     end
     if info == nil then
-        ns.Error(action .. " can have info!")
+        ns.Error(action .. ' can have info!')
     end
     local slot = ns.GetSlot(action)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
