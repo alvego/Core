@@ -126,6 +126,8 @@ local function getProtoAction()
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     local rage = UnitMana('player')
     local stance = GetShapeshiftForm()
+    local aoe  = ns.IsShift() or (ns.State.numTargets > 2)
+    local ctrl = ns.IsCtr()
 
     if stance ~= 2 and ns.State.combatLock then --ns.CanUseAction('Оборонительная стойка')
         return 'Оборонительная стойка', 'свитч в дэфстэнс в бою'
@@ -157,19 +159,7 @@ local function getProtoAction()
         -- end
     end
 
-    if IsUsableSpell('Реванш') and inMelee and ns.CanUseAction('Сверхусилие') then
-        return 'Сверхусилие', 'реванш доступен, [Сверхусилие]'
-    end
-
-    -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
-    if ns.State.gcd then return 'none', 'гкд' end
-    -- то что требуется гкд
-
-    -- Генерация ярости: Кровавая ярость
-    if ns.State.combatLock and rage < 30 and inMelee and ns.CanUseAction('Кровавая ярость') then
-        return 'Кровавая ярость', 'генерация ярости'
-    end
-
+    -- часть ротации которую можно прожимать во время гкд
     -- Защита: Блок щитом, при низком здоровье Глухая оборона
     if ns.State.playerHP100 < 80 and rage >= 10 and ns.CanUseAction('Блок щитом') then
         return 'Блок щитом', 'защита при hp < 80%'
@@ -177,6 +167,32 @@ local function getProtoAction()
     if ns.State.playerHP100 < 35 and rage >= 10 and ns.CanUseAction('Глухая оборона') then
         return 'Глухая оборона', 'деф при hp < 35%'
     end
+
+     -- Генерация ярости: Кровавая ярость
+    if ns.State.combatLock and rage < 20 and inMelee and ns.CanUseAction('Кровавая ярость') then
+        return 'Кровавая ярость', 'генерация ярости'
+    end
+
+    -- Удары которые можно сетить вне гкд 
+    if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and rage >= 80 then
+        return 'Удар героя', 'соло заполнитель' 
+    end
+
+    if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and ns.HasMyBuff('Символ реванша') then
+        return 'Удар героя', 'Бесплатный по проку'
+    end
+
+    if aoe and not IsCurrentSpell('Рассекающий удар') and ns.CanUseAction('Рассекающий удар') and rage >= 36 and inMelee then
+        return 'Рассекающий удар', 'aoe заполнитель'
+    end
+
+    if IsUsableSpell('Реванш') and ns.CanUseAction('Реванш') and inMelee and ns.CanUseAction('Сверхусилие') then
+        return 'Сверхусилие', 'реванш доступен, [Сверхусилие]'
+    end
+
+    if ns.State.gcd then return 'none', 'гкд' end
+
+    -- то что выполняется в рамках гкд
 
     local dist10 = CheckInteractDistance('target', 3)
 
@@ -187,22 +203,14 @@ local function getProtoAction()
             return 'Удар грома', 'пулл в мили'
         end
 
-        if ns.CanUseAction('Ударная волна') and dist10 and not ns.IsReadySpell('Удар грома') and rage >= 15 then
+        if ns.CanUseAction('Ударная волна') and ns.State.targetVisible and dist10 and not ns.IsReadySpell('Удар грома') and rage >= 15 then
             return 'Ударная волна', 'пулл 10м'
         end
 
         return 'none', 'завершаем ротацию, чтобы не переходить к основной'
     end
 
-    local aoe = ns.IsShift()
-    local ctrl = ns.IsCtr()
-
     if ns.State.combatLock and ns.State.group then
-        -- Деморализующий крик в АОЕ
-        if aoe and dist10 and ns.CanUseAction('Деморализующий крик') and rage >= 10 and not ns.HasMyDebuff('Деморализующий крик') then
-            return 'Деморализующий крик', 'aoe крик'
-        end
-
         local aSpell, aReason
         -- Проверка агро для маусовер-цели
         if UnitExists('mouseover') and UnitCanAttack('player', 'mouseover') then
@@ -221,6 +229,7 @@ local function getProtoAction()
     end
 
     -- Основные атакующие способности
+
     if IsUsableSpell('Реванш') and inMelee and ns.CanUseAction('Реванш') then
         return 'Реванш', 'реванш по доступности'
     end
@@ -233,25 +242,27 @@ local function getProtoAction()
         return 'Удар грома', 'гром в мили'
     end
 
-    if dist10 and not ns.IsReadySpell('Удар грома') and rage >= 17 and ns.CanUseAction('Ударная волна') then
+     -- Деморализующий крик в АОЕ
+    if aoe and dist10 and ns.CanUseAction('Деморализующий крик') and rage >= 10 and not ns.HasMyDebuff('Деморализующий крик') then
+        return 'Деморализующий крик', 'автоматический деморал крик'
+    end
+
+    if not (ns.HasMyBuff('Командирский крик') or ns.HasBuff('Боевой крик') or ns.HasBuff('благословение могущества')) then
+        return 'Боевой крик', 'яростно кричим на бицуху'
+    end
+
+    if dist10 and not ns.IsReadySpell('Удар грома') and ns.State.targetVisible and rage >= 17 and ns.CanUseAction('Ударная волна') then
         return 'Ударная волна', 'волна в 10м'
     end
     if rage >= 36 and stance == 2 and inMelee and ns.CanUseAction('Мощный удар щитом') then
         return 'Мощный удар щитом', 'сливаем рагу щитом'
     end
-    if not aoe and IsUsableSpell('Сокрушение') and not ns.HasMyBuff('Щит и меч') and rage >= 20 and inMelee then
-        return 'Сокрушение', 'крушим вместо щита'
+    if not aoe and IsUsableSpell('Сокрушение') and not ns.HasMyBuff('Щит и меч') and rage >= 31 and inMelee then
+        return 'Сокрушение', 'крушим пока shit на КД'
     end
     -- раскол по контролу на боса
     if ctrl and ns.CanUseAction('Раскол брони') and not ns.HasMyDebuff('Раскол брони') then
         return 'Раскол брони', 'раскол по ctrl'
-    end
-    if aoe and not IsCurrentSpell('Рассекающий удар') and ns.CanUseAction('Рассекающий удар') and rage >= 20 and inMelee then
-        return 'Рассекающий удар', 'aoe заполнитель'
-    end
-    -- Использование Удара героя только по прокам Символа реванша
-    if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and (ns.HasMyBuff('Символ реванша') or rage >= 80) then
-        return 'Удар героя', 'соло заполнитель'
     end
 
     return 'none', 'пока всё'
