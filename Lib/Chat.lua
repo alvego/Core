@@ -5,13 +5,11 @@ local _, ns = ... -- namespace
 ------------------------------------------------------------------------------------------------------------------
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
-local CHAT_NAME_TEMPLATE = CHAT_NAME_TEMPLATE
 local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
 local ChatFrame_RemoveAllChannels = ChatFrame_RemoveAllChannels
 local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
-local GetCVar = GetCVar
 local format = format
 ------------------------------------------------------------------------------------------------------------------
 -- Имя новой вкладки чата
@@ -67,7 +65,7 @@ local function getFreeChatIndex()
         tab = _G['ChatFrame' .. i .. 'Tab']
         -- Проверяем, что фрейм не используется (нет имени вкладки или вкладка скрыта и не настроена)
 
-        if frame and tab and not tab:IsShown() and not frame:IsShown() then --and tab:GetText() == format(CHAT_NAME_TEMPLATE, i)
+        if frame and tab and not tab:IsShown() and not frame:IsShown() then
             return frame, tab
         end
     end

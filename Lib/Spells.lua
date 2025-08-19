@@ -94,7 +94,7 @@ local function onEvent(event, ...)
 
     lastUsedSpell = spellName
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
-        ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00') -- TODO: Debug
+        --ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
         ns.TimerStart(spellName)
         return
     end

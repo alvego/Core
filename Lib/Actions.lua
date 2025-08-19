@@ -6,6 +6,7 @@ local name, ns = ... -- namespace
 local ActionHasRange = ActionHasRange
 local format = format
 local wipe = wipe
+local error = error
 local GetMacroInfo = GetMacroInfo
 local GetActionInfo = GetActionInfo
 local GetSpellInfo = GetSpellInfo

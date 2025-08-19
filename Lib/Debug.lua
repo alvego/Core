@@ -5,6 +5,8 @@ local _, ns = ...
 ------------------------------------------------------------------------------------------------------------------
 local GetCVar = GetCVar
 local tinsert = tinsert
+local type = type
+local error = error
 ------------------------------------------------------------------------------------------------------------------
 local funcList = {}
 function ns.AttachUpdateDebugState(func)

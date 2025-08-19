@@ -7,7 +7,6 @@ local UnitGUID = UnitGUID
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
 local IsInInstance = IsInInstance
-local hooksecurefunc = hooksecurefunc
 local GetNumPartyMembers = GetNumPartyMembers
 local GetNumRaidMembers = GetNumRaidMembers
 local UnitIsPlayer = UnitIsPlayer
@@ -17,7 +16,6 @@ local UnitAffectingCombat = UnitAffectingCombat
 local IsCurrentSpell = IsCurrentSpell
 local GetUnitSpeed = GetUnitSpeed
 local IsFalling = IsFalling
-local format = format
 ------------------------------------------------------------------------------------------------------------------
 ns.State = {}
 

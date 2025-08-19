@@ -7,6 +7,7 @@ local UnitBuff = UnitBuff
 local UnitDebuff = UnitDebuff
 local GetTime = GetTime
 local wipe = wipe
+local type = type
 ------------------------------------------------------------------------------------------------------------------
 local function matchBuff(buffName, name, debuffType, canStealOrPurge, spellId)
     if type(buffName) == 'number' then
