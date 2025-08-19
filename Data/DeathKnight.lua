@@ -84,6 +84,7 @@ local function getBloodAction()
     local waitPestilence = frostFever and bloodPlague and minDebuffDuration < 1.5 and
         timeToBloodRuneReady < minDebuffDuration and glyphofDisease
 
+    local frostPresenceBuff = ns.HasBuff('Власть льда')
     local immuneToFrost = ns.State.targetImmuneMagic
 
     if immuneToFrost then
@@ -95,7 +96,7 @@ local function getBloodAction()
         if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction('Ледяное прикосновение') then
             return 'Ледяное прикосновение', 'range 1'
         end
-        if ns.CanUseAction('Лик смерти') then
+        if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction('Лик смерти') then
             return 'Лик смерти', 'range 2'
         end
         if IsUsableSpell('Зимний горн') and ns.CanUseAction('Зимний горн') then
@@ -177,15 +178,19 @@ local function getBloodAction()
         return 'Зимний горн', 'дуем'
     end
 
-    -- local GoFrostAbils = frostRunes > 0 or frostDeathRunes > 0 or bloodDeathRunes == 0 or not glyphofDisease or b2r or
-    --     frostFever and bloodPlague and minDebuffDuration > ttrb2r + 1.5 or
-    --     minDebuffDuration > 10
+    local goFrostAbils = frostRunes > 0 or frostDeathRunes > 0 or bloodDeathRunes == 0 or not glyphofDisease or b2r or
+        frostFever and bloodPlague and minDebuffDuration > ttrb2r + 1.5 or
+        minDebuffDuration > 10
+
+    if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and ns.CanUseAction('Ледяное прикосновение') then
+        return 'Ледяное прикосновение', 'арго лед прикосновением'
+    end
 
     if goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction('Кровавый удар') then
         return 'Удар в сердце', 'не aoe, cливаем руну крови'
     end
 
-    if runicPower >= 0 and ns.CanUseAction('Пожинание') then
+    if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction('Пожинание') then
         return 'Пожинание', 'сливаем runic power'
     end
 
