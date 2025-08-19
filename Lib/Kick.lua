@@ -11,7 +11,7 @@ function ns.UnitNeedKick(unit, kickByStun) -- cбивалка, проверяе�
     if kickByStun and UnitLevel(unit) == -1 then return false end
     local spell, left, duration, channel, notinterrupt = ns.UnitCasting(unit)
     if not spell then return false end
-    if not notinterrupt and not kickByStun then return false end
+    if notinterrupt and not kickByStun then return false end
     if left < 0.1 then return false end
     local salt = math_random() * 0.3         -- [0 .. 0.3]
     local kickZone = duration * (channel and (0.9 - salt) or (0.1 + salt))
