@@ -149,8 +149,11 @@ local function getBloodAction()
         return 'Смерть и разложение', 'aoe'
     end
 
-    if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets and ns.CanUseAction('Мор') then
-        return 'Мор', 'довешиваем болячки'
+    if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
+        if ns.CanUseAction('Мор') then
+            return 'Мор', 'довешиваем болячки'
+        end
+        return 'none', 'ждем довес [Мор]'
     end
 
     if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction('Ледяное прикосновение') then
