@@ -32,6 +32,19 @@ local function getBloodAction()
     if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction('Заморозка разума') then
         return 'Заморозка разума', 'кик в гкд'
     end
+
+    if IsUsableSpell('Гневный натиск') and ns.CanUseAction('Гневный натиск') then
+        return 'Гневный натиск', 'нет замедлениям'
+    end
+
+    if not ns.State.pvp and IsUsableSpell('Кровавое неистовство') and ns.CanUseAction('Кровавое неистовство') then
+        return 'Кровавое неистовство', 'pve бурст'
+    end
+
+    if not ns.State.pvp and IsUsableSpell('Истерия') and ns.CanUseAction('Истерия') then
+        return 'Истерия', 'бурст'
+    end
+
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
@@ -148,8 +161,12 @@ local function getBloodAction()
         return 'Удар чумы', 'вешаем [Кровавая чума]'
     end
 
-    if goBloodAbils and ns.State.playerHP100 < 70 and ns.CanUseAction('Захват рун') then
+    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Захват рун') and ns.CanUseAction('Захват рун') then
         return 'Захват рун', 'хилимся hp < 70%'
+    end
+
+    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Кровь вампира') and ns.CanUseAction('Кровь вампира') then
+        return 'Кровь вампира', 'утолщаемся hp < 70%'
     end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
