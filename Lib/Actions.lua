@@ -124,11 +124,14 @@ function ns.UseAction(action, info)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
 
 
-
-    local hex = slot == 0 and '888888' or (canuse and 'ffff88' or 'ff8888')
-    ns.ActionLog(nil, action, info .. ' ' .. canuseinfo, hex)
-
-    if not canuse then slot = 0 end
+    if action == 'none' then
+        if ns.showNoneReason then
+            ns.ActionLog(nil, action, info, '888888')
+        end
+    elseif not canuse then
+        ns.ActionLog(nil, action, info .. ' ' .. canuseinfo, 'ff8888')
+        slot = 0
+    end
 
     if lastSlot ~= slot then
         lastSlot = slot

@@ -6,6 +6,8 @@ local _, ns = ... -- namespace
 local SpellIsTargeting = SpellIsTargeting
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local IsMouselooking = IsMouselooking
+local UnitExists = UnitExists
 ------------------------------------------------------------------------------------------------------------------
 if type(ns.GetAction) ~= 'function' then
   error('GetAction not a func!')
@@ -26,26 +28,35 @@ local function getAction()
   end
 
   if SpellIsTargeting() then
+    if IsMouselooking() then
+      return 'none', 'отпусти правую кнопку мыши'
+    end
+
     return 'mouse1', 'делаем выбор области' -- left mouse click
   end
+
   local btn = ns.State.pressedButton
   if btn then
     local btnName = ns.GetSlotName(btn)
     btnName = btnName and ' [' .. btnName .. ']' or ''
     return 'none', 'зажата Button' .. btn .. btnName
   end
+
   if GetCurrentKeyBoardFocus() then
     return 'none', 'чат'
   end
+
   if ns.State.mount or ns.State.vehicle then
     if ns.State.attack then
       return 'dismount', 'спешится, зажата атака'
     end
     return 'none', 'верхом'
   end
+
   if not ns.State.attack and ns.State.playerEat then
     return 'none', ns.State.playerEat
   end
+
   return ns.GetAction()
 end
 ------------------------------------------------------------------------------------------------------------------

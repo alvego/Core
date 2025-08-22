@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------------------------------------------
 -- By by Unknown Coder
 ------------------------------------------------------------------------------------------------------------------
-local _, ns = ... -- namespace
+local name, ns = ... -- namespace
 ------------------------------------------------------------------------------------------------------------------
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
@@ -12,23 +12,20 @@ local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
 local format = format
 ------------------------------------------------------------------------------------------------------------------
--- Имя новой вкладки чата
-local DEBUG_TAB_NAME = 'Debug'
-
-
+-- Функция для получения текущего активного чата
 local function getDebugChatFrame()
     local debugChatFrame, tab
     -- Находим чат-фрейм с нашей вкладкой
     for i = 1, NUM_CHAT_WINDOWS do
         tab = _G['ChatFrame' .. i .. 'Tab']
-        if tab and tab:GetText() == DEBUG_TAB_NAME then
+        if tab and tab:GetText() == name then
             debugChatFrame = _G['ChatFrame' .. i]
             break
         end
     end
     return debugChatFrame, tab
 end
-
+------------------------------------------------------------------------------------------------------------------
 -- Функция для управления видимостью вкладки
 local function updateDebugTabVisibility(visible)
     local chatFrame, tab = getDebugChatFrame()
@@ -56,8 +53,8 @@ local function updateDebugTabVisibility(visible)
     end
 end
 ns.AttachUpdateDebugState(updateDebugTabVisibility)
-
-
+------------------------------------------------------------------------------------------------------------------
+-- Функция для получения свободного чат-фрейма
 local function getFreeChatIndex()
     local frame, tab
     for i = 1, NUM_CHAT_WINDOWS do
@@ -71,7 +68,8 @@ local function getFreeChatIndex()
     end
     return nil
 end
-
+------------------------------------------------------------------------------------------------------------------
+-- Настройка чат-фрейма
 local function configureDebugChatFrame(chatFrame)
     -- Настраиваем чат-фрейм
     if not chatFrame then
@@ -79,7 +77,7 @@ local function configureDebugChatFrame(chatFrame)
         return
     end
     -- Устанавливаем имя вкладки
-    FCF_SetWindowName(chatFrame, DEBUG_TAB_NAME)
+    FCF_SetWindowName(chatFrame, name)
 
     -- Отключаем стандартные каналы чата
     ChatFrame_RemoveAllMessageGroups(chatFrame)
@@ -91,6 +89,7 @@ local function configureDebugChatFrame(chatFrame)
     chatFrame:SetResizable(true)
 end
 
+------------------------------------------------------------------------------------------------------------------
 -- Функция для создания вкладки чата
 local function createDebugChatTab()
     -- Проверяем, не существует ли уже вкладка с именем 'Debug'
@@ -130,7 +129,7 @@ function ns.DebugChatNoSpam(msg, hex)
 end
 
 ------------------------------------------------------------------------------------------------------------------
--- Функция для вывода отладочных сообщений без частого спама
+-- Функция для вывода отладочных сообщений без частого спама с указанием времени
 function ns.Log(...)
     local log = ns.ToStr(...)
     if not ns.IsChanged('ns.Log', log) and ns.TimerLess('ns.Log', 1) then
@@ -149,6 +148,7 @@ function ns.Error(...)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода отладочных сообщений в общий чат
 function ns.Chat(msg, hexColor)
     if msg == nil then return end
     hexColor = hexColor or '88FF88'
@@ -160,6 +160,7 @@ function ns.Chat(msg, hexColor)
 end
 
 ------------------------------------------------------------------------------------------------------------------
+-- Функция для вывода сообщений в центре экрана с затуханием (UIErrorsFrame)
 function ns.Echo(msg) -- Показ сообщения в UIErrorsFrame
     if msg == nil then return end
     UIErrorsFrame:Clear()

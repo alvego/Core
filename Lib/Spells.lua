@@ -79,9 +79,9 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     if subEvent:match('^SPELL_CAST') then
         local spellName = select(2, ...)
         lastUsedSpell = spellName
-        if subEvent == 'SPELL_CAST_FAILED' then
+        if ns.showSpellError and subEvent == 'SPELL_CAST_FAILED' then
             local reason = select(4, ...)
-            ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', '880000')
+            ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', 'AA0000')
         end
     end
 end
@@ -94,7 +94,9 @@ local function onEvent(event, ...)
 
     lastUsedSpell = spellName
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
-        --ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
+        if ns.showSpellSuccess then
+            ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
+        end
         ns.TimerStart(spellName)
         return
     end
@@ -116,6 +118,7 @@ ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
 
 
 local function onUIErrorMessage(event, ...)
+    if not ns.showSpellError then return end
     local action = 'Ошибка'
     if failedSpell and ns.TimerLess('failedSpell', 0.5) then action = failedSpell end
     local message = ...

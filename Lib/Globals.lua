@@ -6,6 +6,9 @@ local _, ns = ...
 if Paused == nil then Paused = false end
 ------------------------------------------------------------------------------------------------------------------
 ns.advance = 0.05
+ns.showSpellSuccess = false
+ns.showSpellError = false
+ns.showNoneReason = true
 ------------------------------------------------------------------------------------------------------------------
 function ns.TogglePause(start, stop)
     if Paused then

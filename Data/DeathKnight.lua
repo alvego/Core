@@ -28,10 +28,7 @@ local function getBloodAction()
         return tarcmd, tarinfo
     end
 
-    local inMelee = ns.IsSpellInRange('Удар чумы')
-    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction('Заморозка разума') then
-        return 'Заморозка разума', 'кик в гкд'
-    end
+
 
     if IsUsableSpell('Гневный натиск') and ns.CanUseAction('Гневный натиск') then
         return 'Гневный натиск', 'нет замедлениям'
@@ -43,6 +40,15 @@ local function getBloodAction()
 
     if not ns.State.pvp and IsUsableSpell('Истерия') and ns.CanUseAction('Истерия') then
         return 'Истерия', 'бурст'
+    end
+
+    if ns.State.playerHP100 < 80 and ns.CanUseAction('Незыблемость льда') then
+        return 'Незыблемость льда', 'деф hp < 80%'
+    end
+
+    local inMelee = ns.IsSpellInRange('Удар чумы')
+    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction('Заморозка разума') then
+        return 'Заморозка разума', 'кик в гкд'
     end
 
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
@@ -89,7 +95,7 @@ local function getBloodAction()
     -- если у нас нет рун, на кд которых мы опираемся, но есть руны смерти, которых мы не учитываем, то почему бы их не слить...
     local goBloodAbils = bloodRunes == 2 or bloodRunes == 1 and minDebuffDuration > timeToBloodRuneReady + 1.5 or
         not glyphofDisease or minDebuffDuration > 10 or bloodRunes == 0
-
+    goBloodAbils = goBloodAbils or frostDeathRunes > 0 or unholyDeathRunes > 0
     -- ситуация - у нас 3 секунды до спадания болезни, руна крови на кд 4 сек и полная руна смерти вместо руны крови
     -- в итоге будет слита руна смерти на касание и мы не сможем заюзать мор
 
@@ -144,7 +150,7 @@ local function getBloodAction()
         return 'Пожинание', 'сливаем runic power'
     end
 
-
+    -- UnitExists('mouseover')
     if numTargets >= targetsForAOE and goBloodAbils and ns.CanUseAction('Смерть и разложение') then
         return 'Смерть и разложение', 'aoe'
     end
@@ -153,7 +159,8 @@ local function getBloodAction()
         if ns.CanUseAction('Мор') then
             return 'Мор', 'довешиваем болячки'
         end
-        return 'none', 'ждем довес [Мор]'
+        goBloodAbils = false
+        --return 'none', 'ждем довес [Мор]'
     end
 
     if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction('Ледяное прикосновение') then
@@ -164,12 +171,12 @@ local function getBloodAction()
         return 'Удар чумы', 'вешаем [Кровавая чума]'
     end
 
-    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Захват рун') and ns.CanUseAction('Захват рун') then
-        return 'Захват рун', 'хилимся hp < 70%'
-    end
-
     if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Кровь вампира') and ns.CanUseAction('Кровь вампира') then
         return 'Кровь вампира', 'утолщаемся hp < 70%'
+    end
+
+    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Захват рун') and ns.CanUseAction('Захват рун') then
+        return 'Захват рун', 'хилимся hp < 70%'
     end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
@@ -195,7 +202,7 @@ local function getBloodAction()
     end
 
     if IsUsableSpell('Зимний горн') and ns.CanUseAction('Зимний горн') then
-        return 'Зимний горн', 'дуем'
+        return 'Зимний горн', 'дуем в дудку'
     end
 
     local goFrostAbils = frostRunes > 0 or frostDeathRunes > 0 or bloodDeathRunes == 0 or not glyphofDisease or b2r or
@@ -203,10 +210,10 @@ local function getBloodAction()
         minDebuffDuration > 10
 
     if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and ns.CanUseAction('Ледяное прикосновение') then
-        return 'Ледяное прикосновение', 'арго лед прикосновением'
+        return 'Ледяное прикосновение', 'агро лед прикосновением'
     end
 
-    if goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction('Кровавый удар') then
+    if goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction('Удар в сердце') then
         return 'Удар в сердце', 'не aoe, cливаем руну крови'
     end
 
