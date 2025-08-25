@@ -164,6 +164,11 @@ local function getProtoAction()
     if ns.State.playerHP100 < 80 and rage >= 10 and ns.CanUseAction('Блок щитом') then
         return 'Блок щитом', 'защита при hp < 80%'
     end
+
+    if ns.State.playerHP100 < 70 and not ns.State.instance and ns.CanUseAction('Безудержная ярость') then
+        return 'Безудержная ярость', 'дефаемся и хилимся расовой абилкой'
+    end
+
     if ns.State.playerHP100 < 35 and rage >= 10 and ns.CanUseAction('Глухая оборона') then
         return 'Глухая оборона', 'деф при hp < 35%'
     end
@@ -186,8 +191,8 @@ local function getProtoAction()
         return 'Рассекающий удар', 'aoe заполнитель'
     end
 
-    if IsUsableSpell('Реванш') and ns.CanUseAction('Реванш') and inMelee and ns.CanUseAction('Сверхусилие') then
-        return 'Сверхусилие', 'реванш доступен, [Сверхусилие]'
+    if IsUsableSpell('Реванш') and ns.CanUseAction('Реванш') and inMelee and ns.CanUseAction('Варварский ритуал') then
+        return 'Варварский ритуал', 'реванш доступен, [Варварский ритуал]'
     end
 
     if ns.State.gcd then return 'none', 'гкд' end
