@@ -108,6 +108,9 @@ local function formatIcon(icon)
 end
 
 function ns.ActionLog(icon, action, info, hex)
+    if string.sub(info, 1, 1) == "#" then
+        return -- игнорируем комментарии
+    end
     ns.DebugChatNoSpam(format('%s [%s] %s', formatIcon(icon), action or '...', info or '???'), hex or 'FFFFFF')
 end
 

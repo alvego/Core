@@ -13,7 +13,7 @@ local CheckInteractDistance = CheckInteractDistance
 
 local aoeCast               = { 'Огненный столб', 'Снежная буря' }
 local intBuff               = { 'Чародейская гениальность', 'Чародейский интеллект' }
-local fireBuff              = { 'Власть Огня', 'Путь огня' }
+local fireBuff              = { 'Власть Огня', 'Путь огня', 'Криво-пружинный механизм' }
 
 ------------------------------------------------------------------------------------------------------------------
 function ns:GetAction()
@@ -64,11 +64,12 @@ function ns:GetAction()
         return tarcmd, tarinfo
     end
 
-    if not ns.State.gcd then
-        local instantFireBuff = ns.HasBuff(fireBuff)
-        if instantFireBuff then
-            return 'Огненная глыба', instantFireBuff
+    local instantFireBuff = ns.HasBuff(fireBuff)
+    if instantFireBuff then
+        if ns.State.gcd then
+            return 'none', 'гкд, ждем глыбу'
         end
+        return 'Огненная глыба', instantFireBuff
     end
 
     local force = ns.IsAlt() or ns.State.targetHard
@@ -78,9 +79,12 @@ function ns:GetAction()
             if ns.IsReadyAction('Возгорание') then
                 return 'Возгорание', 'бурст pvp'
             end
-        else
+        elseif ns.TimerMore('Власть Огня', 1) or ns.TimerMore('Криво-пружинный механизм', 1) then
             if ns.IsReadyAction('Власть Огня') then
                 return 'Власть Огня', 'бурст'
+            end
+            if ns.IsReadyAction('Криво-пружинный механизм') then
+                return 'Криво-пружинный механизм', 'бурст расса'
             end
         end
     end
@@ -100,10 +104,6 @@ function ns:GetAction()
 
     local scorch = ns.HasDebuff('Улучшенный ожог', 'target', 1)
 
-    if not ns.State.pvp and ns.CanUseAction('Реактивный снаряд') then
-        return 'Реактивный снаряд', 'рпг'
-    end
-
     if ns.CanUseAction('Огненный взрыв') then
         return 'Огненный взрыв', 'взрываем'
     end
@@ -119,7 +119,7 @@ function ns:GetAction()
             return 'Чародейский взрыв', 'слив маны'
         end
     end
-    if ns.State.still and not scorch and ns.TimerMore('Ожог', 2) then
+    if ns.State.still and not scorch and ns.TimerMore('Ожог', 5) then
         return 'Ожог', 'наладываем улучшенный ожог'
     end
 

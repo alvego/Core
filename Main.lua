@@ -17,10 +17,10 @@ end
 local function getAction()
   if ns.IsPaused() then
     if ns.State.autoattack then
-      return 'stopattack', 'выкл автоатаку - пауза'
+      return 'stopattack', '#выкл автоатаку - пауза'
     end
 
-    return 'none', 'пауза'
+    return 'none', '#пауза'
   end
 
   if UnitIsDeadOrGhost("player") then
@@ -85,7 +85,7 @@ function ns.TryTarget()
       end
     end
   else
-    return 'startattack', 'автоатака'
+    return 'startattack', '#автоатака'
   end
   return false, ''
 end

@@ -91,13 +91,12 @@ local failedSpell = nil
 local function onEvent(event, ...)
     local source, spellName = select(1, ...)
     if source ~= 'player' then return end
-
+    ns.TimerStart(spellName)
     lastUsedSpell = spellName
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
         if ns.showSpellSuccess then
             ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
         end
-        ns.TimerStart(spellName)
         return
     end
 

@@ -30,12 +30,12 @@ local function getBloodAction()
 
 
 
-    if IsUsableSpell('Гневный натиск') and ns.CanUseAction('Гневный натиск') then
-        return 'Гневный натиск', 'нет замедлениям'
+    if not ns.State.instance and IsUsableSpell('Безудержная ярость') and ns.CanUseAction('Безудержная ярость') then
+        return 'Безудержная ярость', 'pvp бурст'
     end
 
-    if not ns.State.pvp and IsUsableSpell('Кровавое неистовство') and ns.CanUseAction('Кровавое неистовство') then
-        return 'Кровавое неистовство', 'pve бурст'
+    if not ns.State.pvp and IsUsableSpell('Варварский ритуал') and ns.CanUseAction('Варварский ритуал') then
+        return 'Варварский ритуал', 'pve бурст'
     end
 
     if not ns.State.pvp and IsUsableSpell('Истерия') and ns.CanUseAction('Истерия') then
