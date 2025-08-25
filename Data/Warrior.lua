@@ -70,35 +70,35 @@ local function checkThreatAndAct(unit, rage, stance)
     -- Проверка удара грома (10 метров, вне АОЕ)
     if not spellUsed and rage >= 16 and stance ~= 3 and dist10 and ns.CanUseAction('Удар грома') then
         spellUsed = 'Удар грома'
-        reason = 'Цель не агрит игрока, угроза < 3'
+        reason = 'Цель не спровоцирована'
         rangeInfo = '10м'
     end
 
     -- Проверка дразнящего удара (мили)
     if not spellUsed and ns.IsSpellInRange('Кровопускание', unit) and ns.CanUseAction('Дразнящий удар') then
         spellUsed = (unit == 'mouseover' and 'Дразнящий М' or 'Дразнящий удар')
-        reason = 'Цель не агрит игрока, угроза < 3'
+        reason = 'Цель не спровоцирована'
         rangeInfo = 'мили'
     end
 
     -- Проверка раскола брони (мили)
     if not spellUsed and rage >= 15 and stance == 2 and ns.IsSpellInRange('Кровопускание', unit) and ns.CanUseAction('Раскол брони') then
         spellUsed = (unit == 'mouseover' and 'Раскол брони МО' or 'Раскол брони')
-        reason = 'Цель не агрит игрока'
+        reason = 'Цель не спровоцирована'
         rangeInfo = 'мили'
     end
 
     -- Проверка провокации (30 метров)
     if not spellUsed and not dist10 and ns.CanUseAction('Провокация') and ns.IsSpellInRange('Провокация', unit) then
         spellUsed = (unit == 'mouseover' and 'Провокация МО' or 'Провокация')
-        reason = 'Цель не агрит игрока, угроза < 3'
+        reason = 'Цель не спровоцирована'
         rangeInfo = '30м'
     end
 
     -- Проверка вызывающего крика (10 метров, вне АОЕ)
     if not spellUsed and dist10 and IsUsableSpell('Вызывающий крик') and ns.CanUseAction('Вызывающий крик') and rage >= 10 then
         spellUsed = 'Вызывающий крик'
-        reason = 'Цель не агрит игрока, угроза < 3'
+        reason = 'Цель не спровоцирована'
         rangeInfo = '10м'
     end
 
@@ -130,7 +130,7 @@ local function getProtoAction()
     local ctrl = ns.IsCtr()
 
     if stance ~= 2 and ns.State.combatLock then --ns.CanUseAction('Оборонительная стойка')
-        return 'Оборонительная стойка', 'свитч в дэфстэнс в бою'
+        return 'Оборонительная стойка', '#свитч в дэфстэнс в бою'
     end
 
     local tarcmd, tarinfo = ns.TryTarget()
@@ -147,11 +147,11 @@ local function getProtoAction()
     if ns.State.attack and not isRecentlyCharged then
         -- Инициация боя: Рывок
         if ns.CanUseAction('Рывок') then
-            return 'Рывок', 'прыгаем [Рывок]'
+            return 'Рывок', '#прыгаем [Рывок]'
         end
         -- Или Перехват
         if ns.CanUseAction('Перехват') then
-            return 'Перехват', 'прыгаем [Перехват]'
+            return 'Перехват', '#прыгаем [Перехват]'
         end
         -- Или Вмешательство
         -- if ns.CanUseAction('Вмешательство') then
@@ -162,40 +162,40 @@ local function getProtoAction()
     -- часть ротации которую можно прожимать во время гкд
     -- Защита: Блок щитом, при низком здоровье Глухая оборона
     if ns.State.playerHP100 < 80 and rage >= 10 and ns.CanUseAction('Блок щитом') then
-        return 'Блок щитом', 'защита при hp < 80%'
+        return 'Блок щитом', '#защита при hp < 80%'
     end
 
     if ns.State.playerHP100 < 70 and not ns.State.instance and ns.CanUseAction('Безудержная ярость') then
-        return 'Безудержная ярость', 'дефаемся и хилимся расовой абилкой'
+        return 'Безудержная ярость', '#дефаемся и хилимся расовой абилкой'
     end
 
     if ns.State.playerHP100 < 35 and rage >= 10 and ns.CanUseAction('Глухая оборона') then
-        return 'Глухая оборона', 'деф при hp < 35%'
+        return 'Глухая оборона', '#деф при hp < 35%'
     end
 
      -- Генерация ярости: Кровавая ярость
     if ns.State.combatLock and rage < 20 and inMelee and ns.CanUseAction('Кровавая ярость') then
-        return 'Кровавая ярость', 'генерация ярости'
+        return 'Кровавая ярость', '#генерация ярости'
     end
 
     -- Удары которые можно сетить вне гкд 
     if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and rage >= 80 then
-        return 'Удар героя', 'соло заполнитель' 
+        return 'Удар героя', '#соло заполнитель' 
     end
 
     if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and ns.HasMyBuff('Символ реванша') then
-        return 'Удар героя', 'Бесплатный по проку'
+        return 'Удар героя', '#Бесплатный по проку'
     end
 
     if aoe and not IsCurrentSpell('Рассекающий удар') and ns.CanUseAction('Рассекающий удар') and rage >= 36 and inMelee then
-        return 'Рассекающий удар', 'aoe заполнитель'
+        return 'Рассекающий удар', '#aoe заполнитель'
     end
 
     if IsUsableSpell('Реванш') and ns.CanUseAction('Реванш') and inMelee and ns.CanUseAction('Варварский ритуал') then
-        return 'Варварский ритуал', 'реванш доступен, [Варварский ритуал]'
+        return 'Варварский ритуал', '#реванш доступен, [Варварский ритуал]'
     end
 
-    if ns.State.gcd then return 'none', 'гкд' end
+    if ns.State.gcd then return 'none', '#гкд' end
 
     -- то что выполняется в рамках гкд
 
@@ -205,14 +205,14 @@ local function getProtoAction()
     local isPull = ns.TimerLess('combatLock', 3) -- Первые 3 секунды боя
     if isPull and ns.State.group then            -- только в группе
         if ns.CanUseAction('Удар грома') and rage >= 16 and inMelee then
-            return 'Удар грома', 'пулл в мили'
+            return 'Удар грома', '#пулл в мили'
         end
 
         if ns.CanUseAction('Ударная волна') and ns.State.targetVisible and dist10 and not ns.IsReadySpell('Удар грома') and rage >= 15 then
-            return 'Ударная волна', 'пулл 10м'
+            return 'Ударная волна', '#пулл 10м'
         end
 
-        return 'none', 'завершаем ротацию, чтобы не переходить к основной'
+        return 'none', '#завершаем ротацию, чтобы не переходить к основной'
     end
 
     if ns.State.combatLock and ns.State.group then
@@ -236,41 +236,41 @@ local function getProtoAction()
     -- Основные атакующие способности
 
     if IsUsableSpell('Реванш') and inMelee and ns.CanUseAction('Реванш') then
-        return 'Реванш', 'реванш по доступности'
+        return 'Реванш', '#реванш по доступности'
     end
 
     if inMelee and ns.CanUseAction('Мощный удар щитом') and ns.HasMyBuff('Щит и меч') then
-        return 'Мощный удар щитом', 'по проку бъем щитом'
+        return 'Мощный удар щитом', '#по проку бъем щитом'
     end
 
     if rage >= 16 and inMelee and ns.CanUseAction('Удар грома') then
-        return 'Удар грома', 'гром в мили'
+        return 'Удар грома', '#гром в мили'
     end
 
      -- Деморализующий крик в АОЕ
     if aoe and dist10 and ns.CanUseAction('Деморализующий крик') and rage >= 10 and not ns.HasMyDebuff('Деморализующий крик') then
-        return 'Деморализующий крик', 'автоматический деморал крик'
+        return 'Деморализующий крик', '#автоматический деморал крик'
     end
 
     if not (ns.HasMyBuff('Командирский крик') or ns.HasBuff('Боевой крик') or ns.HasBuff('благословение могущества')) then
-        return 'Боевой крик', 'яростно кричим на бицуху'
+        return 'Боевой крик', '#яростно кричим на бицуху'
     end
 
     if dist10 and not ns.IsReadySpell('Удар грома') and ns.State.targetVisible and rage >= 17 and ns.CanUseAction('Ударная волна') then
-        return 'Ударная волна', 'волна в 10м'
+        return 'Ударная волна', '#волна в 10м'
     end
     if rage >= 36 and stance == 2 and inMelee and ns.CanUseAction('Мощный удар щитом') then
-        return 'Мощный удар щитом', 'сливаем рагу щитом'
+        return 'Мощный удар щитом', '#сливаем рагу щитом'
     end
     if not aoe and IsUsableSpell('Сокрушение') and not ns.HasMyBuff('Щит и меч') and rage >= 31 and inMelee then
-        return 'Сокрушение', 'крушим пока shit на КД'
+        return 'Сокрушение', '#крушим пока shit на КД'
     end
     -- раскол по контролу на боса
     if ctrl and ns.CanUseAction('Раскол брони') and not ns.HasMyDebuff('Раскол брони') then
-        return 'Раскол брони', 'раскол по ctrl'
+        return 'Раскол брони', '#раскол по ctrl'
     end
 
-    return 'none', 'пока всё'
+    return 'none', '#пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getArmsAction, getFuryAction, getProtoAction }
