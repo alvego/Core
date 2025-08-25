@@ -17,6 +17,7 @@ ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
 end)
 
 local function getBloodAction()
+    local action
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
         return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
@@ -27,35 +28,40 @@ local function getBloodAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-
-
-
-    if not ns.State.instance and IsUsableSpell('Безудержная ярость') and ns.CanUseAction('Безудержная ярость') then
-        return 'Безудержная ярость', 'pvp бурст'
+    action = 'Безудержная ярость'
+    if not ns.State.instance and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'pvp бурст'
     end
 
-    if not ns.State.pvp and IsUsableSpell('Варварский ритуал') and ns.CanUseAction('Варварский ритуал') then
-        return 'Варварский ритуал', 'pve бурст'
+    action = 'Варварский ритуал'
+    if not ns.State.pvp and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'pve бурст'
     end
 
-    if not ns.State.pvp and IsUsableSpell('Истерия') and ns.CanUseAction('Истерия') then
-        return 'Истерия', 'бурст'
+    action = 'Истерия'
+    if not ns.State.pvp and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'бурст'
     end
 
-    if ns.State.playerHP100 < 80 and ns.CanUseAction('Незыблемость льда') then
-        return 'Незыблемость льда', 'деф hp < 80%'
+    action = 'Незыблемость льда'
+    if ns.State.playerHP100 < 80 and ns.CanUseAction(action) then
+        return action, 'деф hp < 80%'
     end
 
     local inMelee = ns.IsSpellInRange('Удар чумы')
-    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction('Заморозка разума') then
-        return 'Заморозка разума', 'кик в гкд'
+
+    action = 'Заморозка разума'
+    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction(action) then
+        return action, 'кик в гкд'
     end
 
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
     if ns.State.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
-    if ns.TimerMore('Заморозка разума', 1) and ns.UnitNeedKick('target') and ns.CanUseAction('Удушение') then
-        return 'Удушение', 'кик'
+
+    action = 'Удушение'
+    if ns.TimerMore('Заморозка разума', 1) and ns.UnitNeedKick('target') and ns.CanUseAction(action) then
+        return action, 'кик'
     end
 
     local glyphofDisease = true     -- При использовании способности 'Мор' время действия болезней и их вторичных эффектов на цели обновляется.
@@ -112,15 +118,21 @@ local function getBloodAction()
     end
 
     if not inMelee then
-        if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction('Ледяное прикосновение') then
-            return 'Ледяное прикосновение', 'range 1'
+        action = 'Ледяное прикосновение'
+        if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction(action) then
+            return action, 'range 1'
         end
-        if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction('Лик смерти') then
-            return 'Лик смерти', 'range 2'
+
+        action = 'Лик смерти'
+        if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction(action) then
+            return action, 'range 2'
         end
-        if IsUsableSpell('Зимний горн') and ns.CanUseAction('Зимний горн') then
-            return 'Зимний горн', 'range 3'
+
+        action = 'Зимний горн'
+        if IsUsableSpell(action) and ns.CanUseAction(action) then
+            return action, 'range 3'
         end
+
         return 'none', 'больше нечем в range'
     end
 
@@ -134,8 +146,9 @@ local function getBloodAction()
     -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
     local targetsForAOE = 3
 
-    if glyphofDisease and frostFever and bloodPlague and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and ns.CanUseAction('Мор') then
-        return 'Мор', 'обновляем болезни'
+    action = 'Мор'
+    if glyphofDisease and frostFever and bloodPlague and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and ns.CanUseAction(action) then
+        return action, 'обновляем болезни'
     end
 
     if waitPestilence then
@@ -146,83 +159,99 @@ local function getBloodAction()
         return 'Рунический удар', 'не aoe'
     end
 
+    action = 'Пожинание'
     if runicPower > 80 and ns.CanUseAction('Пожинание') then
-        return 'Пожинание', 'сливаем runic power'
+        return action, 'сливаем runic power'
     end
 
-    -- UnitExists('mouseover')
-    if numTargets >= targetsForAOE and goBloodAbils and ns.CanUseAction('Смерть и разложение') then
-        return 'Смерть и разложение', 'aoe'
+    action = 'Смерть и разложение'
+    if numTargets >= targetsForAOE and goBloodAbils and ns.CanUseAction(action) then
+        return action, 'aoe'
     end
 
     if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
-        if ns.CanUseAction('Мор') then
-            return 'Мор', 'довешиваем болячки'
+        action = 'Мор'
+        if ns.CanUseAction(action) then
+            return action, 'довешиваем болячки'
         end
         goBloodAbils = false
         --return 'none', 'ждем довес [Мор]'
     end
 
-    if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction('Ледяное прикосновение') then
-        return 'Ледяное прикосновение', 'вешаем [Озноб]'
+    action = 'Ледяное прикосновение'
+    if frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction(action) then
+        return action, 'вешаем [Озноб]'
     end
 
-    if bloodPlagueLeft < 1 and ns.CanUseAction('Удар чумы') then
-        return 'Удар чумы', 'вешаем [Кровавая чума]'
+    action = 'Удар чумы'
+    if bloodPlagueLeft < 1 and ns.CanUseAction(action) then
+        return action, 'вешаем [Кровавая чума]'
     end
 
-    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Кровь вампира') and ns.CanUseAction('Кровь вампира') then
-        return 'Кровь вампира', 'утолщаемся hp < 70%'
+    action = 'Кровь вампира'
+    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'утолщаемся hp < 70%'
     end
 
-    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell('Захват рун') and ns.CanUseAction('Захват рун') then
-        return 'Захват рун', 'хилимся hp < 70%'
+    action = 'Захват рун'
+    if goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'хилимся hp < 70%'
     end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
 
-    if ns.State.playerHP100 < (ns.State.group and 40 or 80) and targetDebuffsFromMe > 0 and ns.CanUseAction('Удар смерти') then
-        return 'Удар смерти', 'хилимся, есть болезни'
+    action = 'Удар смерти'
+    if ns.State.playerHP100 < (ns.State.group and 40 or 80) and targetDebuffsFromMe > 0 and ns.CanUseAction(action) then
+        return action, 'хилимся, есть болезни'
     end
 
-    if ns.State.targetHard and ns.CanUseAction('Танцующее руническое оружие') then
-        return 'Танцующее руническое оружие', 'бурст'
+    action = 'Танцующее руническое оружие'
+    if ns.State.targetHard and ns.CanUseAction(action) then
+        return action, 'бурст'
     end
 
-    if goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and ns.CanUseAction('Вскипание крови') then
-        return 'Вскипание крови', 'слив руны крови, пока нет [Смерть и разложение]'
+    action = 'Вскипание крови'
+    if goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and ns.CanUseAction(action) then
+        return action, 'слив руны крови, пока нет [Смерть и разложение]'
     end
 
-    if not IsCurrentSpell('Рунический удар') and IsUsableSpell('Рунический удар') and ns.CanUseAction('Рунический удар') then
-        return 'Рунический удар', 'руник'
+    action = 'Рунический удар'
+    if not IsCurrentSpell(action) and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'руник'
     end
 
-    if unholyRunes + frostRunes > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and ns.CanUseAction('Удар смерти') then
-        return 'Удар смерти', 'дамажим, есть болезни'
+    action = 'Удар смерти'
+    if unholyRunes + frostRunes > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and ns.CanUseAction(action) then
+        return action, 'дамажим, есть болезни'
     end
 
-    if IsUsableSpell('Зимний горн') and ns.CanUseAction('Зимний горн') then
-        return 'Зимний горн', 'дуем в дудку'
+    action = 'Зимний горн'
+    if IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'дуем в дудку'
     end
 
     local goFrostAbils = frostRunes > 0 or frostDeathRunes > 0 or bloodDeathRunes == 0 or not glyphofDisease or b2r or
         frostFever and bloodPlague and minDebuffDuration > ttrb2r + 1.5 or
         minDebuffDuration > 10
 
-    if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and ns.CanUseAction('Ледяное прикосновение') then
-        return 'Ледяное прикосновение', 'агро лед прикосновением'
+    action = 'Ледяное прикосновение'
+    if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and ns.CanUseAction(action) then
+        return action, 'агро лед тач'
     end
 
-    if goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction('Удар в сердце') then
-        return 'Удар в сердце', 'не aoe, cливаем руну крови'
+    action = 'Удар в сердце'
+    if goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction(action) then
+        return action, 'не aoe, cливаем руну крови'
     end
 
-    if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction('Пожинание') then
-        return 'Пожинание', 'сливаем runic power'
+    action = 'Пожинание'
+    if runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction(action) then
+        return action, 'сливаем runic power'
     end
 
-    if bloodRunes < 1 and IsUsableSpell('Кровоотвод') and ns.CanUseAction('Кровоотвод') then
-        return 'Кровоотвод', 'нет рун крови'
+    action = 'Кровоотвод'
+    if bloodRunes < 1 and IsUsableSpell(action) and ns.CanUseAction(action) then
+        return action, 'нет рун крови'
     end
 
     return 'none', 'пока всё'

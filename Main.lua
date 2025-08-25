@@ -65,9 +65,9 @@ function ns.TryTarget()
   if ns.State.invalidTarget then
     if ns.State.combatMode or ns.State.attack then
       if ns.State.pvp then
-        return 'tarpvp', 'выбор цели-игрока'
+        return 'tarpvp', '#выбор цели-игрока'
       end
-      return 'tar', 'выбор цели'
+      return 'tar', '#выбор цели'
     end
 
     return 'none', ns.State.invalidTarget
