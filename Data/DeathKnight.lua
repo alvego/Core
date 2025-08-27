@@ -155,6 +155,18 @@ local function getBloodAction()
         return 'none', 'ждем [Мор]'
     end
 
+    if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
+        action = 'Мор'
+        if ns.CanUseAction(action) then
+            return action, 'довешиваем болячки'
+        end
+        action = 'Кровоотвод'
+        if bloodRunes < 1 and IsUsableSpell(action) and ns.CanUseAction(action) then
+            return action, 'нет рун крови на [Мор]'
+        end
+        return 'none', 'ждем довес [Мор]'
+    end
+
     if numTargets < targetsForAOE and not IsCurrentSpell('Рунический удар') and IsUsableSpell('Рунический удар') and ns.CanUseAction('Рунический удар') then
         return 'Рунический удар', 'не aoe'
     end
@@ -167,15 +179,6 @@ local function getBloodAction()
     action = 'Смерть и разложение'
     if numTargets >= targetsForAOE and goBloodAbils and ns.CanUseAction(action) then
         return action, 'aoe'
-    end
-
-    if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
-        action = 'Мор'
-        if ns.CanUseAction(action) then
-            return action, 'довешиваем болячки'
-        end
-        goBloodAbils = false
-        --return 'none', 'ждем довес [Мор]'
     end
 
     action = 'Ледяное прикосновение'
@@ -212,7 +215,7 @@ local function getBloodAction()
 
     action = 'Вскипание крови'
     if goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and ns.CanUseAction(action) then
-        return action, 'слив руны крови, пока нет [Смерть и разложение]'
+        return action, 'Вскипаем, лужа на кд'
     end
 
     action = 'Рунический удар'
