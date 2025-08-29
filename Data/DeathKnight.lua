@@ -32,7 +32,7 @@ local function getBloodAction()
     local inMelee = ns.IsSpellInRange('Удар чумы')
 
     action = 'Безудержная ярость'
-    if inMelee and not ns.State.instance and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if inMelee and not ns.State.instance and not ns.HasBuff('Перемирие') and IsUsableSpell(action) and ns.CanUseAction(action) then
         return action, 'pvp бурст'
     end
 
