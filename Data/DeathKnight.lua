@@ -62,7 +62,7 @@ local function tryThreat(unit)
     if isTanking then return false end
     if ns.IsOneUnit('player', targetUnit) then return false end
 
-    if ns.TimerLess('Темная власть', 2) or ns.TimerLess('Хватка смерти', 2) then
+    if ns.TimerLess('Темная власть', 3) or ns.TimerLess('Хватка смерти', 3) then
         return false -- недавно прожали, не частим
     end
 
@@ -85,7 +85,7 @@ local function tryThreat(unit)
         UnitName(unit),
         unit,
         getThreatStatusText(status),
-        threatPercent,
+        threatPercent or 0,
         unitTargetName
     )
 end
