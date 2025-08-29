@@ -124,10 +124,10 @@ local function getProtoAction()
         return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
     end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local rage = UnitMana('player')
+    local rage   = UnitMana('player')
     local stance = GetShapeshiftForm()
-    local aoe  = ns.IsShift() or (ns.State.numTargets > 2)
-    local ctrl = ns.IsCtr()
+    local aoe    = ns.IsShift() or (ns.State.numTargets > 2)
+    local ctrl   = ns.IsCtr()
 
     if stance ~= 2 and ns.State.combatLock then --ns.CanUseAction('Оборонительная стойка')
         return 'Оборонительная стойка', '#свитч в дэфстэнс в бою'
@@ -173,14 +173,14 @@ local function getProtoAction()
         return 'Глухая оборона', '#деф при hp < 35%'
     end
 
-     -- Генерация ярости: Кровавая ярость
+    -- Генерация ярости: Кровавая ярость
     if ns.State.combatLock and rage < 20 and inMelee and ns.CanUseAction('Кровавая ярость') then
         return 'Кровавая ярость', '#генерация ярости'
     end
 
-    -- Удары которые можно сетить вне гкд 
+    -- Удары которые можно сетить вне гкд
     if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and rage >= 80 then
-        return 'Удар героя', '#соло заполнитель' 
+        return 'Удар героя', '#соло заполнитель'
     end
 
     if not aoe and not IsCurrentSpell('Удар героя') and ns.CanUseAction('Удар героя') and inMelee and ns.HasMyBuff('Символ реванша') then
@@ -247,7 +247,7 @@ local function getProtoAction()
         return 'Удар грома', '#гром в мили'
     end
 
-     -- Деморализующий крик в АОЕ
+    -- Деморализующий крик в АОЕ
     if aoe and dist10 and ns.CanUseAction('Деморализующий крик') and rage >= 10 and not ns.HasMyDebuff('Деморализующий крик') then
         return 'Деморализующий крик', '#автоматический деморал крик'
     end
@@ -274,10 +274,10 @@ local function getProtoAction()
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getArmsAction, getFuryAction, getProtoAction }
-function ns:GetAction()
+local function updateRotation()
     local spec = ns.GetCurrentSpecID()
-    local rotation = rotations[spec]
-    return rotation()
+    ns.GetAction = rotations[spec]
 end
-
+ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
+ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
 ------------------------------------------------------------------------------------------------------------------
