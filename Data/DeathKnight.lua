@@ -308,9 +308,10 @@ end
 local rotations = { getBloodAction, getFrostAction, getUncholyAction }
 local function updateRotation()
     local spec = ns.GetCurrentSpecID()
+    --print('Spec', spec, 'selected')
     ns.GetAction = rotations[spec]
 end
 ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
 ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
-ns.AttachEvent('PLAYER_ENTERING_WORLD', updateRotation)
+--ns.AttachEvent('PLAYER_ENTERING_WORLD', updateRotation)
 ------------------------------------------------------------------------------------------------------------------
