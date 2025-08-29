@@ -9,11 +9,6 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local IsMouselooking = IsMouselooking
 local UnitExists = UnitExists
 ------------------------------------------------------------------------------------------------------------------
-if type(ns.GetAction) ~= 'function' then
-  error('GetAction not a func!')
-  return
-end
-------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if ns.IsPaused() then
     if ns.State.autoattack then
@@ -55,6 +50,10 @@ local function getAction()
 
   if not ns.State.attack and ns.State.playerEat then
     return 'none', ns.State.playerEat
+  end
+
+  if type(ns.GetAction) ~= 'function' then
+    return 'none', 'ns.GetAction not a func!'
   end
 
   return ns.GetAction()

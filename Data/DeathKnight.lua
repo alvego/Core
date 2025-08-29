@@ -2,10 +2,11 @@
 -- By by Unknown Coder
 ------------------------------------------------------------------------------------------------------------------
 local _, ns = ... -- namespace
+local st = ns.State
 ------------------------------------------------------------------------------------------------------------------
-if ns.State.playerClass ~= 'DEATHKNIGHT' then return end
+if st.playerClass ~= 'DEATHKNIGHT' then return end
 ------------------------------------------------------------------------------------------------------------------
-ns.Chat(ns.State.playerClass, ns.State.playerColor)
+ns.Chat(st.playerClass, st.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 local GetRuneCooldown = GetRuneCooldown
 local GetRuneType = GetRuneType
@@ -16,11 +17,23 @@ ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
     lastNumWoundedTargets = 0
 end)
 ------------------------------------------------------------------------------------------------------------------
+local function canUseSpell(spell)
+    return IsUsableSpell(spell) and ns.CanUseAction(spell)
+end
+------------------------------------------------------------------------------------------------------------------
+local function canUseGcdSpell(spell)
+    return not st.gcd and canUseSpell(spell)
+end
+------------------------------------------------------------------------------------------------------------------
+local function canUseCurrentSpell(spell)
+    return not IsCurrentSpell(spell) and canUseSpell(spell)
+end
+------------------------------------------------------------------------------------------------------------------
 local function getBloodAction()
     local action
 
-    if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
+    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
+        return 'none', 'кастую [' .. st.playerCasting .. ']'
     end
 
     local runicPower = UnitPower('player')
@@ -32,36 +45,36 @@ local function getBloodAction()
     local inMelee = ns.IsSpellInRange('Удар чумы')
 
     action = 'Безудержная ярость'
-    if inMelee and not ns.State.instance and not ns.HasBuff('Перемирие') and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if inMelee and not st.instance and not ns.HasBuff('Перемирие') and canUseSpell(action) then
         return action, 'pvp бурст'
     end
 
     action = 'Варварский ритуал'
-    if inMelee and not ns.State.pvp and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if inMelee and not st.pvp and canUseSpell(action) then
         return action, 'pve бурст'
     end
 
     action = 'Истерия'
-    if inMelee and not ns.State.pvp and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if inMelee and not st.pvp and canUseSpell(action) then
         return action, 'бурст'
     end
 
     action = 'Незыблемость льда'
-    if inMelee and ns.State.playerHP100 < 80 and ns.CanUseAction(action) then
+    if inMelee and st.playerHP100 < 80 and canUseSpell(action) then
         return action, 'деф hp < 80%'
     end
 
     action = 'Заморозка разума'
-    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and ns.CanUseAction(action) then
+    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and canUseSpell(action) then
         return action, 'кик в гкд'
     end
 
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
-    --if ns.State.gcd then return 'none', 'гкд' end
+    --if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
 
     action = 'Удушение'
-    if not ns.State.gcd and ns.TimerMore('Заморозка разума', 1) and ns.UnitNeedKick('target') and ns.CanUseAction(action) then
+    if ns.TimerMore('Заморозка разума', 1) and ns.UnitNeedKick('target') and canUseGcdSpell(action) then
         return action, 'кик'
     end
 
@@ -111,7 +124,7 @@ local function getBloodAction()
         timeToBloodRuneReady < minDebuffDuration and glyphofDisease
 
     local frostPresenceBuff = ns.HasBuff('Власть льда')
-    local immuneToFrost = ns.State.targetImmuneMagic
+    local immuneToFrost = st.targetImmuneMagic
 
     if immuneToFrost then
         frostFever = true
@@ -120,24 +133,24 @@ local function getBloodAction()
 
     if not inMelee then
         action = 'Ледяное прикосновение'
-        if not ns.State.gcd and frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction(action) then
+        if frostFeverLeft < 1 and not immuneToFrost and canUseGcdSpell(action) then
             return action, 'range 1'
         end
 
         action = 'Лик смерти'
-        if not ns.State.gcd and runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction(action) then
+        if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
             return action, 'range 2'
         end
 
         action = 'Зимний горн'
-        if IsUsableSpell(action) and ns.CanUseAction(action) then
+        if canUseSpell(action) then
             return action, 'range 3'
         end
 
         return 'none', 'больше нечем в range'
     end
 
-    local numTargetsReal = ns.State.numTargets
+    local numTargetsReal = st.numTargets
     local numTargets = numTargetsReal
 
     local numWoundedTargets = math.max(ns.DotedTargetsCount('Кровавая чума'), ns.DotedTargetsCount('Озноб'))
@@ -148,7 +161,7 @@ local function getBloodAction()
     local targetsForAOE = 3
 
     action = 'Мор'
-    if glyphofDisease and frostFever and bloodPlague and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and ns.CanUseAction(action) then
+    if glyphofDisease and frostFever and bloodPlague and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and canUseGcdSpell(action) then
         return action, 'обновляем болезни'
     end
 
@@ -158,79 +171,80 @@ local function getBloodAction()
 
     if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
         action = 'Мор'
-        if not ns.State.gcd and ns.CanUseAction(action) then
+        if canUseGcdSpell(action) then
             return action, 'довешиваем болячки'
         end
         action = 'Кровоотвод'
-        if bloodRunes < 1 and IsUsableSpell(action) and ns.CanUseAction(action) then
+        if bloodRunes < 1 and canUseSpell(action) then
             return action, 'нет рун крови на [Мор]'
         end
         return 'none', 'ждем довес [Мор]'
     end
 
-    if numTargets < targetsForAOE and not IsCurrentSpell('Рунический удар') and IsUsableSpell('Рунический удар') and ns.CanUseAction('Рунический удар') then
-        return 'Рунический удар', 'не aoe'
+    action = 'Рунический удар'
+    if numTargets < targetsForAOE and canUseCurrentSpell(action) then
+        return action, 'не aoe'
     end
 
     action = 'Пожинание'
-    if not ns.State.gcd and runicPower > 80 and ns.CanUseAction('Пожинание') then
+    if runicPower > 80 and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
 
     action = 'Смерть и разложение'
-    if not ns.State.gcd and numTargets >= targetsForAOE and goBloodAbils and ns.CanUseAction(action) then
+    if numTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
         return action, 'aoe'
     end
 
     action = 'Ледяное прикосновение'
-    if not ns.State.gcd and frostFeverLeft < 1 and not immuneToFrost and ns.CanUseAction(action) then
+    if frostFeverLeft < 1 and not immuneToFrost and canUseGcdSpell(action) then
         return action, 'вешаем [Озноб]'
     end
 
     action = 'Удар чумы'
-    if not ns.State.gcd and bloodPlagueLeft < 1 and ns.CanUseAction(action) then
+    if bloodPlagueLeft < 1 and canUseGcdSpell(action) then
         return action, 'вешаем [Кровавая чума]'
     end
 
     action = 'Кровь вампира'
-    if not ns.State.gcd and goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then
         return action, 'утолщаемся hp < 70%'
     end
 
     action = 'Захват рун'
-    if not ns.State.gcd and goBloodAbils and ns.State.playerHP100 < 70 and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if goBloodAbils and st.playerHP100 < 70 and canUseGcdSpell(action) then
         return action, 'хилимся hp < 70%'
     end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
 
     action = 'Удар смерти'
-    if not ns.State.gcd and ns.State.playerHP100 < (ns.State.group and 40 or 80) and targetDebuffsFromMe > 0 and ns.CanUseAction(action) then
+    if st.playerHP100 < (st.group and 40 or 80) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
         return action, 'хилимся, есть болезни'
     end
 
     action = 'Танцующее руническое оружие'
-    if not ns.State.gcd and ns.State.targetHard and ns.CanUseAction(action) then
+    if st.targetHard and canUseGcdSpell(action) then
         return action, 'бурст'
     end
 
     action = 'Вскипание крови'
-    if not ns.State.gcd and goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and ns.CanUseAction(action) then
+    if goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and canUseGcdSpell(action) then
         return action, 'Вскипаем, лужа на кд'
     end
 
     action = 'Рунический удар'
-    if not IsCurrentSpell(action) and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if canUseCurrentSpell(action) then
         return action, 'руник'
     end
 
     action = 'Удар смерти'
-    if not ns.State.gcd and (unholyRunes + frostRunes) > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and ns.CanUseAction(action) then
+    if (unholyRunes + frostRunes) > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
         return action, 'дамажим, есть болезни'
     end
 
     action = 'Зимний горн'
-    if IsUsableSpell(action) and ns.CanUseAction(action) then
+    if canUseSpell(action) then
         return action, 'дуем в дудку'
     end
 
@@ -239,31 +253,31 @@ local function getBloodAction()
         minDebuffDuration > 10
 
     action = 'Ледяное прикосновение'
-    if not ns.State.gcd and frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and ns.CanUseAction(action) then
+    if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and canUseGcdSpell(action) then
         return action, 'агро лед тач'
     end
 
     action = 'Удар в сердце'
-    if not ns.State.gcd and goBloodAbils and (numTargets < targetsForAOE) and ns.CanUseAction(action) then
+    if goBloodAbils and (numTargets < targetsForAOE) and canUseGcdSpell(action) then
         return action, 'не aoe, cливаем руну крови'
     end
 
     action = 'Пожинание'
-    if not ns.State.gcd and runicPower >= (frostPresenceBuff and 60 or 0) and ns.CanUseAction(action) then
+    if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
 
     action = 'Кровоотвод'
-    if bloodRunes < 1 and IsUsableSpell(action) and ns.CanUseAction(action) then
+    if bloodRunes < 1 and canUseSpell(action) then
         return action, 'нет рун крови'
     end
-    if ns.State.gcd then return 'none', 'гкд' end
-    return 'none', ns.State.gcd and 'гкд' or 'нечем бить'
+    if st.gcd then return 'none', 'гкд' end
+    return 'none', st.gcd and 'гкд' or 'нечем бить'
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getFrostAction()
-    if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
+    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
+        return 'none', 'кастую [' .. st.playerCasting .. ']'
     end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     local tarcmd, tarinfo = ns.TryTarget()
@@ -271,14 +285,14 @@ local function getFrostAction()
         return tarcmd, tarinfo
     end
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
-    if ns.State.gcd then return 'none', 'гкд' end
+    if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getUncholyAction()
-    if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. ns.State.playerCasting .. ']'
+    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
+        return 'none', 'кастую [' .. st.playerCasting .. ']'
     end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     local tarcmd, tarinfo = ns.TryTarget()
@@ -286,14 +300,17 @@ local function getUncholyAction()
         return tarcmd, tarinfo
     end
     -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
-    if ns.State.gcd then return 'none', 'гкд' end
+    if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getBloodAction, getFrostAction, getUncholyAction }
-function ns:GetAction()
+local function updateRotation()
     local spec = ns.GetCurrentSpecID()
-    local rotation = rotations[spec]
-    return rotation()
+    ns.GetAction = rotations[spec]
 end
+ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
+ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
+ns.AttachEvent('PLAYER_ENTERING_WORLD', updateRotation)
+------------------------------------------------------------------------------------------------------------------

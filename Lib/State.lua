@@ -81,4 +81,5 @@ function ns.UpdateState()
     ns.State.lastUsedSpell = ns.LastUsedSpell()
 end
 
+ns.UpdateState() -- for init
 ------------------------------------------------------------------------------------------------------------------
