@@ -165,7 +165,7 @@ local function getProtoAction()
         return 'Блок щитом', '#защита при hp < 80%'
     end
 
-    if ns.State.playerHP100 < 70 and not ns.State.instance and ns.CanUseAction('Безудержная ярость') then
+    if ns.State.playerHP100 < 70 and not ns.HasBuff('Перемирие') and not ns.State.instance and ns.CanUseAction('Безудержная ярость') then
         return 'Безудержная ярость', '#дефаемся и хилимся расовой абилкой'
     end
 
