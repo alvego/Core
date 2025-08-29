@@ -280,4 +280,5 @@ local function updateRotation()
 end
 ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
 ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
+updateRotation()
 ------------------------------------------------------------------------------------------------------------------

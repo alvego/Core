@@ -54,10 +54,7 @@ local function tryThreat(unit)
     local isTanking, status, threatPercent = UnitDetailedThreatSituation('player', unit) -- 0: нет угрозы, 1: есть угроза, 2: овертаунт, 3: танк
     local spellUsed, action
     local targetUnit = unit .. 'target'
-    local unitTargetName = 'Нет цели'
-    if UnitExists(targetUnit) then
-        unitTargetName = UnitName(targetUnit)
-    end
+    local unitTargetName = UnitExists(targetUnit) and UnitName(targetUnit) or 'Нет цели'
 
     if isTanking then return false end
     if ns.IsOneUnit('player', targetUnit) then return false end
@@ -66,12 +63,12 @@ local function tryThreat(unit)
         return false -- недавно прожали, не частим
     end
 
-    action = (unit == 'mouseover') and 'mdarkcmd' or 'Темная власть'
+    action = (unit == 'mouseover') and 'Темная власть MO' or 'Темная власть'
     if not spellUsed and IsUsableSpell('Темная власть') and ns.CanUseAction(action) then
         spellUsed = action
     end
 
-    action = (unit == 'mouseover') and 'mdeathgrp' or 'Хватка смерти'
+    action = (unit == 'mouseover') and 'Хватка смерти MO' or 'Хватка смерти'
     if not spellUsed and IsUsableSpell('Хватка смерти') and ns.CanUseAction(action) then
         spellUsed = action
     end
@@ -121,12 +118,12 @@ local function getBloodAction()
         return action, 'бурст'
     end
 
-    action = 'Незыблемость льда'
+    action = 'Незыблемость льда' -- 20rp
     if inMelee and st.playerHP100 < 80 and canUseSpell(action) then
         return action, 'деф hp < 80%'
     end
 
-    action = 'Заморозка разума'
+    action = 'Заморозка разума' -- 20rp
     if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and canUseSpell(action) then
         return action, 'кик в гкд'
     end
@@ -224,7 +221,7 @@ local function getBloodAction()
             return action, 'range 1'
         end
 
-        action = 'Лик смерти'
+        action = 'Лик смерти' -- 40rp
         if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
             return action, 'range 2'
         end
@@ -268,12 +265,12 @@ local function getBloodAction()
         return 'none', 'ждем довес [Мор]'
     end
 
-    action = 'Рунический удар'
+    action = 'Рунический удар' -- 20rp
     if numTargets < targetsForAOE and canUseCurrentSpell(action) then
         return action, 'не aoe'
     end
 
-    action = 'Пожинание'
+    action = 'Пожинание' -- 32rp
     if runicPower > 80 and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
@@ -310,7 +307,7 @@ local function getBloodAction()
         return action, 'хилимся, есть болезни'
     end
 
-    action = 'Танцующее руническое оружие'
+    action = 'Танцующее руническое оружие' -- 60rp
     if st.targetHard and canUseGcdSpell(action) then
         return action, 'бурст'
     end
@@ -320,7 +317,7 @@ local function getBloodAction()
         return action, 'Вскипаем, лужа на кд'
     end
 
-    action = 'Рунический удар'
+    action = 'Рунический удар' -- 20rp
     if canUseCurrentSpell(action) then
         return action, 'руник'
     end
@@ -349,7 +346,7 @@ local function getBloodAction()
         return action, 'не aoe, cливаем руну крови'
     end
 
-    action = 'Пожинание'
+    action = 'Пожинание' -- 32rp
     if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
@@ -399,4 +396,5 @@ local function updateRotation()
 end
 ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
 ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
+updateRotation()
 ------------------------------------------------------------------------------------------------------------------

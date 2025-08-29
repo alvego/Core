@@ -83,6 +83,10 @@ ns.AttachTelemetry(function()
 end)
 
 ns.AttachTelemetry(function()
+    return format('SPD: %s%%', ns.Round(ns.State.speed / 7 * 100))
+end)
+
+ns.AttachTelemetry(function()
     return format('TAR: %s', ns.State.numTargets)
 end)
 
