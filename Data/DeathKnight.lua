@@ -11,6 +11,7 @@ ns.Chat(st.playerClass, st.playerColor)
 local GetRuneCooldown = GetRuneCooldown
 local GetRuneType = GetRuneType
 local GetTalentInfo = GetTalentInfo
+local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
 ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
@@ -29,6 +30,67 @@ local function canUseCurrentSpell(spell)
     return not IsCurrentSpell(spell) and canUseSpell(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
+-- Функция для преобразования статуса в текст
+local function getThreatStatusText(status)
+    if status == 0 then
+        return "нет угрозы"
+    elseif status == 1 then
+        return "есть угроза"
+    elseif status == 2 then
+        return "овертаунт"
+    elseif status == 3 then
+        return "танкуем"
+    else
+        return "неизвестно"
+    end
+end
+
+-- Новая функция для обработки агро-способностей
+local function tryThreat(unit)
+    if ns.IsInvalidTarget(unit) then
+        return false
+    end
+
+    local isTanking, status, threatPercent = UnitDetailedThreatSituation('player', unit) -- 0: нет угрозы, 1: есть угроза, 2: овертаунт, 3: танк
+    local spellUsed, action
+    local targetUnit = unit .. 'target'
+    local unitTargetName = 'Нет цели'
+    if UnitExists(targetUnit) then
+        unitTargetName = UnitName(targetUnit)
+    end
+
+    if isTanking then return false end
+    if ns.IsOneUnit('player', targetUnit) then return false end
+
+    if ns.TimerLess('Темная власть', 2) or ns.TimerLess('Хватка смерти', 2) then
+        return false -- недавно прожали, не частим
+    end
+
+    action = (unit == 'mouseover') and 'mdarkcmd' or 'Темная власть'
+    if not spellUsed and IsUsableSpell('Темная власть') and ns.CanUseAction(action) then
+        spellUsed = action
+    end
+
+    action = (unit == 'mouseover') and 'mdeathgrp' or 'Хватка смерти'
+    if not spellUsed and IsUsableSpell('Хватка смерти') and ns.CanUseAction(action) then
+        spellUsed = action
+    end
+
+    if not spellUsed then
+        return false
+    end
+
+    return spellUsed, string.format(
+        'агрим %s (%s): %s, угроза: %d, бъет: %s',
+        UnitName(unit),
+        unit,
+        getThreatStatusText(status),
+        threatPercent,
+        unitTargetName
+    )
+end
+------------------------------------------------------------------------------------------------------------------
+
 local function getBloodAction()
     local action
 
@@ -130,6 +192,31 @@ local function getBloodAction()
         frostFever = true
         frostFeverLeft = 10
     end
+
+    if frostPresenceBuff and st.group then           -- только в группе
+        -- Пуллтайм ротация
+        local isPull = ns.TimerLess('combatLock', 3) -- Первые 3 секунды боя
+        if isPull then
+            action = 'Смерть и разложение'
+            if goBloodAbils and canUseGcdSpell(action) then
+                return action, 'пул'
+            end
+        end
+        if ns.State.combatLock then
+            -- Проверка агро для маусовер-цели
+            local aSpell, aReason = tryThreat('mouseover')
+            if aSpell then
+                return aSpell, aReason
+            end
+
+            -- Проверка агро для текущей цели
+            aSpell, aReason = tryThreat('target')
+            if aSpell then
+                return aSpell, aReason
+            end
+        end
+    end
+
 
     if not inMelee then
         action = 'Ледяное прикосновение'
