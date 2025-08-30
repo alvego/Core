@@ -165,7 +165,7 @@ local function getBloodAction()
     end
 
     action = 'Истерия'
-    if inMelee and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
+    if inMelee and st.playerHP100 > 80 and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
         return action, 'бурст'
     end
 
@@ -308,10 +308,10 @@ local function getBloodAction()
         if canUseGcdSpell(action) then
             return action, 'довешиваем болячки'
         end
-        -- action = 'Кровоотвод'
-        -- if bloodRunes < 1 and canUseSpell(action) then
-        --     return action, 'нет рун крови на [Мор]'
-        -- end
+        action = 'Кровоотвод'
+        if bloodRunes < 1 and canUseSpell(action) then
+            return action, 'нет рун крови на [Мор]'
+        end
         return 'none', 'ждем довес [Мор]'
     end
 
