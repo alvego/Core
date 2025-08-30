@@ -18,6 +18,28 @@ ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
     lastNumWoundedTargets = 0
 end)
 ------------------------------------------------------------------------------------------------------------------
+local ghoulGuid = nil
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
+                                                       sourceGUID, sourceName, sourceFlags,
+                                                       destGUID, destName, destFlags, ...)
+    if subEvent == "UNIT_DIED" and destGUID == ghoulGuid then
+        ns.TimerReset('summonGhoul')
+        ghoulGuid = nil
+        --print('убили гуля', destGUID)
+        return
+    end
+
+    if sourceGUID ~= st.playerGUID then return end
+
+    local spellName = select(2, ...)
+    if subEvent == 'SPELL_SUMMON' and destName == 'Восставший союзник' and spellName == 'Воскрешение мертвых' then
+        ns.TimerStart('summonGhoul') -- призвали гуля
+        --print('призвали гуля', destGUID)
+        ghoulGuid = destGUID
+        return
+    end
+end)
+------------------------------------------------------------------------------------------------------------------
 local function canUseSpell(spell)
     return IsUsableSpell(spell) and ns.CanUseAction(spell)
 end
@@ -91,16 +113,45 @@ end
 local function getBloodAction()
     local action
 
+
     if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
         return 'none', 'кастую [' .. st.playerCasting .. ']'
     end
 
-    local runicPower = UnitPower('player')
+
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     local tarcmd, tarinfo = ns.TryTarget()
     if tarcmd then
         return tarcmd, tarinfo
     end
+
+    ns.TimerToggle('hp50less', st.playerHP100 < 50) -- таймер идет пока hp < 50
+
+    local runicPower = UnitPower('player')
+    -- [Танцующее руническое оружие], как раз должно быть готово
+    local dancingRuneWeaponReady = ns.TimerMore('Танцующее руническое оружие', 90) -- 1.5m
+    -- нужно бурстить
+    local needBurst = st.targetHard and dancingRuneWeaponReady
+    -- hp меньше половины уже 3 секунды
+    local needHeal = ns.TimerStarted('hp50less') and ns.TimerMore('hp50less', 3)
+    -- [Воскрешение мертвых], как раз должно быть готово
+    local raiseDeadReady = ns.TimerMore('Воскрешение мертвых', 180) -- 3m
+    --  [Смертельный союз], как раз должно быть готово
+    local deathPactReady = ns.TimerMore('Смертельный союз', 120) -- 2m
+    local hasGhoul = ns.TimerLess('summonGhoul', 60) -- гуля призвали меньше минуты назад
+    local needDeathPact = needHeal and deathPactReady and (raiseDeadReady or hasGhoul)
+    local goRunicAbils = not needBurst and not needDeathPact
+
+    action = 'Воскрешение мертвых'
+    if needDeathPact and (runicPower >= 40) and canUseGcdSpell(action) then
+        return action, 'призываем гуля'
+    end
+
+    action = 'Смертельный союз' -- 40rp
+    if hasGhoul and canUseGcdSpell(action) then
+        return action, 'хилимся гулем'
+    end
+
     local inMelee = ns.IsSpellInRange('Удар чумы')
 
     action = 'Безудержная ярость'
@@ -114,17 +165,17 @@ local function getBloodAction()
     end
 
     action = 'Истерия'
-    if inMelee and not st.pvp and canUseSpell(action) then
+    if inMelee and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
         return action, 'бурст'
     end
 
     action = 'Незыблемость льда' -- 20rp
-    if inMelee and st.playerHP100 < 80 and canUseSpell(action) then
+    if goRunicAbils and inMelee and st.playerHP100 < 80 and canUseSpell(action) then
         return action, 'деф hp < 80%'
     end
 
     action = 'Заморозка разума' -- 20rp
-    if ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and canUseSpell(action) then
+    if goRunicAbils and ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and canUseSpell(action) then
         return action, 'кик в гкд'
     end
 
@@ -174,7 +225,6 @@ local function getBloodAction()
     -- если у нас нет рун, на кд которых мы опираемся, но есть руны смерти, которых мы не учитываем, то почему бы их не слить...
     local goBloodAbils = bloodRunes == 2 or bloodRunes == 1 and minDebuffDuration > timeToBloodRuneReady + 1.5 or
         not glyphofDisease or minDebuffDuration > 10 or bloodRunes == 0
-    goBloodAbils = goBloodAbils or frostDeathRunes > 0 or unholyDeathRunes > 0
     -- ситуация - у нас 3 секунды до спадания болезни, руна крови на кд 4 сек и полная руна смерти вместо руны крови
     -- в итоге будет слита руна смерти на касание и мы не сможем заюзать мор
 
@@ -190,9 +240,9 @@ local function getBloodAction()
         frostFeverLeft = 10
     end
 
-    if frostPresenceBuff and st.group then           -- только в группе
+    if frostPresenceBuff and st.group and not st.pvp then -- только в группе
         -- Пуллтайм ротация
-        local isPull = ns.TimerLess('combatLock', 3) -- Первые 3 секунды боя
+        local isPull = ns.TimerLess('combatLock', 3)      -- Первые 3 секунды боя
         if isPull then
             action = 'Смерть и разложение'
             if goBloodAbils and canUseGcdSpell(action) then
@@ -222,7 +272,7 @@ local function getBloodAction()
         end
 
         action = 'Лик смерти' -- 40rp
-        if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
+        if goRunicAbils and runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
             return action, 'range 2'
         end
 
@@ -258,20 +308,20 @@ local function getBloodAction()
         if canUseGcdSpell(action) then
             return action, 'довешиваем болячки'
         end
-        action = 'Кровоотвод'
-        if bloodRunes < 1 and canUseSpell(action) then
-            return action, 'нет рун крови на [Мор]'
-        end
+        -- action = 'Кровоотвод'
+        -- if bloodRunes < 1 and canUseSpell(action) then
+        --     return action, 'нет рун крови на [Мор]'
+        -- end
         return 'none', 'ждем довес [Мор]'
     end
 
     action = 'Рунический удар' -- 20rp
-    if numTargets < targetsForAOE and canUseCurrentSpell(action) then
+    if goRunicAbils and numTargets < targetsForAOE and canUseCurrentSpell(action) then
         return action, 'не aoe'
     end
 
     action = 'Пожинание' -- 32rp
-    if runicPower > 80 and canUseGcdSpell(action) then
+    if goRunicAbils and runicPower > 80 and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
 
@@ -291,14 +341,14 @@ local function getBloodAction()
     end
 
     action = 'Кровь вампира'
-    if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then
-        return action, 'утолщаемся hp < 70%'
+    if (goBloodAbils or needDeathPact) and st.playerHP100 < 60 and canUseSpell(action) then
+        return action, 'утолщаемся hp < 60%'
     end
 
-    action = 'Захват рун'
-    if goBloodAbils and st.playerHP100 < 70 and canUseGcdSpell(action) then
-        return action, 'хилимся hp < 70%'
-    end
+    -- action = 'Захват рун'
+    -- if goBloodAbils and st.playerHP100 < 60 and canUseGcdSpell(action) then
+    --     return action, 'хилимся hp < 60%'
+    -- end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
 
@@ -308,7 +358,7 @@ local function getBloodAction()
     end
 
     action = 'Танцующее руническое оружие' -- 60rp
-    if st.targetHard and canUseGcdSpell(action) then
+    if needBurst and not needDeathPact and canUseGcdSpell(action) then
         return action, 'бурст'
     end
 
@@ -318,7 +368,7 @@ local function getBloodAction()
     end
 
     action = 'Рунический удар' -- 20rp
-    if canUseCurrentSpell(action) then
+    if goRunicAbils and canUseCurrentSpell(action) then
         return action, 'руник'
     end
 
@@ -347,12 +397,12 @@ local function getBloodAction()
     end
 
     action = 'Пожинание' -- 32rp
-    if runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
+    if goRunicAbils and runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
 
     action = 'Кровоотвод'
-    if bloodRunes < 1 and canUseSpell(action) then
+    if st.gcd and bloodRunes < 1 and canUseSpell(action) then
         return action, 'нет рун крови'
     end
     if st.gcd then return 'none', 'гкд' end

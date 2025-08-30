@@ -94,12 +94,6 @@ function ns.IsOneUnit(unit1, unit2)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function ns.UnitThreat(u, t)
-    if not UnitIsPlayer(u) then return 0 end
-    return UnitThreatSituation(u, t) or 0
-end
-
-------------------------------------------------------------------------------------------------------------------
 local inDuel = false
 local function startDuel()
     inDuel = true

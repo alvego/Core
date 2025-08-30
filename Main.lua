@@ -7,7 +7,6 @@ local SpellIsTargeting = SpellIsTargeting
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local IsMouselooking = IsMouselooking
-local UnitExists = UnitExists
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if ns.IsPaused() then
@@ -18,7 +17,7 @@ local function getAction()
     return 'none', '#пауза'
   end
 
-  if UnitIsDeadOrGhost("player") then
+  if UnitIsDeadOrGhost('player') then
     return 'none', 'ты мертв'
   end
 
@@ -59,7 +58,20 @@ local function getAction()
   return ns.GetAction()
 end
 ------------------------------------------------------------------------------------------------------------------
-local stopAttackDebuff = { 'Паралич', 'Превращение' }
+local stopAttackDebuff = {
+  'Паралич',
+  'Превращение',
+  'Ошеломление',
+  'Покаяние',
+  'Сон',
+  -- 'Соблазн',
+  -- 'Страх',
+  -- 'Вой ужаса',
+  -- 'Устрашающий крик',
+  -- 'Контроль над разумом',
+  -- 'Глубинный ужас',
+  -- 'Ментальный крик'
+}
 function ns.TryTarget()
   if ns.State.invalidTarget then
     if ns.State.combatMode or ns.State.attack then
@@ -76,14 +88,12 @@ function ns.TryTarget()
     return 'none', 'цель не в бою, не нажата атака, не вкл автоатака'
   end
 
+  local stopDebuff = not ns.State.attack and ns.HasDebuff(stopAttackDebuff)
   if ns.State.autoattack then
-    if not ns.State.attack then
-      local debuff = ns.HasDebuff(stopAttackDebuff)
-      if debuff then
-        return 'stopattack', 'не бъем в ' .. debuff
-      end
+    if stopDebuff then
+      return 'stopattack', 'не бъем в ' .. stopDebuff
     end
-  else
+  elseif not stopDebuff then
     return 'startattack', '#автоатака'
   end
   return false, ''
@@ -99,12 +109,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 --[[
-UIParentLoadAddOn("Blizzard_DebugTools");
+UIParentLoadAddOn('Blizzard_DebugTools');
 DevTools_Dump(ns)
 ]]
 
 --[[
-  /run UIParentLoadAddOn("Blizzard_DebugTools");
+  /run UIParentLoadAddOn('Blizzard_DebugTools');
   /fstack true
   /etrace
 ]]
