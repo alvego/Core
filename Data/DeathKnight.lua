@@ -179,7 +179,7 @@ local function getBloodAction()
         return action, 'кик в гкд'
     end
 
-    -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
+    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
     --if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
 
@@ -418,7 +418,7 @@ local function getFrostAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
+    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
@@ -433,7 +433,7 @@ local function getUncholyAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожвать в гкд
+    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
