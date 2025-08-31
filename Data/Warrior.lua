@@ -36,7 +36,7 @@ local function getArmsAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
@@ -51,7 +51,7 @@ local function getFuryAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'

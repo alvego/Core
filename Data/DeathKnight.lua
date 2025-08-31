@@ -180,7 +180,7 @@ local function getBloodAction()
         return action, 'кик в гкд'
     end
 
-    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
     --if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
 
@@ -285,8 +285,7 @@ local function getBloodAction()
         return 'none', 'больше нечем в range'
     end
 
-    local numTargetsReal = st.numTargets
-    local numTargets = numTargetsReal
+    local numTargets = st.numTargets
 
     local numWoundedTargets = math.max(ns.DotedTargetsCount('Кровавая чума'), ns.DotedTargetsCount('Озноб'))
 
@@ -304,7 +303,7 @@ local function getBloodAction()
         return 'none', 'ждем [Мор]'
     end
 
-    if frostFever and bloodPlague and numTargetsReal > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets then
+    if frostFever and bloodPlague and (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or (frostFeverLeft ~= bloodPlagueLeft and numTargets > 1) then
         action = 'Мор'
         if canUseGcdSpell(action) then
             return action, 'довешиваем болячки'
@@ -419,7 +418,7 @@ local function getFrostAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
@@ -434,7 +433,7 @@ local function getUncholyAction()
     if tarcmd then
         return tarcmd, tarinfo
     end
-    -- тут ротацию ишем, можно испольовать что можно прожать в гкд
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
     if st.gcd then return 'none', 'гкд' end
     -- то что требуется гкд
     return 'none', 'пока всё'
