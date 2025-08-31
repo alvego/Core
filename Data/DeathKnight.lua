@@ -303,7 +303,11 @@ local function getBloodAction()
         return 'none', 'ждем [Мор]'
     end
 
-    if frostFever and bloodPlague and (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or (frostFeverLeft ~= bloodPlagueLeft and numTargets > 1) then
+    if frostFever and bloodPlague and
+        (
+            (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or
+            (numTargets > 1 and frostFeverLeft ~= bloodPlagueLeft)
+        ) then
         action = 'Мор'
         if canUseGcdSpell(action) then
             return action, 'довешиваем болячки'
