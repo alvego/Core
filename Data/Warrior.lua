@@ -8,6 +8,11 @@ if ns.State.playerClass ~= 'WARRIOR' then return end
 ns.Chat(ns.State.playerClass, ns.State.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 local UnitMana = UnitMana
+local type = type
+local UnitThreatSituation = UnitThreatSituation
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local CheckInteractDistance = CheckInteractDistance
+local GetShapeshiftForm = GetShapeshiftForm
 ------------------------------------------------------------------------------------------------------------------
 local function getArmsAction()
     if ns.State.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
@@ -274,11 +279,18 @@ local function getProtoAction()
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getArmsAction, getFuryAction, getProtoAction }
+local rotation
 local function updateRotation()
     local spec = ns.GetCurrentSpecID()
-    ns.GetAction = rotations[spec]
+    rotation = rotations[spec]
 end
 ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
 ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
-updateRotation()
+function ns.GetAction()
+    if type(rotation) ~= 'function' then
+        updateRotation()
+    end
+    return rotation()
+end
+
 ------------------------------------------------------------------------------------------------------------------

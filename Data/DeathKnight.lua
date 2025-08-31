@@ -12,6 +12,7 @@ local GetRuneCooldown = GetRuneCooldown
 local GetRuneType = GetRuneType
 local GetTalentInfo = GetTalentInfo
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
+local type = type
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
 ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
@@ -440,11 +441,18 @@ local function getUncholyAction()
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getBloodAction, getFrostAction, getUncholyAction }
+local rotation
 local function updateRotation()
     local spec = ns.GetCurrentSpecID()
-    ns.GetAction = rotations[spec]
+    rotation = rotations[spec]
 end
 ns.AttachEvent('PLAYER_TALENT_UPDATE', updateRotation)
 ns.AttachEvent('ACTIVE_TALENT_GROUP_CHANGED', updateRotation)
-updateRotation()
+function ns.GetAction()
+    if type(rotation) ~= 'function' then
+        updateRotation()
+    end
+    return rotation()
+end
+
 ------------------------------------------------------------------------------------------------------------------
