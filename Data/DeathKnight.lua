@@ -273,7 +273,7 @@ local function getBloodAction()
         end
 
         action = 'Лик смерти' -- 40rp
-        if goRunicAbils and runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
+        if goRunicAbils and runicPower >= (frostPresenceBuff and 80 or 60) and canUseGcdSpell(action) then
             return action, 'range 2'
         end
 
@@ -303,7 +303,7 @@ local function getBloodAction()
         return 'none', 'ждем [Мор]'
     end
 
-    if frostFever and bloodPlague and
+    if frostFever and bloodPlague and ns.TimerMore('Мор', 2) and
         (
             (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or
             (numTargets > 1 and frostFeverLeft ~= bloodPlagueLeft)
@@ -330,7 +330,7 @@ local function getBloodAction()
     end
 
     action = 'Смерть и разложение'
-    if numTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
+    if st.ttd > 10 and numTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
         return action, 'aoe'
     end
 
@@ -401,7 +401,7 @@ local function getBloodAction()
     end
 
     action = 'Пожинание' -- 32rp
-    if goRunicAbils and runicPower >= (frostPresenceBuff and 60 or 0) and canUseGcdSpell(action) then
+    if goRunicAbils and runicPower >= (frostPresenceBuff and 80 or 52) and canUseGcdSpell(action) then
         return action, 'сливаем runic power'
     end
 
@@ -409,6 +409,11 @@ local function getBloodAction()
     if st.gcd and bloodRunes < 1 and canUseSpell(action) then
         return action, 'нет рун крови'
     end
+    action = 'Усиление рунического оружия'
+    if not st.gcd and runicPower < 52 and (bloodRunes + unholyRunes + frostRunes + bloodDeathRunes + unholyDeathRunes + frostDeathRunes == 0) and canUseSpell(action) then
+        return action, 'нет рун'
+    end
+
     if st.gcd then return 'none', 'гкд' end
     return 'none', st.gcd and 'гкд' or 'нечем бить'
 end
