@@ -24,7 +24,7 @@ Global Const $SLEEP_MIN = 50
 Global Const $SLEEP_MAX = 1000
 Global Const $SLEEP_RANDOM = 150
 Global Const $AOE_BUTTON = 1000 ; Номер кнопки для AoE-спеллов
-Global Const $AOE_Y_OFFSET = 0.6 ; Смещение клика на 60% высоты экрана
+Global Const $AOE_Y_OFFSET = 0.5 ; Смещение клика на % высоты экрана
 
 ; Глобальные переменные
 Global $hWnd
@@ -238,7 +238,7 @@ EndFunc
 
 
 ; Нажать кнопку мыши в указанном окне
-Func MouseDownInWindow($hWnd, $button = "left", $x = -1, $y = -1)
+Func MouseDownInWindow($hWnd, $button = "left")
     Local $msg = 0
     Switch $button
         Case "left"
@@ -249,18 +249,12 @@ Func MouseDownInWindow($hWnd, $button = "left", $x = -1, $y = -1)
             $msg = 0x0207 ; WM_MBUTTONDOWN
     EndSwitch
 
-    If $x >= 0 And $y >= 0 Then
-        ; Преобразуем координаты в lParam
-        Local $lParam = BitOR($y * 0x10000, BitAND($x, 0xFFFF))
-        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", $lParam)
-    Else
-        ; Без координат - отправляем сообщение без позиции
-        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
-    EndIf
+    ; Без координат - отправляем сообщение без позиции
+	DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
 EndFunc
 
 ; Отпустить кнопку мыши в указанном окне
-Func MouseUpInWindow($hWnd, $button = "left", $x = -1, $y = -1)
+Func MouseUpInWindow($hWnd, $button = "left")
     Local $msg = 0
     Switch $button
         Case "left"
@@ -271,29 +265,32 @@ Func MouseUpInWindow($hWnd, $button = "left", $x = -1, $y = -1)
             $msg = 0x0208 ; WM_MBUTTONUP
     EndSwitch
 
-    If $x >= 0 And $y >= 0 Then
-        ; Преобразуем координаты в lParam
-        Local $lParam = BitOR($y * 0x10000, BitAND($x, 0xFFFF))
-        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", $lParam)
-    Else
-        ; Без координат - отправляем сообщение без позиции
-        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
-    EndIf
+   	; Без координат - отправляем сообщение без позиции
+	DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
 EndFunc
 
 ; Клик в указанном окне
-Func MouseClickInWindow($hWnd, $button = "left", $x = -1, $y = -1, $clicks = 1)
-    For $i = 1 To $clicks
-        MouseDownInWindow($hWnd, $button, $x, $y)
-        Sleep(10)
-        MouseUpInWindow($hWnd, $button, $x, $y)
-        Sleep(10)
-    Next
+Func MouseClickInWindow($hWnd, $button = "left")
+    MouseDownInWindow($hWnd, $button)
+	Sleep(10)
+	MouseUpInWindow($hWnd, $button)
+	Sleep(10)
 EndFunc
 
 ; Обработка AoE-спелла (клик в центре экрана)
 Func HandleAoESpell()
     Local $isRButtonDown = _IsPressed("02") ; Правая кнопка мыши
+
+	Local $isMButtonDown = _IsPressed("04") ; Средняя кнопка мыши
+	; Не используется управление камерой и нажат модификатор
+    If WinActive($hWnd) And $isMButtonDown And Not $isRButtonDown Then
+        ; Ситуация с контролируемой позицией спела
+        ; Например AoE по Ctrl у мага в указанную область
+        ; Тогда просто кликаем мышкой по текущим координатам и выходим
+		MouseClickInWindow($hWnd, "left")
+        Sleep(10)
+        Return
+    EndIf
 
     ; Сохраняем текущую позицию курсора
     Local $mousePos = MouseGetPos()
@@ -302,21 +299,16 @@ Func HandleAoESpell()
         Return
     EndIf
 
-    ; Не используется управление камерой и нажат модификатор
-    ;~ If WinActive($hWnd) And Not $isRButtonDown Then
-    ;~     ; Ситуация с контролируемой позицией спела
-    ;~     ; Например AoE по Ctrl у мага в указанную область
-    ;~     ; Тогда просто кликаем мышкой по текущим координатам и выходим
-    ;~     Local $winPos = WinGetPos($hWnd)
-    ;~     If Not @error Then
-    ;~         ; Преобразуем абсолютные координаты в относительные
-    ;~         Local $relX = $mousePos[0] - $winPos[0]
-    ;~         Local $relY = $mousePos[1] - $winPos[1]
-    ;~         MouseClickInWindow($hWnd, "left", $relX, $relY)
-    ;~     EndIf
-    ;~     Sleep(10)
-    ;~     Return
-    ;~ EndIf
+	; Получаем размеры окна WoW
+    Local $winPos = WinGetPos($hWnd)
+    If @error Then ;Не удалось получить размеры окна
+        ConsoleWrite("Couldn't get the window dimensions" & @CRLF)
+        Return
+    EndIf
+
+    ; Вычисляем абсолютные координаты центра экрана (чуть ниже, 60% высоты)
+    Local $centerX = $winPos[0] + Int($winPos[2] / 2)
+    Local $centerY = $winPos[1] + Int($winPos[3] * $AOE_Y_OFFSET)
 
     ; Проверяем, удерживается ли правая кнопка мыши
     If $isRButtonDown Then
@@ -324,20 +316,17 @@ Func HandleAoESpell()
         Sleep(10)
     EndIf
 
-    ; Получаем размеры окна WoW
-    Local $winPos = WinGetPos($hWnd)
-    If @error Then ;Не удалось получить размеры окна
-        ConsoleWrite("Couldn't get the window dimensions" & @CRLF)
-        Return
-    EndIf
-
-    ; Вычисляем центр экрана (чуть ниже, 60% высоты) - относительные координаты
-    Local $centerX = Int($winPos[2] / 2)
-    Local $centerY = Int($winPos[3] * $AOE_Y_OFFSET)
+	; Перемещаем курсор в центр экрана
+    MouseMove($centerX, $centerY, 5)
+    Sleep(10) ; Задержка для обработки перемещения
 
     ; Кликаем в центр экрана
-    MouseClickInWindow($hWnd, "left", $centerX, $centerY)
+    MouseClickInWindow($hWnd, "left")
     Sleep(10)
+
+	; Возвращаем курсор в исходную позицию
+    MouseMove($mousePos[0], $mousePos[1], 5)
+    Sleep(10) ; Задержка для обработки перемещения
 
     ; Восстанавливаем правую кнопку, если она была нажата
     If $isRButtonDown Then

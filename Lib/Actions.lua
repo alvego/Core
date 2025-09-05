@@ -33,7 +33,7 @@ end
 local actions = {}
 local updateActions = function()
     wipe(actions)
-    for slot = 1, 36 do -- 12 x 3
+    for slot = 1, 120 do -- 12 x 10
         local name = ns.GetSlotName(slot)
         if name then
             actions[name] = slot
@@ -66,7 +66,7 @@ function ns.CanUseSlot(slot)
     if slot == nil then
         return false, 'not set'
     end
-    if slot == 0 or slot > 72 then -- не проверяем кастомные слоты
+    if slot == 0 or slot > 120 then -- не проверяем кастомные слоты
         return true, ''
     end
     local isUsable, notEnoughMana = IsUsableAction(slot)
@@ -139,7 +139,7 @@ function ns.UseAction(action, info)
     if lastSlot ~= slot then
         lastSlot = slot
         ns.Semaphore(slot)
-        if slot ~= 0 and slot <= 72 then -- 12 * 6
+        if slot ~= 0 and slot <= 120 then -- 12 * 10
             local icon = GetActionTexture(slot)
             ns.ActionLog(icon, action, info, '00BFFF')
         end
@@ -160,7 +160,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function ns.ButtonIsPressed()
-    for i = 1, 72 do -- 12 x 6
+    for i = 1, 120 do -- 12 x 10
         local btn = _G['BT4Button' .. i]
         if btn and btn:GetButtonState() == 'PUSHED' and lastSlot ~= i then
             return i

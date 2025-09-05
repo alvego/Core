@@ -22,9 +22,9 @@ local function getAction()
   end
 
   if SpellIsTargeting() then
-    if IsMouselooking() then
-      return 'none', 'отпусти правую кнопку мыши'
-    end
+    -- if IsMouselooking() then
+    --   return 'none', 'отпусти правую кнопку мыши'
+    -- end
 
     return 'mouse1', 'делаем выбор области' -- left mouse click
   end

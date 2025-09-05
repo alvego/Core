@@ -17,7 +17,7 @@ local fireBuff              = { 'Власть Огня', 'Путь огня', '�
 
 ------------------------------------------------------------------------------------------------------------------
 function ns:GetAction()
-    local aoe = ns.IsCtr()
+    local aoe = ns.IsMouse(3)
 
     if aoe and ns.State.playerCasting and not tContains(aoeCast, ns.State.playerCasting) then
         return 'stopcast', 'нужно aoe, стопаем: ' .. ns.State.playerCasting
