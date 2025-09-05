@@ -7,13 +7,16 @@
 #include <WinAPIGdiDC.au3>
 #include <WinAPIGdi.au3>
 
-Opt("PixelCoordMode", 2)
-Opt("MouseCoordMode", 2)
+Opt("PixelCoordMode", 1)
+Opt("MouseCoordMode", 1)
+
+Opt("SendKeyDelay", 100) ; изменяет продолжительность паузы между эмулированными нажатиями клавиш.
+Opt("SendKeyDownDelay", 50) ; изменяет продолжительность нажатого состояния клавиши, перед тем как отпустить.
 
 ; Константы
+Global Const $WINDOW_TITLE = "World of Warcraft"
 Global Const $ENGLISH_LAYOUT = 0x4090409
 Global Const $RUSSIAN_LAYOUT = 0x4190419
-Global Const $VK_NUMLOCK = 0x90
 Global Const $BUTTON_COUNT = 120
 Global Const $FRAME_X = 1
 Global Const $FRAME_Y = 1
@@ -43,19 +46,19 @@ Func SetupKeyMap()
     $keyMap[11] = "-"
     $keyMap[12] = "="
 
-    ; Панель 2 (13-24): num0..num9, num+, num-
-    $keyMap[13] = "{NUMPAD0}"
-    $keyMap[14] = "{NUMPAD1}"
-    $keyMap[15] = "{NUMPAD2}"
-    $keyMap[16] = "{NUMPAD3}"
-    $keyMap[17] = "{NUMPAD4}"
-    $keyMap[18] = "{NUMPAD5}"
-    $keyMap[19] = "{NUMPAD6}"
-    $keyMap[20] = "{NUMPAD7}"
-    $keyMap[21] = "{NUMPAD8}"
-    $keyMap[22] = "{NUMPAD9}"
-    $keyMap[23] = "{NUMPADSUB}"
-    $keyMap[24] = "{NUMPADADD}"
+    ; Панель 2 (13-24): Ctrl + 1..9, Ctrl + 0, Ctrl + -, Ctrl + =
+    $keyMap[13] = "^1"
+    $keyMap[14] = "^2"
+    $keyMap[15] = "^3"
+    $keyMap[16] = "^4"
+    $keyMap[17] = "^5"
+    $keyMap[18] = "^6"
+    $keyMap[19] = "^7"
+    $keyMap[20] = "^8"
+    $keyMap[21] = "^9"
+    $keyMap[22] = "^0"
+    $keyMap[23] = "^-"
+    $keyMap[24] = "^="
 
     ; Панель 3 (25-36): F1..F12
     $keyMap[25] = "{F1}"
@@ -71,13 +74,13 @@ Func SetupKeyMap()
     $keyMap[35] = "{F11}"
     $keyMap[36] = "{F12}"
 
-    ; Панель 4 (37-48): q|й, `|ё, e|у, r|к, t|е, f|а, Ctrl + F7..F12
-    $keyMap[37] = "q|й"
-    $keyMap[38] = "`|ё"
-    $keyMap[39] = "e|у"
-    $keyMap[40] = "r|к"
-    $keyMap[41] = "t|е"
-    $keyMap[42] = "f|а"
+    ; Панель 4 (37-48): Ctrl + F1..F12
+    $keyMap[37] = "^{F1}"
+    $keyMap[38] = "^{F2}"
+    $keyMap[39] = "^{F3}"
+    $keyMap[40] = "^{F4}"
+    $keyMap[41] = "^{F5}"
+    $keyMap[42] = "^{F6}"
     $keyMap[43] = "^{F7}"
     $keyMap[44] = "^{F8}"
     $keyMap[45] = "^{F9}"
@@ -85,114 +88,99 @@ Func SetupKeyMap()
     $keyMap[47] = "^{F11}"
     $keyMap[48] = "^{F12}"
 
-    ; Панель 5 (49-60): Ctrl + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[49] = "^{NUMPAD0}"
-    $keyMap[50] = "^{NUMPAD1}"
-    $keyMap[51] = "^{NUMPAD2}"
-    $keyMap[52] = "^{NUMPAD3}"
-    $keyMap[53] = "^{NUMPAD4}"
-    $keyMap[54] = "^{NUMPAD5}"
-    $keyMap[55] = "^{NUMPAD6}"
-    $keyMap[56] = "^{NUMPAD7}"
-    $keyMap[57] = "^{NUMPAD8}"
-    $keyMap[58] = "^{NUMPAD9}"
-    $keyMap[59] = "^{NUMPADSUB}"
-    $keyMap[60] = "^{NUMPADADD}"
+    ; Панель 5 (49-60): q|й, `|ё, e|у, r|к, t|е, f|а, g|п, Alt + F8..F12
+    $keyMap[49] = "q|й"
+    $keyMap[50] = "`|ё"
+    $keyMap[51] = "e|у"
+    $keyMap[52] = "r|к"
+    $keyMap[53] = "t|е"
+    $keyMap[54] = "f|а"
+    $keyMap[55] = "g|п"
+    $keyMap[56] = "^q|^й"
+    $keyMap[57] = "^e|^у"
+    $keyMap[58] = "^r|^к"
+    $keyMap[59] = "^t|^е"
+    $keyMap[60] = "^f|^а"
 
-    ; Панель 6 (61-72): Alt + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[61] = "!{NUMPAD0}"
-    $keyMap[62] = "!{NUMPAD1}"
-    $keyMap[63] = "!{NUMPAD2}"
-    $keyMap[64] = "!{NUMPAD3}"
-    $keyMap[65] = "!{NUMPAD4}"
-    $keyMap[66] = "!{NUMPAD5}"
-    $keyMap[67] = "!{NUMPAD6}"
-    $keyMap[68] = "!{NUMPAD7}"
-    $keyMap[69] = "!{NUMPAD8}"
-    $keyMap[70] = "!{NUMPAD9}"
-    $keyMap[71] = "!{NUMPADSUB}"
-    $keyMap[72] = "!{NUMPADADD}"
+    ; Панель 6 (61-72): Ctrl+Shift + F1..F12
+    $keyMap[61] = "^+{F1}"
+    $keyMap[62] = "^+{F2}"
+    $keyMap[63] = "^+{F3}"
+    $keyMap[64] = "^+{F4}"
+    $keyMap[65] = "^+{F5}"
+    $keyMap[66] = "^+{F6}"
+    $keyMap[67] = "^+{F7}"
+    $keyMap[68] = "^+{F8}"
+    $keyMap[69] = "^+{F9}"
+    $keyMap[70] = "^+{F10}"
+    $keyMap[71] = "^+{F11}"
+    $keyMap[72] = "^+{F12}"
 
-    ; Панель 7 (73-84): Ctrl+Shift + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[73] = "^+{NUMPAD0}"
-    $keyMap[74] = "^+{NUMPAD1}"
-    $keyMap[75] = "^+{NUMPAD2}"
-    $keyMap[76] = "^+{NUMPAD3}"
-    $keyMap[77] = "^+{NUMPAD4}"
-    $keyMap[78] = "^+{NUMPAD5}"
-    $keyMap[79] = "^+{NUMPAD6}"
-    $keyMap[80] = "^+{NUMPAD7}"
-    $keyMap[81] = "^+{NUMPAD8}"
-    $keyMap[82] = "^+{NUMPAD9}"
-    $keyMap[83] = "^+{NUMPADSUB}"
-    $keyMap[84] = "^+{NUMPADADD}"
+    ; Панель 7 (73-84): Alt + 1..9, Alt + 0, Alt + -, Alt + =
+    $keyMap[73] = "!1"
+    $keyMap[74] = "!2"
+    $keyMap[75] = "!3"
+    $keyMap[76] = "!4"
+    $keyMap[77] = "!5"
+    $keyMap[78] = "!6"
+    $keyMap[79] = "!7"
+    $keyMap[80] = "!8"
+    $keyMap[81] = "!9"
+    $keyMap[82] = "!0"
+    $keyMap[83] = "!-"
+    $keyMap[84] = "!="
 
-    ; Панель 8 (85-96): Shift+Alt + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[85] = "+!{NUMPAD0}"
-    $keyMap[86] = "+!{NUMPAD1}"
-    $keyMap[87] = "+!{NUMPAD2}"
-    $keyMap[88] = "+!{NUMPAD3}"
-    $keyMap[89] = "+!{NUMPAD4}"
-    $keyMap[90] = "+!{NUMPAD5}"
-    $keyMap[91] = "+!{NUMPAD6}"
-    $keyMap[92] = "+!{NUMPAD7}"
-    $keyMap[93] = "+!{NUMPAD8}"
-    $keyMap[94] = "+!{NUMPAD9}"
-    $keyMap[95] = "+!{NUMPADSUB}"
-    $keyMap[96] = "+!{NUMPADADD}"
+    ; Панель 8 (85-96): Shift + 1..9, Shift + 0, Shift + -, Shift + =
+    $keyMap[85] = "+1"
+    $keyMap[86] = "+2"
+    $keyMap[87] = "+3"
+    $keyMap[88] = "+4"
+    $keyMap[89] = "+5"
+    $keyMap[90] = "+6"
+    $keyMap[91] = "+7"
+    $keyMap[92] = "+8"
+    $keyMap[93] = "+9"
+    $keyMap[94] = "+0"
+    $keyMap[95] = "+-"
+    $keyMap[96] = "+="
 
-    ; Панель 9 (97-108): Ctrl+Alt + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[97] = "^!{NUMPAD0}"
-    $keyMap[98] = "^!{NUMPAD1}"
-    $keyMap[99] = "^!{NUMPAD2}"
-    $keyMap[100] = "^!{NUMPAD3}"
-    $keyMap[101] = "^!{NUMPAD4}"
-    $keyMap[102] = "^!{NUMPAD5}"
-    $keyMap[103] = "^!{NUMPAD6}"
-    $keyMap[104] = "^!{NUMPAD7}"
-    $keyMap[105] = "^!{NUMPAD8}"
-    $keyMap[106] = "^!{NUMPAD9}"
-    $keyMap[107] = "^!{NUMPADSUB}"
-    $keyMap[108] = "^!{NUMPADADD}"
+    ; Панель 9 (97-108): Ctrl + Shift + 1..9, Ctrl + Shift + 0, Ctrl + Shift + -, Ctrl + Shift + =
+    $keyMap[97] = "^+1"
+    $keyMap[98] = "^+2"
+    $keyMap[99] = "^+3"
+    $keyMap[100] ="^+4"
+    $keyMap[101] ="^+5"
+    $keyMap[102] ="^+6"
+    $keyMap[103] ="^+7"
+    $keyMap[104] ="^+8"
+    $keyMap[105] ="^+9"
+    $keyMap[106] ="^+0"
+    $keyMap[107] ="^+-"
+    $keyMap[108] ="^+="
 
-    ; Панель 10 (109-120): Ctrl+Shift+Alt + Numpad0..Numpad9, Numpad+, Numpad-
-    $keyMap[109] = "^+!{NUMPAD0}"
-    $keyMap[110] = "^+!{NUMPAD1}"
-    $keyMap[111] = "^+!{NUMPAD2}"
-    $keyMap[112] = "^+!{NUMPAD3}"
-    $keyMap[113] = "^+!{NUMPAD4}"
-    $keyMap[114] = "^+!{NUMPAD5}"
-    $keyMap[115] = "^+!{NUMPAD6}"
-    $keyMap[116] = "^+!{NUMPAD7}"
-    $keyMap[117] = "^+!{NUMPAD8}"
-    $keyMap[118] = "^+!{NUMPAD9}"
-    $keyMap[119] = "^+!{NUMPADSUB}"
-    $keyMap[120] = "^+!{NUMPADADD}"
+    ; Панель 10 (109-120): Ctrl + Alt + 1..9, Ctrl + Alt + 0, Ctrl + Alt + -, Ctrl + Alt + =
+    $keyMap[109] = "^!1"
+    $keyMap[110] = "^!2"
+    $keyMap[111] = "^!3"
+    $keyMap[112] = "^!4"
+    $keyMap[113] = "^!5"
+    $keyMap[114] = "^!6"
+    $keyMap[115] = "^!7"
+    $keyMap[116] = "^!8"
+    $keyMap[117] = "^!9"
+    $keyMap[118] = "^!0"
+    $keyMap[119] = "^!-"
+    $keyMap[120] = "^!="
 EndFunc
 
 ; Проверка наличия окна WoW
 Func CheckWindow()
-    $hWnd = WinGetHandle("World of Warcraft")
+    $hWnd = WinGetHandle($WINDOW_TITLE)
     If @error Then ; Окно World of Warcraft не найдено!
 		ConsoleWrite("The World of Warcraft window has not been found!" & @CRLF)
 		Return False
     EndIf
     Return True
-EndFunc
-
-; Проверка состояния NumLock
-Func IsNumLockOn()
-    Local $aRet = DllCall("user32.dll", "int", "GetKeyState", "int", $VK_NUMLOCK)
-    Return BitAND($aRet[0], 0x01) = 0x01
-EndFunc
-
-; Включение NumLock
-Func EnableNumLock()
-    If Not IsNumLockOn() Then
-        DllCall("user32.dll", "int", "keybd_event", "int", $VK_NUMLOCK, "int", 0x45, "int", 0, "int", 0)
-        DllCall("user32.dll", "int", "keybd_event", "int", $VK_NUMLOCK, "int", 0x45, "int", 0x02, "int", 0)
-        ConsoleWrite("NumLock is enabled" & @CRLF) ; NumLock включён
-    EndIf
 EndFunc
 
 ; Получение текущей раскладки клавиатуры
@@ -214,13 +202,13 @@ EndFunc
 
 ; Конвертация цвета в номер кнопки
 Func ReadButtonNumber()
-	;return GetPixelColorFromWindow($FRAME_X, $FRAME_Y)
-    Local $color = GetPixelColorFromWindow($FRAME_X, $FRAME_Y)
-    If $color = -1 Then Return -1
-    Local $r = BitShift(BitAND($color, 0xFF0000), 16)
-    Local $g = BitShift(BitAND($color, 0x00FF00), 8)
-    Local $b = BitAND($color, 0x0000FF)
-    Return $r * 65536 + $g * 256 + $b
+	return GetPixelColorFromWindow($FRAME_X, $FRAME_Y)
+    ;~ Local $color = GetPixelColorFromWindow($FRAME_X, $FRAME_Y)
+    ;~ If $color = -1 Then Return -1
+    ;~ Local $r = BitShift(BitAND($color, 0xFF0000), 16)
+    ;~ Local $g = BitShift(BitAND($color, 0x00FF00), 8)
+    ;~ Local $b = BitAND($color, 0x0000FF)
+    ;~ Return $r * 65536 + $g * 256 + $b
 EndFunc
 
 ; Проверка, что модификаторы не нажаты пользователем
@@ -230,7 +218,7 @@ EndFunc
 
 ; Отправка клавиши с учётом модификаторов и раскладки
 Func SendKeyWithModifiers($key)
-    Local $modifiers = ""
+
     Local $baseKey = $key
 
     ; Проверяем наличие eng|rus (например, "q|й")
@@ -243,67 +231,97 @@ Func SendKeyWithModifiers($key)
         $baseKey = ($layout = $RUSSIAN_LAYOUT) ? $rusKey : $engKey
     EndIf
 
-    ; Разбираем модификаторы
-    If StringLeft($baseKey, 1) = "+" Then
-        $modifiers &= "{SHIFT down}"
-        $baseKey = StringTrimLeft($baseKey, 1)
-    EndIf
-    If StringLeft($baseKey, 1) = "^" Then
-        $modifiers &= "{CTRL down}"
-        $baseKey = StringTrimLeft($baseKey, 1)
-    EndIf
-    If StringLeft($baseKey, 1) = "!" Then
-        $modifiers &= "{ALT down}"
-        $baseKey = StringTrimLeft($baseKey, 1)
-    EndIf
-
-    ; Фильтр для предотвращения Alt+F4
-    If $modifiers & "{ALT down}" And $baseKey = "{F4}" Then
-        ConsoleWrite("Alt+F4 sending is prevented" & @CRLF) ;Предотвращена отправка Alt+F4
-        Return
-    EndIf
-
-    ; Отправляем модификаторы, клавишу, отпускаем
-    If $modifiers <> "" Then
-        ControlSend($hWnd, "", "", $modifiers, 1)
-		Sleep(10) ; Небольшая задержка для обработки
-    EndIf
-    ControlSend($hWnd, "", "", $baseKey, 1)
+	;ToolTip($baseKey, 10,0)
+    ControlSend($hWnd, "", "", $baseKey, 0)
 	Sleep(10) ; Небольшая задержка для обработки
-    If $modifiers <> "" Then
-        ControlSend($hWnd, "", "", StringReplace($modifiers, "down", "up"), 1)
-		Sleep(10) ; Небольшая задержка для обработки
+EndFunc
+
+
+; Нажать кнопку мыши в указанном окне
+Func MouseDownInWindow($hWnd, $button = "left", $x = -1, $y = -1)
+    Local $msg = 0
+    Switch $button
+        Case "left"
+            $msg = 0x0201 ; WM_LBUTTONDOWN
+        Case "right"
+            $msg = 0x0204 ; WM_RBUTTONDOWN
+        Case "middle"
+            $msg = 0x0207 ; WM_MBUTTONDOWN
+    EndSwitch
+
+    If $x >= 0 And $y >= 0 Then
+        ; Преобразуем координаты в lParam
+        Local $lParam = BitOR($y * 0x10000, BitAND($x, 0xFFFF))
+        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", $lParam)
+    Else
+        ; Без координат - отправляем сообщение без позиции
+        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
     EndIf
 EndFunc
 
+; Отпустить кнопку мыши в указанном окне
+Func MouseUpInWindow($hWnd, $button = "left", $x = -1, $y = -1)
+    Local $msg = 0
+    Switch $button
+        Case "left"
+            $msg = 0x0202 ; WM_LBUTTONUP
+        Case "right"
+            $msg = 0x0205 ; WM_RBUTTONUP
+        Case "middle"
+            $msg = 0x0208 ; WM_MBUTTONUP
+    EndSwitch
+
+    If $x >= 0 And $y >= 0 Then
+        ; Преобразуем координаты в lParam
+        Local $lParam = BitOR($y * 0x10000, BitAND($x, 0xFFFF))
+        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", $lParam)
+    Else
+        ; Без координат - отправляем сообщение без позиции
+        DllCall("user32.dll", "bool", "PostMessage", "hwnd", $hWnd, "int", $msg, "wparam", 0, "lparam", 0)
+    EndIf
+EndFunc
+
+; Клик в указанном окне
+Func MouseClickInWindow($hWnd, $button = "left", $x = -1, $y = -1, $clicks = 1)
+    For $i = 1 To $clicks
+        MouseDownInWindow($hWnd, $button, $x, $y)
+        Sleep(10)
+        MouseUpInWindow($hWnd, $button, $x, $y)
+        Sleep(10)
+    Next
+EndFunc
 
 ; Обработка AoE-спелла (клик в центре экрана)
 Func HandleAoESpell()
     Local $isRButtonDown = _IsPressed("02") ; Правая кнопка мыши
 
-	; Не используется управление камерой и нажат модификатор
-	if Not $isRButtonDown And Not AreModifiersReleased() Then
-		; Ситуация с контролируемой позицией спела
-		; Например AoE по Ctrl у мага в указанную облать
-		; Тогда просто кликаем мышкой по текущим координатам и выходим
-		ControlSend($hWnd, "", "", "{LButton down}", 1)
-        Sleep(10) ; Небольшая задержка для обработки
-		ControlSend($hWnd, "", "", "{LButton up}", 1)
-		Sleep(10) ; Небольшая задержка для обработки
-		Return
-	EndIf
-
-	; Сохраняем текущую позицию курсора
+    ; Сохраняем текущую позицию курсора
     Local $mousePos = MouseGetPos()
     If @error Then ; Не удалось получить позицию курсора
         ConsoleWrite("Couldn't get cursor position" & @CRLF)
         Return
     EndIf
 
-	; Проверяем, удерживается ли правая кнопка мыши
+    ; Не используется управление камерой и нажат модификатор
+    ;~ If WinActive($hWnd) And Not $isRButtonDown Then
+    ;~     ; Ситуация с контролируемой позицией спела
+    ;~     ; Например AoE по Ctrl у мага в указанную область
+    ;~     ; Тогда просто кликаем мышкой по текущим координатам и выходим
+    ;~     Local $winPos = WinGetPos($hWnd)
+    ;~     If Not @error Then
+    ;~         ; Преобразуем абсолютные координаты в относительные
+    ;~         Local $relX = $mousePos[0] - $winPos[0]
+    ;~         Local $relY = $mousePos[1] - $winPos[1]
+    ;~         MouseClickInWindow($hWnd, "left", $relX, $relY)
+    ;~     EndIf
+    ;~     Sleep(10)
+    ;~     Return
+    ;~ EndIf
+
+    ; Проверяем, удерживается ли правая кнопка мыши
     If $isRButtonDown Then
-        ControlSend($hWnd, "", "", "{RButton up}", 1)
-        Sleep(10) ; Небольшая задержка для обработки
+        MouseUpInWindow($hWnd, "right")
+        Sleep(10)
     EndIf
 
     ; Получаем размеры окна WoW
@@ -312,26 +330,19 @@ Func HandleAoESpell()
         ConsoleWrite("Couldn't get the window dimensions" & @CRLF)
         Return
     EndIf
-    Local $winX = $winPos[0]
-    Local $winY = $winPos[1]
-    Local $winWidth = $winPos[2]
-    Local $winHeight = $winPos[3]
 
-    ; Вычисляем центр экрана (чуть ниже, 60% высоты)
-    Local $centerX = $winX + $winWidth / 2
-    Local $centerY = $winY + $winHeight * $AOE_Y_OFFSET
+    ; Вычисляем центр экрана (чуть ниже, 60% высоты) - относительные координаты
+    Local $centerX = Int($winPos[2] / 2)
+    Local $centerY = Int($winPos[3] * $AOE_Y_OFFSET)
 
-    ; Перемещаем курсор и кликаем
-    ControlClick($hWnd, "", "", "left", 1, $centerX - $winX, $centerY - $winY)
-    Sleep(10) ; Задержка для обработки клика
-
-    ; Возвращаем курсор в исходную позицию
-    MouseMove($mousePos[0], $mousePos[1], 0)
+    ; Кликаем в центр экрана
+    MouseClickInWindow($hWnd, "left", $centerX, $centerY)
+    Sleep(10)
 
     ; Восстанавливаем правую кнопку, если она была нажата
     If $isRButtonDown Then
-        ControlSend($hWnd, "", "", "{RButton down}", 1)
-		Sleep(10) ; Задержка для обработки клика
+        MouseDownInWindow($hWnd, "right")
+        Sleep(10)
     EndIf
 EndFunc
 
@@ -352,8 +363,6 @@ Func MainLoop()
 		If $num = $AOE_BUTTON Then
 			HandleAoESpell()
 		ElseIf $num >= 1 And $num <= $BUTTON_COUNT And AreModifiersReleased() Then
-			EnableNumLock()
-			ToolTip($keyMap[$num], 10,0)
 			SendKeyWithModifiers($keyMap[$num])
 		EndIf
 
