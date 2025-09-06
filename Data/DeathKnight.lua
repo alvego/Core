@@ -9,11 +9,15 @@ if st.playerClass ~= 'DEATHKNIGHT' then return end
 ns.Chat(st.playerClass, st.playerColor)
 ------------------------------------------------------------------------------------------------------------------
 local GetRuneCooldown = GetRuneCooldown
+local IsUsableItem = IsUsableItem
+local IsUsableSpell = IsUsableSpell
+local IsCurrentSpell = IsCurrentSpell
 local GetRuneType = GetRuneType
 local GetTalentInfo = GetTalentInfo
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local type = type
 local math_max = math.max
+local format = format
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
 ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
@@ -59,7 +63,15 @@ local function canUseGcdSpell(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
 local function canUseCurrentSpell(spell)
-    return not IsCurrentSpell(spell) and canUseSpell(spell)
+    if ns.TimerLess('CurrentSpell', 1) then return false end
+    if IsCurrentSpell(spell) then return false end
+    if not canUseSpell(spell) then return false end
+    ns.TimerStart('CurrentSpell')
+    return true
+end
+------------------------------------------------------------------------------------------------------------------
+local function canUseItem(item)
+    return IsUsableItem(item) and ns.CanUseAction(item)
 end
 ------------------------------------------------------------------------------------------------------------------
 -- Функция для преобразования статуса в текст
@@ -122,6 +134,7 @@ end
 
 local function getBloodAction()
     local action, reason
+
     -- иногда в ротации есть необходимость прерывания своего каста
     action, reason = 'none', 'кастую [%s]'
     if st.playerCasting then return action, format(reason, st.playerCasting) end
@@ -204,9 +217,11 @@ local function getBloodAction()
     action, reason = 'Кровь вампира', 'утолщаемся'
     if (goBloodAbils and needHeal or needDeathPact) and canUseSpell(action) then return action, reason end
 
-
     action, reason = 'Захват рун', 'хилися на 10% хп'
     if (goBloodAbils and needHeal or needDeathPact) and canUseSpell(action) then return action, reason end
+
+    action, reason = 'Особое пойло Нота', 'хилися и восстанавливаем рп'
+    if (goBloodAbils and needHeal or needDeathPact) and canUseItem(action) then return action, reason end
 
     action, reason = 'Воскрешение мертвых', 'призываем гуля'
     if needDeathPact and (runicPower >= 40) and canUseGcdSpell(action) then return action, reason end
@@ -223,9 +238,9 @@ local function getBloodAction()
     if needHeal and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
     -----------------------------------------------
     -- недавно прожали, то не частим
-    if ns.TimerMore('Заморозка разума', 2) and ns.TimerMore('Удушение', 2) and ns.TimerMore('Хватка смерти', 2) then
+    if ns.TimerMore('Заморозка разума', 1) and ns.TimerMore('Удушение', 1) and ns.TimerMore('Хватка смерти', 1) then
         local spell, notinterrupt = ns.UnitNeedKick('target')
-        local needKick = spell and notinterrupt
+        local needKick = spell and not notinterrupt
         action, reason = 'Заморозка разума', 'кик в гкд [%s]' -- 20rp
         if needKick and canUseSpell(action) then return action, format(reason, spell) end
 
@@ -327,6 +342,9 @@ local function getBloodAction()
             return action, reason
         end
     end
+
+    action, reason = 'Особое пойло Нота', 'бурст, восстанавливаем рп'
+    if (needBurst and not needDeathPact) and (runicPower < 60) and canUseItem(action) then return action, reason end
 
     action, reason = 'Танцующее руническое оружие', 'бурст' -- 60rp
     if needBurst and not needDeathPact and canUseGcdSpell(action) then return action, reason end
