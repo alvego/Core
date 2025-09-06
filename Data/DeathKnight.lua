@@ -13,10 +13,19 @@ local GetRuneType = GetRuneType
 local GetTalentInfo = GetTalentInfo
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local type = type
+local math_max = math.max
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
 ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
     lastNumWoundedTargets = 0
+end)
+------------------------------------------------------------------------------------------------------------------
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
+                                                       sourceGUID, sourceName, sourceFlags,
+                                                       destGUID, destName, destFlags, ...)
+    if subEvent:match("_DAMAGE") and destGUID == ns.State.playerGUID then --SWING_DAMAGE
+        ns.TimerStart(subEvent:match("SPELL_") and "SPELL_DAMAGE" or "SWING_DAMAGE")
+    end
 end)
 ------------------------------------------------------------------------------------------------------------------
 local ghoulGuid = nil
@@ -112,29 +121,25 @@ end
 ------------------------------------------------------------------------------------------------------------------
 
 local function getBloodAction()
-    local action
-
-
-    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. st.playerCasting .. ']'
-    end
-
-
+    local action, reason
+    -- иногда в ротации есть необходимость прерывания своего каста
+    action, reason = 'none', 'кастую [%s]'
+    if st.playerCasting then return action, format(reason, st.playerCasting) end
+    -----------------------------------------------
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local tarcmd, tarinfo = ns.TryTarget()
-    if tarcmd then
-        return tarcmd, tarinfo
-    end
-
+    action, reason = ns.TryTarget()
+    if action then return action, reason end
+    -----------------------------------------------
     ns.TimerToggle('hp50less', st.playerHP100 < 50) -- таймер идет пока hp < 50
-
+    -----------------------------------------------
     local runicPower = UnitPower('player')
+    -----------------------------------------------
     -- [Танцующее руническое оружие], как раз должно быть готово
     local dancingRuneWeaponReady = ns.TimerMore('Танцующее руническое оружие', 90) -- 1.5m
     -- нужно бурстить
     local needBurst = st.targetHard and dancingRuneWeaponReady
-    -- hp меньше половины уже 3 секунды
-    local needHeal = ns.TimerStarted('hp50less') and ns.TimerMore('hp50less', 3)
+    -- hp меньше половины уже 2 секунды
+    local needHeal = ns.TimerStarted('hp50less') and ns.TimerMore('hp50less', 2)
     -- [Воскрешение мертвых], как раз должно быть готово
     local raiseDeadReady = ns.TimerMore('Воскрешение мертвых', 180) -- 3m
     --  [Смертельный союз], как раз должно быть готово
@@ -142,310 +147,303 @@ local function getBloodAction()
     local hasGhoul = ns.TimerLess('summonGhoul', 60) -- гуля призвали меньше минуты назад
     local needDeathPact = needHeal and deathPactReady and (raiseDeadReady or hasGhoul)
     local goRunicAbils = not needBurst and not needDeathPact
-
-    action = 'Воскрешение мертвых'
-    if needDeathPact and (runicPower >= 40) and canUseGcdSpell(action) then
-        return action, 'призываем гуля'
-    end
-
-    action = 'Смертельный союз' -- 40rp
-    if hasGhoul and canUseGcdSpell(action) then
-        return action, 'хилимся гулем'
-    end
-
-    local inMelee = ns.IsSpellInRange('Удар чумы')
-
-    action = 'Безудержная ярость'
-    if inMelee and not st.instance and not ns.HasBuff('Перемирие') and canUseSpell(action) then
-        return action, 'pvp бурст'
-    end
-
-    action = 'Варварский ритуал'
-    if inMelee and not st.pvp and canUseSpell(action) then
-        return action, 'pve бурст'
-    end
-
-    action = 'Истерия'
-    if inMelee and st.playerHP100 > 80 and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
-        return action, 'бурст'
-    end
-
-    action = 'Незыблемость льда' -- 20rp
-    if goRunicAbils and inMelee and st.playerHP100 < 80 and canUseSpell(action) then
-        return action, 'деф hp < 80%'
-    end
-
-    action = 'Заморозка разума' -- 20rp
-    if goRunicAbils and ns.TimerMore('Удушение', 1) and ns.UnitNeedKick('target') and canUseSpell(action) then
-        return action, 'кик в гкд'
-    end
-
-    -- тут ротацию ишем, можно использовать что можно прожать в гкд
-    --if st.gcd then return 'none', 'гкд' end
-    -- то что требуется гкд
-
-    action = 'Удушение'
-    if ns.TimerMore('Заморозка разума', 1) and ns.UnitNeedKick('target') and canUseGcdSpell(action) then
-        return action, 'кик'
-    end
-
+    -----------------------------------------------
     local glyphofDisease = true     -- При использовании способности 'Мор' время действия болезней и их вторичных эффектов на цели обновляется.
     local glyphofDeathStrike = true -- Увеличивает урон от способности 'Удар смерти' на 1% за каждые 1 ед. накопленной силы рун (максимум на 25%). Сила рун при этом не расходуется.
     local morbidityTalentCount = select(5, GetTalentInfo(3, 5))
-
+    -----------------------------------------------
     local bloodPlague, bloodPlagueLeft = ns.HasMyDebuff('Кровавая чума')
     local frostFever, frostFeverLeft = ns.HasMyDebuff('Озноб')
-
-
+    -----------------------------------------------
     local bloodRunes = (select(3, GetRuneCooldown(1)) and (GetRuneType(1) == 1) and 1 or 0) +
         (select(3, GetRuneCooldown(2)) and (GetRuneType(2) == 1) and 1 or 0)
     local unholyRunes = (select(3, GetRuneCooldown(3)) and (GetRuneType(3) == 2) and 1 or 0) +
         (select(3, GetRuneCooldown(4)) and (GetRuneType(4) == 2) and 1 or 0)
     local frostRunes = (select(3, GetRuneCooldown(5)) and (GetRuneType(5) == 3) and 1 or 0) +
         (select(3, GetRuneCooldown(6)) and (GetRuneType(6) == 3) and 1 or 0)
-
+    -----------------------------------------------
     local bloodDeathRunes = (select(3, GetRuneCooldown(1)) and (GetRuneType(1) == 4) and 1 or 0) +
         (select(3, GetRuneCooldown(2)) and (GetRuneType(2) == 4) and 1 or 0)
     local unholyDeathRunes = (select(3, GetRuneCooldown(3)) and (GetRuneType(3) == 4) and 1 or 0) +
         (select(3, GetRuneCooldown(4)) and (GetRuneType(4) == 4) and 1 or 0)
     local frostDeathRunes = (select(3, GetRuneCooldown(5)) and (GetRuneType(5) == 4) and 1 or 0) +
         (select(3, GetRuneCooldown(6)) and (GetRuneType(6) == 4) and 1 or 0)
-
+    -----------------------------------------------
     local b1s, _, b1r = GetRuneCooldown(1)
     local b2s, _, b2r = GetRuneCooldown(2)
-
+    -----------------------------------------------
     local ttrb1r = b1r and 0 or 10 - (GetTime() - b1s)
     local ttrb2r = b2r and 0 or 10 - (GetTime() - b2s)
-
+    -----------------------------------------------
     -- если у нас 1 руна есть, то надо чтобы до отката второй было меньше, чем времени до спадания дота
     -- так же до спадания дота должно быть более гкд, чтобы не получилось так, что руна откатится через 500 мс, а дота спадет через 1 - мы зря заюзаем абилки и из-за гкд не успеем обновить
     local timeToBloodRuneReady = math.max(ttrb1r, ttrb2r)
-
+    -----------------------------------------------
     local minDebuffDuration = math.min(frostFeverLeft, bloodPlagueLeft)
-
+    -----------------------------------------------
     -- если у нас нет рун, на кд которых мы опираемся, но есть руны смерти, которых мы не учитываем, то почему бы их не слить...
     local goBloodAbils = bloodRunes == 2 or bloodRunes == 1 and minDebuffDuration > timeToBloodRuneReady + 1.5 or
         not glyphofDisease or minDebuffDuration > 10 or bloodRunes == 0
     -- ситуация - у нас 3 секунды до спадания болезни, руна крови на кд 4 сек и полная руна смерти вместо руны крови
     -- в итоге будет слита руна смерти на касание и мы не сможем заюзать мор
 
+    local hasDiseases = frostFever and bloodPlague
     -- если до отката руны меньше чем до спадания и всё это меньше гкд, то почему бы их не слить, надо дождаться отката руны и заюзать мор
-    local waitPestilence = frostFever and bloodPlague and minDebuffDuration < 1.5 and
+    local waitPestilence = hasDiseases and minDebuffDuration < 1.5 and
         timeToBloodRuneReady < minDebuffDuration and glyphofDisease
 
     local frostPresenceBuff = ns.HasBuff('Власть льда')
-    local immuneToFrost = st.targetImmuneMagic
 
-    if immuneToFrost then
+    if st.targetImmuneMagic then
         frostFever = true
         frostFeverLeft = 10
+        hasDiseases = bloodPlague
     end
+    -----------------------------------------------
 
+    action, reason = 'Кровь вампира', 'утолщаемся'
+    if (goBloodAbils and needHeal or needDeathPact) and canUseSpell(action) then return action, reason end
+
+
+    action, reason = 'Захват рун', 'хилися на 10% хп'
+    if (goBloodAbils and needHeal or needDeathPact) and canUseSpell(action) then return action, reason end
+
+    action, reason = 'Воскрешение мертвых', 'призываем гуля'
+    if needDeathPact and (runicPower >= 40) and canUseGcdSpell(action) then return action, reason end
+
+    action, reason = 'Смертельный союз', 'хилимся гулем' -- 40rp
+    if hasGhoul and canUseGcdSpell(action) then return action, reason end
+
+    local inMelee = ns.IsSpellInRange('Удар чумы')
+
+    action, reason = 'Незыблемость льда', 'физ деф hp < 50%' -- 20rp
+    if needHeal and ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+
+    action, reason = 'Антимагический панцирь', 'маг деф hp < 50%' -- 20rp
+    if needHeal and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    -----------------------------------------------
+    -- недавно прожали, то не частим
+    if ns.TimerMore('Заморозка разума', 2) and ns.TimerMore('Удушение', 2) and ns.TimerMore('Хватка смерти', 2) then
+        local spell, notinterrupt = ns.UnitNeedKick('target')
+        local needKick = spell and notinterrupt
+        action, reason = 'Заморозка разума', 'кик в гкд [%s]' -- 20rp
+        if needKick and canUseSpell(action) then return action, format(reason, spell) end
+
+        action, reason = 'Удушение', 'кик [%s] - цель'
+        if needKick and canUseGcdSpell(action) then return action, format(reason, spell) end
+
+        if frostPresenceBuff or not st.group then
+            action, reason = 'Хватка смерти', 'кик [%s]'
+            if spell and notinterrupt and ns.CanUseAction(action) then return action, format(reason, spell) end
+
+            spell, notinterrupt = ns.UnitNeedKick('mouseover')
+            action, reason = 'Хватка смерти MO', 'кик [%s]'
+            if spell and ns.CanUseAction(action) and ns.IsSpellInRange('Хватка смерти', 'mouseover') then
+                return action,
+                    format(reason, spell)
+            end
+        end
+    end
+    -----------------------------------------------
     if frostPresenceBuff and st.group and not st.pvp then -- только в группе
         -- Пуллтайм ротация
         local isPull = ns.TimerLess('combatLock', 3)      -- Первые 3 секунды боя
         if isPull then
-            action = 'Смерть и разложение'
-            if goBloodAbils and canUseGcdSpell(action) then
-                return action, 'пул'
-            end
+            action, reason = 'Смерть и разложение', 'пул'
+            if goBloodAbils and canUseGcdSpell(action) then return action, reason end
         end
         if ns.State.combatLock then
             -- Проверка агро для маусовер-цели
-            local aSpell, aReason = tryThreat('mouseover')
-            if aSpell then
-                return aSpell, aReason
-            end
+            action, reason = tryThreat('mouseover')
+            if action then return action, reason end
 
             -- Проверка агро для текущей цели
-            aSpell, aReason = tryThreat('target')
-            if aSpell then
-                return aSpell, aReason
-            end
+            action, reason = tryThreat('target')
+            if action then return action, reason end
         end
     end
 
-
     if not inMelee then
-        action = 'Ледяное прикосновение'
-        if frostFeverLeft < 1 and not immuneToFrost and canUseGcdSpell(action) then
-            return action, 'range 1'
-        end
+        action, reason = 'Ледяное прикосновение', 'range 1'
+        if frostFeverLeft < 1 and not st.targetImmuneMagic and canUseGcdSpell(action) then return action, reason end
 
-        action = 'Лик смерти' -- 40rp
+        action, reason = 'Лик смерти', 'range 2' -- 40rp
         if goRunicAbils and runicPower >= (frostPresenceBuff and 80 or 60) and canUseGcdSpell(action) then
-            return action, 'range 2'
+            return action,
+                reason
         end
 
-        action = 'Зимний горн'
-        if canUseSpell(action) then
-            return action, 'range 3'
-        end
-
-        return 'none', 'больше нечем в range'
+        action, reason = 'Зимний горн', 'range 3'
+        if canUseSpell(action) then return action, reason end
+        action, reason = 'none', 'больше нечем в range'
+        return action, reason
     end
 
     local numTargets = st.numTargets
 
-    local numWoundedTargets = math.max(ns.DotedTargetsCount('Кровавая чума'), ns.DotedTargetsCount('Озноб'))
+    local numWoundedTargets = math_max(ns.DotedTargetsCount('Кровавая чума'), ns.DotedTargetsCount('Озноб'))
+    local maxTargets = math_max(numTargets, numWoundedTargets)
 
     if ns.TimerLess('Мор', 2) then lastNumWoundedTargets = numWoundedTargets end
 
     -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
     local targetsForAOE = 3
 
-    action = 'Мор'
-    if glyphofDisease and frostFever and bloodPlague and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and canUseGcdSpell(action) then
-        return action, 'обновляем болезни'
+    action, reason = 'Мор', 'обновляем болезни'
+    if glyphofDisease and hasDiseases and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and canUseGcdSpell(action) then
+        return
+            action, reason
     end
 
-    if waitPestilence then
-        return 'none', 'ждем [Мор]'
-    end
+    action, reason = 'none', 'ждем [Мор]'
+    if waitPestilence then return action, reason end
 
-    if frostFever and bloodPlague and ns.TimerMore('Мор', 2) and
+    if hasDiseases and ns.TimerMore('Мор', 2) and
         (
             (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or
             (numTargets > 1 and frostFeverLeft ~= bloodPlagueLeft)
         ) then
-        action = 'Мор'
+        action, reason = 'Мор', 'довешиваем болячки'
         if canUseGcdSpell(action) then
-            return action, 'довешиваем болячки'
+            return action, reason
         end
-        action = 'Кровоотвод'
+        action, reason = 'Кровоотвод', 'нет рун крови на [Мор]'
         if bloodRunes < 1 and canUseSpell(action) then
-            return action, 'нет рун крови на [Мор]'
+            return action, reason
         end
-        return 'none', 'ждем довес [Мор]'
+        action, reason = 'none', 'ждем довес [Мор]'
+        return action, reason
     end
 
-    action = 'Рунический удар' -- 20rp
-    if goRunicAbils and numTargets < targetsForAOE and canUseCurrentSpell(action) then
-        return action, 'не aoe'
+    if needBurst or (st.ttd > 15) then
+        action, reason = 'Безудержная ярость', 'pvp бурст'
+        if not st.instance and not ns.HasBuff('Перемирие') and canUseSpell(action) then return action, reason end
+
+        action, reason = 'Варварский ритуал', 'pve бурст'
+        if not st.pvp and canUseSpell(action) then return action, reason end
+
+        action, reason = 'Истерия', 'бурст'
+        if st.playerHP100 > 80 and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
+            return action, reason
+        end
     end
 
-    action = 'Пожинание' -- 32rp
-    if goRunicAbils and runicPower > 80 and canUseGcdSpell(action) then
-        return action, 'сливаем runic power'
-    end
+    action, reason = 'Танцующее руническое оружие', 'бурст' -- 60rp
+    if needBurst and not needDeathPact and canUseGcdSpell(action) then return action, reason end
 
-    action = 'Смерть и разложение'
-    if st.ttd > 10 and numTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
-        return action, 'aoe'
-    end
+    action, reason = 'Рунический удар', 'не aoe' -- 20rp
+    if goRunicAbils and numTargets < targetsForAOE and canUseCurrentSpell(action) then return action, reason end
 
-    action = 'Ледяное прикосновение'
-    if frostFeverLeft < 1 and not immuneToFrost and canUseGcdSpell(action) then
-        return action, 'вешаем [Озноб]'
-    end
+    action, reason = 'Пожинание', 'сливаем runic power' -- 32rp
+    if goRunicAbils and runicPower > 80 and canUseGcdSpell(action) then return action, reason end
 
-    action = 'Удар чумы'
-    if bloodPlagueLeft < 1 and canUseGcdSpell(action) then
-        return action, 'вешаем [Кровавая чума]'
-    end
+    action, reason = 'Смерть и разложение', 'aoe'
+    if st.ttd > 10 and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then return action, reason end
 
-    action = 'Кровь вампира'
-    if (goBloodAbils or needDeathPact) and st.playerHP100 < 60 and canUseSpell(action) then
-        return action, 'утолщаемся hp < 60%'
-    end
+    action, reason = 'Ледяное прикосновение', 'вешаем [Озноб]'
+    if frostFeverLeft < 1 and not st.targetImmuneMagic and canUseGcdSpell(action) then return action, reason end
 
-    -- action = 'Захват рун'
-    -- if goBloodAbils and st.playerHP100 < 60 and canUseGcdSpell(action) then
-    --     return action, 'хилимся hp < 60%'
-    -- end
+    action, reason = 'Удар чумы', 'вешаем [Кровавая чума]'
+    if bloodPlagueLeft < 1 and canUseGcdSpell(action) then return action, reason end
 
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
 
-    action = 'Удар смерти'
+    action, reason = 'Удар смерти', 'хилимся, есть болезни'
     if st.playerHP100 < (st.group and 40 or 80) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
-        return action, 'хилимся, есть болезни'
+        return action,
+            reason
     end
 
-    action = 'Танцующее руническое оружие' -- 60rp
-    if needBurst and not needDeathPact and canUseGcdSpell(action) then
-        return action, 'бурст'
+    action, reason = 'Вскипание крови', 'Вскипаем, лужа на кд'
+    if goBloodAbils and hasDiseases and numWoundedTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and canUseGcdSpell(action) then
+        return
+            action, reason
     end
 
-    action = 'Вскипание крови'
-    if goBloodAbils and numTargets >= targetsForAOE and (ns.TimerLess('Смерть и разложение', 30 - morbidityTalentCount * 5 - timeToBloodRuneReady)) and canUseGcdSpell(action) then
-        return action, 'Вскипаем, лужа на кд'
-    end
+    action, reason = 'Рунический удар', 'руник' -- 20rp
+    if goRunicAbils and canUseCurrentSpell(action) then return action, reason end
 
-    action = 'Рунический удар' -- 20rp
-    if goRunicAbils and canUseCurrentSpell(action) then
-        return action, 'руник'
-    end
-
-    action = 'Удар смерти'
+    action, reason = 'Удар смерти', 'дамажим, есть болезни'
     if (unholyRunes + frostRunes) > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
-        return action, 'дамажим, есть болезни'
+        return
+            action, reason
     end
 
-    action = 'Зимний горн'
-    if canUseSpell(action) then
-        return action, 'дуем в дудку'
-    end
+    action, reason = 'Зимний горн', 'дуем в дудку'
+    if canUseSpell(action) then return action, reason end
 
     local goFrostAbils = frostRunes > 0 or frostDeathRunes > 0 or bloodDeathRunes == 0 or not glyphofDisease or b2r or
-        frostFever and bloodPlague and minDebuffDuration > ttrb2r + 1.5 or
+        hasDiseases and minDebuffDuration > ttrb2r + 1.5 or
         minDebuffDuration > 10
 
-    action = 'Ледяное прикосновение'
-    if frostPresenceBuff and goFrostAbils and not immuneToFrost and numTargets < targetsForAOE and canUseGcdSpell(action) then
-        return action, 'агро лед тач'
+    action, reason = 'Ледяное прикосновение', 'агро лед тач'
+    if frostPresenceBuff and goFrostAbils and not st.targetImmuneMagic and numTargets < targetsForAOE and canUseGcdSpell(action) then
+        return
+            action, reason
     end
 
-    action = 'Удар в сердце'
-    if goBloodAbils and (numTargets < targetsForAOE) and canUseGcdSpell(action) then
-        return action, 'не aoe, cливаем руну крови'
-    end
+    action, reason = 'Удар в сердце', 'не aoe, cливаем руну крови'
+    if goBloodAbils and (numTargets < targetsForAOE) and canUseGcdSpell(action) then return action, reason end
 
-    action = 'Пожинание' -- 32rp
+    action, reason = 'Пожинание', 'сливаем runic power' -- 32rp
     if goRunicAbils and runicPower >= (frostPresenceBuff and 80 or 52) and canUseGcdSpell(action) then
-        return action, 'сливаем runic power'
+        return action,
+            reason
     end
 
-    action = 'Кровоотвод'
-    if st.gcd and bloodRunes < 1 and canUseSpell(action) then
-        return action, 'нет рун крови'
-    end
-    action = 'Усиление рунического оружия'
-    if not st.gcd and runicPower < 52 and (bloodRunes + unholyRunes + frostRunes + bloodDeathRunes + unholyDeathRunes + frostDeathRunes == 0) and canUseSpell(action) then
-        return action, 'нет рун'
+    action, reason = 'Кровоотвод', 'нет рун крови'
+    if not st.gcd and bloodRunes < 1 and canUseSpell(action) then return action, reason end
+
+    action, reason = 'Усиление рунического оружия', 'нет рун'
+    if not st.gcd and runicPower < 20 and (bloodRunes + unholyRunes + frostRunes + bloodDeathRunes + unholyDeathRunes + frostDeathRunes == 0) and canUseSpell(action) then
+        return
+            action, reason
     end
 
-    if st.gcd then return 'none', 'гкд' end
-    return 'none', st.gcd and 'гкд' or 'нечем бить'
+    -- тут ротацию ишем, можно использовать что можно прожать в гкд
+    action, reason = 'none', 'гкд'
+    if st.gcd then return action, reason end
+    -- то что требует отсутствия гкд
+    action, reason = 'none', 'пока всё'
+    return action, reason
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getFrostAction()
-    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. st.playerCasting .. ']'
-    end
+    local action, reason
+    -- иногда в ротации есть необходимость прерывания своего каста
+    action, reason = 'none', 'кастую [%s]'
+    if st.playerCasting then return action, format(reason, st.playerCasting) end
+
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local tarcmd, tarinfo = ns.TryTarget()
-    if tarcmd then
-        return tarcmd, tarinfo
+    action, reason = ns.TryTarget()
+    if action then
+        return action, reason
     end
     -- тут ротацию ишем, можно использовать что можно прожать в гкд
-    if st.gcd then return 'none', 'гкд' end
-    -- то что требуется гкд
-    return 'none', 'пока всё'
+    action, reason = 'none', 'гкд'
+    if st.gcd then return action, reason end
+    -- то что требует отсутствия гкд
+    action, reason = 'none', 'пока всё'
+    return action, reason
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getUncholyAction()
-    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. st.playerCasting .. ']'
-    end
+    local action, reason
+    -- иногда в ротации есть необходимость прерывания своего каста
+    action, reason = 'none', 'кастую [%s]'
+    if st.playerCasting then return action, format(reason, st.playerCasting) end
+
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local tarcmd, tarinfo = ns.TryTarget()
-    if tarcmd then
-        return tarcmd, tarinfo
+    action, reason = ns.TryTarget()
+    if action then
+        return action, reason
     end
     -- тут ротацию ишем, можно использовать что можно прожать в гкд
-    if st.gcd then return 'none', 'гкд' end
-    -- то что требуется гкд
-    return 'none', 'пока всё'
+    action, reason = 'none', 'гкд'
+    if st.gcd then return action, reason end
+    -- то что требует отсутствия гкд
+    action, reason = 'none', 'пока всё'
+    return action, reason
 end
 ------------------------------------------------------------------------------------------------------------------
 local rotations = { getBloodAction, getFrostAction, getUncholyAction }
