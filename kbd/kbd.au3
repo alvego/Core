@@ -317,7 +317,7 @@ Func HandleAoESpell()
     EndIf
 
 	; Перемещаем курсор в центр экрана
-    MouseMove($centerX, $centerY, 5)
+    MouseMove($centerX, $centerY, 1)
     Sleep(10) ; Задержка для обработки перемещения
 
     ; Кликаем в центр экрана
@@ -325,7 +325,7 @@ Func HandleAoESpell()
     Sleep(10)
 
 	; Возвращаем курсор в исходную позицию
-    MouseMove($mousePos[0], $mousePos[1], 5)
+    MouseMove($mousePos[0], $mousePos[1], 1)
     Sleep(10) ; Задержка для обработки перемещения
 
     ; Восстанавливаем правую кнопку, если она была нажата
