@@ -15,6 +15,7 @@ Opt("SendKeyDownDelay", 50) ; изменяет продолжительност�
 
 ; Константы
 Global Const $WINDOW_TITLE = "World of Warcraft"
+Global Const $VK_NUMLOCK = 0x90
 Global Const $ENGLISH_LAYOUT = 0x4090409
 Global Const $RUSSIAN_LAYOUT = 0x4190419
 Global Const $BUTTON_COUNT = 120
@@ -46,19 +47,19 @@ Func SetupKeyMap()
     $keyMap[11] = "-"
     $keyMap[12] = "="
 
-    ; Панель 2 (13-24): Ctrl + 1..9, Ctrl + 0, Ctrl + -, Ctrl + =
-    $keyMap[13] = "^1"
-    $keyMap[14] = "^2"
-    $keyMap[15] = "^3"
-    $keyMap[16] = "^4"
-    $keyMap[17] = "^5"
-    $keyMap[18] = "^6"
-    $keyMap[19] = "^7"
-    $keyMap[20] = "^8"
-    $keyMap[21] = "^9"
-    $keyMap[22] = "^0"
-    $keyMap[23] = "^-"
-    $keyMap[24] = "^="
+    ; Панель 2 (13-24): Shift + F1..F12
+    $keyMap[13] = "+{F1}"
+    $keyMap[14] = "+{F2}"
+    $keyMap[15] = "+{F3}"
+    $keyMap[16] = "+{F4}"
+    $keyMap[17] = "+{F5}"
+    $keyMap[18] = "+{F6}"
+    $keyMap[19] = "+{F7}"
+    $keyMap[20] = "+{F8}"
+    $keyMap[21] = "+{F9}"
+    $keyMap[22] = "+{F10}"
+    $keyMap[23] = "+{F11}"
+    $keyMap[24] = "+{F12}"
 
     ; Панель 3 (25-36): F1..F12
     $keyMap[25] = "{F1}"
@@ -102,33 +103,33 @@ Func SetupKeyMap()
     $keyMap[59] = "^t|^е"
     $keyMap[60] = "^f|^а"
 
-    ; Панель 6 (61-72): Ctrl+Shift + F1..F12
-    $keyMap[61] = "^+{F1}"
-    $keyMap[62] = "^+{F2}"
-    $keyMap[63] = "^+{F3}"
-    $keyMap[64] = "^+{F4}"
-    $keyMap[65] = "^+{F5}"
-    $keyMap[66] = "^+{F6}"
-    $keyMap[67] = "^+{F7}"
-    $keyMap[68] = "^+{F8}"
-    $keyMap[69] = "^+{F9}"
-    $keyMap[70] = "^+{F10}"
-    $keyMap[71] = "^+{F11}"
-    $keyMap[72] = "^+{F12}"
+    ; Панель 6 (61-72):  num0..num9, num+, num-
+    $keyMap[61] = "{NUMPAD0}"
+    $keyMap[62] = "{NUMPAD1}"
+    $keyMap[63] = "{NUMPAD2}"
+    $keyMap[64] = "{NUMPAD3}"
+    $keyMap[65] = "{NUMPAD4}"
+    $keyMap[66] = "{NUMPAD5}"
+    $keyMap[67] = "{NUMPAD6}"
+    $keyMap[68] = "{NUMPAD7}"
+    $keyMap[69] = "{NUMPAD8}"
+    $keyMap[70] = "{NUMPAD9}"
+    $keyMap[71] = "{NUMPADSUB}"
+    $keyMap[72] = "{NUMPADADD}"
 
-    ; Панель 7 (73-84): Alt + 1..9, Alt + 0, Alt + -, Alt + =
-    $keyMap[73] = "!1"
-    $keyMap[74] = "!2"
-    $keyMap[75] = "!3"
-    $keyMap[76] = "!4"
-    $keyMap[77] = "!5"
-    $keyMap[78] = "!6"
-    $keyMap[79] = "!7"
-    $keyMap[80] = "!8"
-    $keyMap[81] = "!9"
-    $keyMap[82] = "!0"
-    $keyMap[83] = "!-"
-    $keyMap[84] = "!="
+    ; Панель 7 (73-84): Ctrl + 1..9, Ctrl + 0, Ctrl + -, Ctrl + =
+    $keyMap[73] = "^1"
+    $keyMap[74] = "^2"
+    $keyMap[75] = "^3"
+    $keyMap[76] = "^4"
+    $keyMap[77] = "^5"
+    $keyMap[78] = "^6"
+    $keyMap[79] = "^7"
+    $keyMap[80] = "^8"
+    $keyMap[81] = "^9"
+    $keyMap[82] = "^0"
+    $keyMap[83] = "^-"
+    $keyMap[84] = "^="
 
     ; Панель 8 (85-96): Shift + 1..9, Shift + 0, Shift + -, Shift + =
     $keyMap[85] = "+1"
@@ -158,19 +159,19 @@ Func SetupKeyMap()
     $keyMap[107] ="^+-"
     $keyMap[108] ="^+="
 
-    ; Панель 10 (109-120): Ctrl + Alt + 1..9, Ctrl + Alt + 0, Ctrl + Alt + -, Ctrl + Alt + =
-    $keyMap[109] = "^!1"
-    $keyMap[110] = "^!2"
-    $keyMap[111] = "^!3"
-    $keyMap[112] = "^!4"
-    $keyMap[113] = "^!5"
-    $keyMap[114] = "^!6"
-    $keyMap[115] = "^!7"
-    $keyMap[116] = "^!8"
-    $keyMap[117] = "^!9"
-    $keyMap[118] = "^!0"
-    $keyMap[119] = "^!-"
-    $keyMap[120] = "^!="
+    ; Панель 10 (109-120): Ctrl + Shift + F1..F12
+    $keyMap[109] = "^+{F1}"
+    $keyMap[110] = "^+{F2}"
+    $keyMap[111] = "^+{F3}"
+    $keyMap[112] = "^+{F4}"
+    $keyMap[113] = "^+{F5}"
+    $keyMap[114] = "^+{F6}"
+    $keyMap[115] = "^+{F7}"
+    $keyMap[116] = "^+{F8}"
+    $keyMap[117] = "^+{F9}"
+    $keyMap[118] = "^+{F10}"
+    $keyMap[119] = "^+{F11}"
+    $keyMap[120] = "^+{F12}"
 EndFunc
 
 ; Проверка наличия окна WoW
@@ -181,6 +182,21 @@ Func CheckWindow()
 		Return False
     EndIf
     Return True
+EndFunc
+
+; Проверка состояния NumLock
+Func IsNumLockOn()
+    Local $aRet = DllCall("user32.dll", "int", "GetKeyState", "int", $VK_NUMLOCK)
+    Return BitAND($aRet[0], 0x01) = 0x01
+EndFunc
+
+; Включение NumLock
+Func EnableNumLock()
+    If Not IsNumLockOn() Then
+        DllCall("user32.dll", "int", "keybd_event", "int", $VK_NUMLOCK, "int", 0x45, "int", 0, "int", 0)
+        DllCall("user32.dll", "int", "keybd_event", "int", $VK_NUMLOCK, "int", 0x45, "int", 0x02, "int", 0)
+        ConsoleWrite("NumLock is enabled" & @CRLF) ; NumLock включён
+    EndIf
 EndFunc
 
 ; Получение текущей раскладки клавиатуры
@@ -229,6 +245,10 @@ Func SendKeyWithModifiers($key)
         Local $rusKey = $parts[2]
         Local $layout = GetCurrentLayout()
         $baseKey = ($layout = $RUSSIAN_LAYOUT) ? $rusKey : $engKey
+    EndIf
+
+    if StringInStr($baseKey, "{NUMPAD") Then
+        EnableNumLock()
     EndIf
 
 	;ToolTip($baseKey, 10,0)

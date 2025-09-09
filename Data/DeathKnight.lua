@@ -152,8 +152,9 @@ local function getBloodAction()
     action, reason = ns.TryTarget()
     if action then return action, reason end
     -----------------------------------------------
-    ns.TimerToggle('hp50less', st.playerHP100 < 50) -- таймер идет пока hp < 50
-    ns.TimerToggle('ttd15more', st.ttd > 15)        -- таймер идет пока ttd > 15
+    ns.TimerToggle('needHeal', st.playerHP100 < 65) -- таймер идет пока hp < 65
+    ns.TimerToggle('needMoreDamage', st.ttd > 20)   -- таймер идет пока ttd > 20
+    ns.TimerToggle('still', st.still)
     -----------------------------------------------
     local runicPower = UnitPower('player')
     -----------------------------------------------
@@ -162,8 +163,9 @@ local function getBloodAction()
     -- нужно бурстить
     local needBurst = st.targetHard and dancingRuneWeaponReady
     -- hp меньше половины уже 2 секунды
-    local needHeal = ns.TimerStarted('hp50less') and ns.TimerMore('hp50less', 2)
-    local needMoreDamage = ns.TimerStarted('ttd15more') and ns.TimerMore('ttd15more', 2)
+    local needHeal = ns.TimerStarted('needHeal') and ns.TimerMore('needHeal', 2)
+    local needMoreDamage = ns.TimerStarted('needMoreDamage') and ns.TimerMore('needMoreDamage', 2)
+    local still = ns.TimerStarted('still') and ns.TimerMore('still', 2)
     -- [Воскрешение мертвых], как раз должно быть готово
     local raiseDeadReady = ns.TimerMore('Воскрешение мертвых', 180) -- 3m
     --  [Смертельный союз], как раз должно быть готово
@@ -351,7 +353,7 @@ local function getBloodAction()
     end
 
     action, reason = 'Смерть и разложение', 'aoe'
-    if needMoreDamage and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
+    if still and needMoreDamage and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
         return action,
             reason
     end
