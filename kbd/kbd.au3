@@ -10,8 +10,8 @@
 Opt("PixelCoordMode", 1)
 Opt("MouseCoordMode", 1)
 
-Opt("SendKeyDelay", 150) ; изменяет продолжительность паузы между эмулированными нажатиями клавиш.
-Opt("SendKeyDownDelay", 100) ; изменяет продолжительность нажатого состояния клавиши, перед тем как отпустить.
+Opt("SendKeyDelay", 75) ; изменяет продолжительность паузы между эмулированными нажатиями клавиш.
+Opt("SendKeyDownDelay", 50) ; изменяет продолжительность нажатого состояния клавиши, перед тем как отпустить.
 
 ; Константы
 Global Const $WINDOW_TITLE = "World of Warcraft"
@@ -22,7 +22,7 @@ Global Const $FRAME_X = 1
 Global Const $FRAME_Y = 1
 Global Const $SLEEP_MIN = 50
 Global Const $SLEEP_MAX = 1000
-Global Const $SLEEP_RANDOM = 150
+Global Const $SLEEP_RANDOM = 100
 Global Const $AOE_BUTTON = 1000 ; Номер кнопки для AoE-спеллов
 Global Const $AOE_Y_OFFSET = 0.5 ; Смещение клика на % высоты экрана
 

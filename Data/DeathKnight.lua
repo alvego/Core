@@ -146,7 +146,7 @@ local function getBloodAction()
     if st.playerCasting then return action, format(reason, st.playerCasting) end
     -----------------------------------------------
     action, reason = 'Захват рун', 'хилися на 10% хп (нет цели)'
-    if st.invalidTarget and st.playerHP100 < 90 and canUseSpell(action) then return action, reason end
+    if st.invalidTarget and st.playerHP100 < 80 and canUseSpell(action) then return action, reason end
 
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     action, reason = ns.TryTarget()
@@ -240,7 +240,7 @@ local function getBloodAction()
     local inMelee = ns.IsSpellInRange('Удар чумы')
 
     action, reason = 'Захват рун', 'хилися на 10% хп'
-    if goBloodAbils and st.playerHP100 < 75 and canUseSpell(action) then return action, reason end
+    if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then return action, reason end
 
     action, reason = 'Незыблемость льда', 'физ деф hp < 75%' -- 20rp
     if st.playerHP100 < 75 and ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
@@ -249,24 +249,33 @@ local function getBloodAction()
     if st.playerHP100 < 75 and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
     -----------------------------------------------
     -- недавно прожали, то не частим
-    if ns.TimerMore('Заморозка разума', 1) and ns.TimerMore('Удушение', 1) and ns.TimerMore('Хватка смерти', 1) then
+    if ns.TimerMore('KICK', 0.5) then
         local spell, notinterrupt = ns.UnitNeedKick('target')
         local needKick = spell and not notinterrupt
         action, reason = 'Заморозка разума', 'кик в гкд [%s]' -- 20rp
-        if needKick and canUseSpell(action) then return action, format(reason, spell) end
+        if needKick and canUseSpell(action) then
+            ns.TimerStart('KICK')
+            return action, format(reason, spell)
+        end
 
         action, reason = 'Удушение', 'кик [%s] - цель'
-        if needKick and canUseGcdSpell(action) then return action, format(reason, spell) end
+        if needKick and canUseGcdSpell(action) then
+            ns.TimerStart('KICK')
+            return action, format(reason, spell)
+        end
 
         if frostPresenceBuff or not st.group then
             action, reason = 'Хватка смерти', 'кик [%s]'
-            if spell and notinterrupt and ns.CanUseAction(action) then return action, format(reason, spell) end
+            if spell and notinterrupt and ns.CanUseAction(action) then
+                ns.TimerStart('KICK')
+                return action, format(reason, spell)
+            end
 
             spell, notinterrupt = ns.UnitNeedKick('mouseover')
             action, reason = 'Хватка смерти MO', 'кик [%s]'
             if spell and ns.CanUseAction(action) and ns.IsSpellInRange('Хватка смерти', 'mouseover') then
-                return action,
-                    format(reason, spell)
+                ns.TimerStart('KICK')
+                return action, format(reason, spell)
             end
         end
     end
@@ -366,8 +375,8 @@ local function getBloodAction()
     action, reason = 'Танцующее руническое оружие', 'бурст' -- 60rp
     if needBurst and not needDeathPact and canUseGcdSpell(action) then return action, reason end
 
-    action, reason = 'Рунический удар', 'не aoe' -- 20rp
-    if goRunicAbils and numTargets < targetsForAOE and canUseCurrentSpell(action) then return action, reason end
+    action, reason = 'Рунический удар', 'не aoe' -- 20rp goRunicAbils and
+    if numTargets < targetsForAOE and canUseCurrentSpell(action) then return action, reason end
 
     action, reason = 'Пожинание', 'сливаем runic power' -- 32rp
     if goRunicAbils and runicPower > 80 and canUseGcdSpell(action) then return action, reason end
@@ -393,8 +402,8 @@ local function getBloodAction()
             action, reason
     end
 
-    action, reason = 'Рунический удар', 'руник' -- 20rp
-    if goRunicAbils and canUseCurrentSpell(action) then return action, reason end
+    action, reason = 'Рунический удар', 'руник' -- 20rp goRunicAbils and
+    if canUseCurrentSpell(action) then return action, reason end
 
     action, reason = 'Удар смерти', 'дамажим, есть болезни'
     if (unholyRunes + frostRunes) > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then

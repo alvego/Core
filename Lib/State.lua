@@ -69,7 +69,7 @@ function ns.UpdateState()
     end
 
     ns.State.autoattack = IsCurrentSpell('Автоматическая атака')
-    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('combatTarget', 2)
+    ns.State.combatMode = ns.State.combatLock or ns.TimerLess('combatTarget', 0.5)
 
     ns.State.speed = GetUnitSpeed('player')
     ns.State.falling = IsFalling()
