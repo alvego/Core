@@ -3,6 +3,7 @@
 ------------------------------------------------------------------------------------------------------------------
 local name, ns = ... -- namespace
 ------------------------------------------------------------------------------------------------------------------
+local _G = _G
 local ActionHasRange = ActionHasRange
 local format = format
 local wipe = wipe
@@ -94,6 +95,12 @@ function ns.GetSlot(action)
     if action == 'mouse1' then
         return 1000 -- left mouse click
     end
+    if action == 'mouse1_center' then
+        return 1001 -- left mouse click in center screen
+    end
+    if action == 'skip_afk' then
+        return 2000 -- Skip AFK state
+    end
     local slot = actions[action]
     if not slot then
         ns.Error('Не могу найти на панели [' .. action .. ']');
@@ -116,6 +123,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 local lastSlot = 0
+local lastAction = nil
 function ns.UseAction(action, info)
     if action == nil then
         error('action can be string')
@@ -142,8 +150,13 @@ function ns.UseAction(action, info)
         if slot ~= 0 and slot <= 120 then -- 12 * 10
             local icon = GetActionTexture(slot)
             ns.ActionLog(icon, action, info, '00BFFF')
+            lastAction = action
         end
     end
+end
+
+function ns.GetLastAction()
+    return lastAction
 end
 
 ------------------------------------------------------------------------------------------------------------------
@@ -163,6 +176,7 @@ function ns.ButtonIsPressed()
     for i = 1, 120 do -- 12 x 10
         local btn = _G['BT4Button' .. i]
         if btn and btn:GetButtonState() == 'PUSHED' and lastSlot ~= i then
+            lastAction = ns.GetSlotName(i)
             return i
         end
     end

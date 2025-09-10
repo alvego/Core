@@ -52,7 +52,7 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
     if sourceGUID ~= st.playerGUID then return end
 
     local spellName = select(2, ...)
-    if subEvent == 'SPELL_SUMMON' and destName == 'Восставший союзник' and spellName == 'Воскрешение мертвых' then
+    if subEvent == 'SPELL_SUMMON' and spellName == 'Воскрешение мертвых' then --destName == 'Восставший союзник' and
         ns.TimerStart('summonGhoul') -- призвали гуля
         ns.Log('Гуль призван', destGUID)
         ghoulGuid = destGUID
@@ -137,6 +137,8 @@ local function tryThreat(unit)
     )
 end
 ------------------------------------------------------------------------------------------------------------------
+ns.AddAutoTargetSpell('Смерть и разложение', true)
+------------------------------------------------------------------------------------------------------------------
 
 local function getBloodAction()
     local action, reason
@@ -153,19 +155,20 @@ local function getBloodAction()
     if action then return action, reason end
     -----------------------------------------------
     ns.TimerToggle('needHeal', st.playerHP100 < 65) -- таймер идет пока hp < 65
-    ns.TimerToggle('needMoreDamage', st.ttd > 20)   -- таймер идет пока ttd > 20
+    ns.TimerToggle('needMoreDamage', st.ttd > 10)   -- таймер идет пока ttd > 20
     ns.TimerToggle('still', st.still)
     -----------------------------------------------
     local runicPower = UnitPower('player')
     -----------------------------------------------
     -- [Танцующее руническое оружие], как раз должно быть готово
     local dancingRuneWeaponReady = ns.TimerMore('Танцующее руническое оружие', 90) -- 1.5m
-    -- нужно бурстить
-    local needBurst = st.targetHard and dancingRuneWeaponReady
+
     -- hp меньше половины уже 2 секунды
-    local needHeal = ns.TimerStarted('needHeal') and ns.TimerMore('needHeal', 2)
-    local needMoreDamage = ns.TimerStarted('needMoreDamage') and ns.TimerMore('needMoreDamage', 2)
-    local still = ns.TimerStarted('still') and ns.TimerMore('still', 2)
+    local needHeal = ns.TimerStarted('needHeal') and ns.TimerMore('needHeal', 1.5)
+    local needMoreDamage = ns.TimerStarted('needMoreDamage') and ns.TimerMore('needMoreDamage', 1)
+    local still = ns.TimerStarted('still') and ns.TimerMore('still', 1)
+    -- нужно бурстить
+    local needBurst = st.targetHard and needMoreDamage and dancingRuneWeaponReady
     -- [Воскрешение мертвых], как раз должно быть готово
     local raiseDeadReady = ns.TimerMore('Воскрешение мертвых', 180) -- 3m
     --  [Смертельный союз], как раз должно быть готово
@@ -323,8 +326,6 @@ local function getBloodAction()
 
     if ns.TimerLess('Мор', 2) then lastNumWoundedTargets = numWoundedTargets end
 
-    -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
-    local targetsForAOE = 3
 
     action, reason = 'Мор', 'обновляем болезни'
     if glyphofDisease and hasDiseases and (frostFeverLeft < 3 or bloodPlagueLeft < 3) and canUseGcdSpell(action) then
@@ -351,6 +352,9 @@ local function getBloodAction()
         action, reason = 'none', 'ждем довес [Мор]'
         return action, reason
     end
+
+    -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
+    local targetsForAOE = 3
 
     action, reason = 'Смерть и разложение', 'aoe'
     if still and needMoreDamage and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then

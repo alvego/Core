@@ -93,6 +93,7 @@ local function onEvent(event, ...)
     if source ~= 'player' then return end
     ns.TimerStart(spellName)
     lastUsedSpell = spellName
+
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
         if ns.showSpellSuccess then
             ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
@@ -138,5 +139,15 @@ end
 --     print('Удар грома был и был менее 3 секунд назад')
 -- end
 
+local autoTargetSpell = {}
+function ns.AddAutoTargetSpell(spellName, inCenter)
+    autoTargetSpell[spellName] = inCenter
+end
+
+function ns.LastSpellAutoTarget()
+    local lastSpellSent = ns.GetLastAction()
+    if not lastSpellSent then return nil end
+    return autoTargetSpell[lastSpellSent]
+end
 
 ------------------------------------------------------------------------------------------------------------------

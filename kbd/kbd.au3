@@ -24,7 +24,9 @@ Global Const $FRAME_Y = 1
 Global Const $SLEEP_MIN = 50
 Global Const $SLEEP_MAX = 1000
 Global Const $SLEEP_RANDOM = 100
-Global Const $AOE_BUTTON = 1000 ; Номер кнопки для AoE-спеллов
+Global Const $AOE_BUTTON = 1000 ; Номер кнопки для AoE-спеллов (Просто клик)
+Global Const $AOE_BUTTON_CENTER = 1001 ; Номер кнопки для AoE-спеллов (Клик в центре экрана)
+Global Const $AFK_BUTTON = 2000 ; Сброс AFK
 Global Const $AOE_Y_OFFSET = 0.5 ; Смещение клика на % высоты экрана
 
 ; Глобальные переменные
@@ -297,20 +299,47 @@ Func MouseClickInWindow($hWnd, $button = "left")
 	Sleep(10)
 EndFunc
 
-; Обработка AoE-спелла (клик в центре экрана)
-Func HandleAoESpell()
+; Перемещение камеры в стороны для сброса AFK статуса
+Func SkipAFK()
     Local $isRButtonDown = _IsPressed("02") ; Правая кнопка мыши
 
-	Local $isMButtonDown = _IsPressed("04") ; Средняя кнопка мыши
-	; Не используется управление камерой и нажат модификатор
-    If WinActive($hWnd) And $isMButtonDown And Not $isRButtonDown Then
-        ; Ситуация с контролируемой позицией спела
-        ; Например AoE по Ctrl у мага в указанную область
-        ; Тогда просто кликаем мышкой по текущим координатам и выходим
-		MouseClickInWindow($hWnd, "left")
-        Sleep(10)
+    ; Сохраняем текущую позицию курсора
+    Local $mousePos = MouseGetPos()
+    If @error Then ; Не удалось получить позицию курсора
+        ConsoleWrite("Couldn't get cursor position" & @CRLF)
         Return
     EndIf
+
+    ; Если не включено утравление камерой, включаем
+    If Not $isRButtonDown Then
+        MouseDownInWindow($hWnd, "right")
+        Sleep(10)
+    EndIf
+
+    Local $delta = 100
+
+    ; Перемещаем камеру влево
+    MouseMove($mousePos[0] - $delta, $mousePos[1], 10)
+    Sleep(10) ; Задержка для обработки перемещения
+
+    ; Перемещаем камеру вправо
+    MouseMove($mousePos[0] + $delta, $mousePos[1], 10)
+    Sleep(10) ; Задержка для обработки перемещения
+
+    ; Перемещаем камеру на исходную позицию
+    MouseMove($mousePos[0], $mousePos[1], 10)
+    Sleep(10) ; Задержка для обработки перемещения
+
+    ; Если было не включено утравление камерой, выключаем как было
+    If Not $isRButtonDown Then
+        MouseUpInWindow($hWnd, "right")
+        Sleep(10)
+    EndIf
+EndFunc
+
+; Обработка AoE-спелла (клик в центре экрана)
+Func HandleAoESpell($inCenter = False)
+    Local $isRButtonDown = _IsPressed("02") ; Правая кнопка мыши
 
     ; Сохраняем текущую позицию курсора
     Local $mousePos = MouseGetPos()
@@ -336,17 +365,21 @@ Func HandleAoESpell()
         Sleep(10)
     EndIf
 
-	; Перемещаем курсор в центр экрана
-    MouseMove($centerX, $centerY, 1)
-    Sleep(10) ; Задержка для обработки перемещения
+    If $inCenter Then
+        ; Перемещаем курсор в центр экрана
+        MouseMove($centerX, $centerY, 1)
+        Sleep(10) ; Задержка для обработки перемещения
+    EndIf
 
     ; Кликаем в центр экрана
     MouseClickInWindow($hWnd, "left")
     Sleep(10)
 
-	; Возвращаем курсор в исходную позицию
-    MouseMove($mousePos[0], $mousePos[1], 1)
-    Sleep(10) ; Задержка для обработки перемещения
+    If $inCenter Then
+        ; Возвращаем курсор в исходную позицию
+        MouseMove($mousePos[0], $mousePos[1], 1)
+        Sleep(10) ; Задержка для обработки перемещения
+    EndIf
 
     ; Восстанавливаем правую кнопку, если она была нажата
     If $isRButtonDown Then
@@ -370,7 +403,11 @@ Func MainLoop()
 		EndIf
 
 		If $num = $AOE_BUTTON Then
-			HandleAoESpell()
+			HandleAoESpell(False)
+        ElseIf $num = $AOE_BUTTON_CENTER Then
+			HandleAoESpell(True)
+        ElseIf $num = $AFK_BUTTON Then
+            SkipAFK()
 		ElseIf $num >= 1 And $num <= $BUTTON_COUNT And AreModifiersReleased() Then
 			SendKeyWithModifiers($keyMap[$num])
 		EndIf

@@ -6,7 +6,8 @@ local _, ns = ... -- namespace
 local SpellIsTargeting = SpellIsTargeting
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
-local IsMouselooking = IsMouselooking
+local UnitIsAFK = UnitIsAFK
+local type = type
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if ns.IsPaused() then
@@ -17,17 +18,24 @@ local function getAction()
     return 'none', '#пауза'
   end
 
+  if UnitIsAFK('player') then
+    return 'skip_afk', 'сброс AFK'
+  end
+
   if UnitIsDeadOrGhost('player') then
     return 'none', 'ты мертв'
   end
 
   if SpellIsTargeting() then
-    -- if IsMouselooking() then
-    --   return 'none', 'отпусти правую кнопку мыши'
-    -- end
-
-    return 'mouse1', 'делаем выбор области' -- left mouse click
+    local info = ns.LastSpellAutoTarget()
+    if info == true then
+      return 'mouse1_center', 'делаем выбор области под себя' -- left mouse click in center screen
+    elseif info == false then
+      return 'mouse1', 'делаем выбор области' -- left mouse click
+    end
+    return 'none', 'ждем выбор области'
   end
+
 
   local btn = ns.State.pressedButton
   if btn then
