@@ -301,40 +301,11 @@ EndFunc
 
 ; Перемещение камеры в стороны для сброса AFK статуса
 Func SkipAFK()
-    Local $isRButtonDown = _IsPressed("02") ; Правая кнопка мыши
-
-    ; Сохраняем текущую позицию курсора
-    Local $mousePos = MouseGetPos()
-    If @error Then ; Не удалось получить позицию курсора
-        ConsoleWrite("Couldn't get cursor position" & @CRLF)
-        Return
-    EndIf
-
-    ; Если не включено утравление камерой, включаем
-    If Not $isRButtonDown Then
-        MouseDownInWindow($hWnd, "right")
-        Sleep(10)
-    EndIf
-
-    Local $delta = 100
-
-    ; Перемещаем камеру влево
-    MouseMove($mousePos[0] - $delta, $mousePos[1], 10)
-    Sleep(10) ; Задержка для обработки перемещения
-
-    ; Перемещаем камеру вправо
-    MouseMove($mousePos[0] + $delta, $mousePos[1], 10)
-    Sleep(10) ; Задержка для обработки перемещения
-
-    ; Перемещаем камеру на исходную позицию
-    MouseMove($mousePos[0], $mousePos[1], 10)
-    Sleep(10) ; Задержка для обработки перемещения
-
-    ; Если было не включено утравление камерой, выключаем как было
-    If Not $isRButtonDown Then
-        MouseUpInWindow($hWnd, "right")
-        Sleep(10)
-    EndIf
+    SendKeyWithModifiers("{s}")
+    Sleep(100)
+    SendKeyWithModifiers("{w}")
+    Sleep(100)
+    SendKeyWithModifiers("{s}")
 EndFunc
 
 ; Обработка AoE-спелла (клик в центре экрана)

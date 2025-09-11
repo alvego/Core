@@ -54,7 +54,7 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
     local spellName = select(2, ...)
     if subEvent == 'SPELL_SUMMON' and spellName == 'Воскрешение мертвых' then --destName == 'Восставший союзник' and
         ns.TimerStart('summonGhoul') -- призвали гуля
-        ns.Log('Гуль призван', destGUID)
+        ns.Log('Гуль призван:', destName, destGUID)
         ghoulGuid = destGUID
         return
     end
