@@ -126,10 +126,10 @@ local lastSlot = 0
 local lastAction = nil
 function ns.UseAction(action, info)
     if action == nil then
-        error(format('ns.UseAction(%s, %s) - action can be string'), action or 'nil', info or 'nil')
+        error(format('ns.UseAction(%s, %s) - action can be string', action or 'nil', info or 'nil'))
     end
     if info == nil then
-        ns.Error(format('ns.UseAction(%s, %s) - can have info!'), action or 'nil', info or 'nil')
+        ns.Error(format('ns.UseAction(%s, %s) - can have info!', action or 'nil', info or 'nil'))
     end
     local slot = ns.GetSlot(action)
     local canuse, canuseinfo = ns.CanUseSlot(slot)
