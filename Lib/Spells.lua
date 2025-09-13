@@ -77,7 +77,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
                                 destFlags, ...)
     if sourceGUID ~= ns.State.playerGUID then return end
     if subEvent:match('^SPELL_CAST') then
-        local spellName = select(2, ...)
+            
         lastUsedSpell = spellName
         if ns.showSpellError and subEvent == 'SPELL_CAST_FAILED' then
             local reason = select(4, ...)

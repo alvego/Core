@@ -29,10 +29,11 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
                                                        destGUID, destName, destFlags, ...)
     if subEvent:match("_DAMAGE") and destGUID == ns.State.playerGUID then --SWING_DAMAGE
         if subEvent:match("SPELL_") then
-            -- ns.Log('Получен урон заклинанием', subEvent, select(1, ...))
+            local spellName = select(2, ...)
+            --ns.Log('Получен урон заклинанием', spellName)
             ns.TimerStart('SPELL_DAMAGE')
         else
-            -- ns.Log('Получен урон от удара', subEvent, select(1, ...))
+            --ns.Log('Получен урон от удара')
             ns.TimerStart('SWING_DAMAGE')
         end
     end
@@ -69,7 +70,7 @@ local function canUseGcdSpell(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
 local function canUseCurrentSpell(spell)
-    if ns.TimerLess('CurrentSpell', 1) then return false end
+    if ns.TimerLess('CurrentSpell', 0.5) then return false end
     if IsCurrentSpell(spell) then return false end
     if not canUseSpell(spell) then return false end
     ns.TimerStart('CurrentSpell')
@@ -151,8 +152,7 @@ local function getBloodAction()
     if st.invalidTarget and st.playerHP100 < 80 and canUseSpell(action) then return action, reason end
 
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    action, reason = ns.TryTarget()
-    if action then return action, reason end
+
     -----------------------------------------------
     ns.TimerToggle('needHeal', st.playerHP100 < 65) -- таймер идет пока hp < 65
     ns.TimerToggle('needMoreDamage', st.ttd > 10)   -- таймер идет пока ttd > 20
@@ -181,9 +181,6 @@ local function getBloodAction()
     local glyphofDeathStrike = true -- Увеличивает урон от способности 'Удар смерти' на 1% за каждые 1 ед. накопленной силы рун (максимум на 25%). Сила рун при этом не расходуется.
     local morbidityTalentCount = select(5, GetTalentInfo(3, 5))
     -----------------------------------------------
-    local bloodPlague, bloodPlagueLeft = ns.HasMyDebuff('Кровавая чума')
-    local frostFever, frostFeverLeft = ns.HasMyDebuff('Озноб')
-    -----------------------------------------------
     local bloodRunes = (select(3, GetRuneCooldown(1)) and (GetRuneType(1) == 1) and 1 or 0) +
         (select(3, GetRuneCooldown(2)) and (GetRuneType(2) == 1) and 1 or 0)
     local unholyRunes = (select(3, GetRuneCooldown(3)) and (GetRuneType(3) == 2) and 1 or 0) +
@@ -207,6 +204,9 @@ local function getBloodAction()
     -- если у нас 1 руна есть, то надо чтобы до отката второй было меньше, чем времени до спадания дота
     -- так же до спадания дота должно быть более гкд, чтобы не получилось так, что руна откатится через 500 мс, а дота спадет через 1 - мы зря заюзаем абилки и из-за гкд не успеем обновить
     local timeToBloodRuneReady = math.max(ttrb1r, ttrb2r)
+    -----------------------------------------------
+    local bloodPlague, bloodPlagueLeft = ns.HasMyDebuff('Кровавая чума')
+    local frostFever, frostFeverLeft = ns.HasMyDebuff('Озноб')
     -----------------------------------------------
     local minDebuffDuration = math.min(frostFeverLeft, bloodPlagueLeft)
     -----------------------------------------------
@@ -242,16 +242,21 @@ local function getBloodAction()
     action, reason = 'Смертельный союз', 'хилимся гулем' -- 40rp
     if hasGhoul and canUseGcdSpell(action) then return action, reason end
 
-    local inMelee = ns.IsSpellInRange('Удар чумы')
-
     action, reason = 'Захват рун', 'хилися на 10% хп'
     if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then return action, reason end
 
-    action, reason = 'Незыблемость льда', 'физ деф hp < 75%' -- 20rp
-    if st.playerHP100 < 75 and ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    action, reason = 'Незыблемость льда', 'физ деф' -- 20rp
+    if st.playerHP100 < 90 and ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
 
-    action, reason = 'Антимагический панцирь', 'маг деф hp < 75%' -- 20rp
-    if st.playerHP100 < 75 and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    action, reason = 'Антимагический панцирь', 'маг деф' -- 20rp
+    if st.playerHP100 < 90 and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    -----------------------------------------------
+
+    action, reason = ns.TryTarget()
+    if action then return action, reason end
+
+    -----------------------------------------------
+    local inMelee = ns.IsSpellInRange('Удар чумы')
     -----------------------------------------------
     -- недавно прожали, то не частим
     if ns.TimerMore('KICK', 0.5) then
@@ -336,6 +341,15 @@ local function getBloodAction()
     action, reason = 'none', 'ждем [Мор]'
     if waitPestilence then return action, reason end
 
+    -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
+    local targetsForAOE = 3
+
+    action, reason = 'Смерть и разложение', 'aoe'
+    if still and needMoreDamage and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
+        return action,
+            reason
+    end
+
     if hasDiseases and ns.TimerMore('Мор', 2) and
         (
             (numTargets > numWoundedTargets and lastNumWoundedTargets ~= numWoundedTargets) or
@@ -353,14 +367,7 @@ local function getBloodAction()
         return action, reason
     end
 
-    -- Death and Decay > Ледяное прикосновение > Удар чумы > Pestilence > Blood Boil
-    local targetsForAOE = 3
 
-    action, reason = 'Смерть и разложение', 'aoe'
-    if still and needMoreDamage and maxTargets >= targetsForAOE and goBloodAbils and canUseGcdSpell(action) then
-        return action,
-            reason
-    end
 
     if needBurst or needMoreDamage then
         action, reason = 'Безудержная ярость', 'pvp бурст'

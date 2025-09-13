@@ -82,7 +82,7 @@ local stopAttackDebuff = {
 }
 function ns.TryTarget()
   if ns.State.invalidTarget then
-    if ns.State.combatMode or ns.State.attack then
+    if ns.State.combatMode then
       if ns.State.pvp then
         return 'tarpvp', '#выбор цели-игрока'
       end
