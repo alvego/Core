@@ -30,10 +30,10 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
     if subEvent:match("_DAMAGE") and destGUID == ns.State.playerGUID then --SWING_DAMAGE
         if subEvent:match("SPELL_") then
             local spellName = select(2, ...)
-            --ns.Log('Получен урон заклинанием', spellName)
+            ns.Log('Получен урон заклинанием', spellName)
             ns.TimerStart('SPELL_DAMAGE')
         else
-            --ns.Log('Получен урон от удара')
+            ns.Log('Получен урон от удара')
             ns.TimerStart('SWING_DAMAGE')
         end
     end
@@ -245,11 +245,13 @@ local function getBloodAction()
     action, reason = 'Захват рун', 'хилися на 10% хп'
     if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then return action, reason end
 
-    action, reason = 'Незыблемость льда', 'физ деф' -- 20rp
-    if st.playerHP100 < 90 and ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    if st.combatLock and st.playerHP100 < 80 then
+        action, reason = 'Незыблемость льда', 'физ деф' -- 20rp
+        if ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
 
-    action, reason = 'Антимагический панцирь', 'маг деф' -- 20rp
-    if st.playerHP100 < 90 and ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+        action, reason = 'Антимагический панцирь', 'маг деф' -- 20rp
+        if ns.TimerLess("SPELL_DAMAGE", 2) and canUseSpell(action) then return action, reason end
+    end
     -----------------------------------------------
 
     action, reason = ns.TryTarget()

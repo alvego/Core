@@ -11,11 +11,11 @@ Lib\Timers.lua
 Lib\Misc.lua
 Lib\Data.lua
 Lib\Events.lua
-Lib\CombatLog.lua
 Lib\Debug.lua
 Lib\Semaphore.lua
 Lib\Chat.lua
 Lib\Telemetry.lua
+Lib\CombatLog.lua
 Lib\Units.lua
 Lib\Targets.lua
 Lib\Modificators.lua

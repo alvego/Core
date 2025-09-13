@@ -14,15 +14,19 @@ ns.AttachBeforeIdle(function()
     if not InCombatLockdown() then
         return -- не в бою
     end
-    if ns.TimerLess("CombatLog", 5) then
+    if ns.TimerLess("CombatLog", 3) then
         return -- последнее сооющение было недавно
     end
-    if ns.TimerLess("CombatLogReset", 30) then
+    if ns.TimerLess("CombatLogReset", 10) then
         return -- не частим со сбросом
     end
     -- сброс ComatLog
     CombatLogClearEntries()
     ns.TimerStart("CombatLogReset")
-    --ns.Log("Reset CombatLog!")
+    ns.Log("Reset CombatLog!")
 end
 )
+
+ns.AttachTelemetry(function()
+    return ns.TelemetryBool('CL', ns.TimerLess("CombatLog", 3))
+end)
