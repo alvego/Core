@@ -15,15 +15,20 @@ Opt("SendKeyDownDelay", 50) ; изменяет продолжительност�
 
 ; Константы
 Global Const $WINDOW_TITLE = "World of Warcraft"
+Global Const $BUTTON_COUNT = 120
+
 Global Const $VK_NUMLOCK = 0x90
 Global Const $ENGLISH_LAYOUT = 0x4090409
 Global Const $RUSSIAN_LAYOUT = 0x4190419
-Global Const $BUTTON_COUNT = 120
+
+
 Global Const $FRAME_X = 1
 Global Const $FRAME_Y = 1
-Global Const $SLEEP_MIN = 50
+
+Global Const $SLEEP_MIN = 25
 Global Const $SLEEP_MAX = 1000
-Global Const $SLEEP_RANDOM = 100
+Global Const $SLEEP_RANDOM = 50
+
 Global Const $AOE_BUTTON = 1000 ; Номер кнопки для AoE-спеллов (Просто клик)
 Global Const $AOE_BUTTON_CENTER = 1001 ; Номер кнопки для AoE-спеллов (Клик в центре экрана)
 Global Const $AFK_BUTTON = 2000 ; Сброс AFK
@@ -255,7 +260,7 @@ Func SendKeyWithModifiers($key)
 
 	;ToolTip($baseKey, 10,0)
     ControlSend($hWnd, "", "", $baseKey, 0)
-	Sleep(10) ; Небольшая задержка для обработки
+	;Sleep(10) ; Небольшая задержка для обработки
 EndFunc
 
 
