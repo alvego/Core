@@ -77,7 +77,6 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
                                 destFlags, ...)
     if sourceGUID ~= ns.State.playerGUID then return end
     if subEvent:match('^SPELL_CAST') then
-            
         lastUsedSpell = spellName
         if ns.showSpellError and subEvent == 'SPELL_CAST_FAILED' then
             local reason = select(4, ...)
@@ -145,9 +144,9 @@ function ns.AddAutoTargetSpell(spellName, inCenter)
 end
 
 function ns.LastSpellAutoTarget()
-    local lastSpellSent = ns.GetLastAction()
-    if not lastSpellSent then return nil end
-    return autoTargetSpell[lastSpellSent]
+    local lastAction = ns.GetLastAction()
+    if not lastAction then return nil end
+    return autoTargetSpell[lastAction]
 end
 
 ------------------------------------------------------------------------------------------------------------------

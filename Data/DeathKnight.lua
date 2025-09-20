@@ -28,8 +28,8 @@ ns.AttachEvent('PLAYER_REGEN_ENABLED', regenTracker)
 local function damageTracker(event, timestamp, subEvent,
                              sourceGUID, sourceName, sourceFlags,
                              destGUID, destName, destFlags, ...)
-    if subEvent:match('_DAMAGE') and destGUID == ns.State.playerGUID then --SWING_DAMAGE
-        if subEvent:match("SPELL_") then
+    if subEvent:match('_DAMAGE') and destGUID == st.playerGUID then --SWING_DAMAGE
+        if subEvent:match('SPELL_') then
             local spellName = select(2, ...)
             ns.Log('Получен урон заклинанием', spellName)
             ns.TimerStart('SPELL_DAMAGE')

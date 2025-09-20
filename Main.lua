@@ -10,6 +10,16 @@ local UnitIsAFK = UnitIsAFK
 local type = type
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
+  if SpellIsTargeting() then
+    local info = ns.LastSpellAutoTarget()
+    if info == true then
+      return 'mouse1_center', 'делаем выбор области под себя' -- left mouse click in center screen
+    elseif info == false then
+      return 'mouse1', 'делаем выбор области' -- left mouse click
+    end
+    return 'none', 'ждем выбор области'
+  end
+
   if ns.IsPaused() then
     if ns.State.autoattack then
       return 'stopattack', '#выкл автоатаку - пауза'
@@ -25,17 +35,6 @@ local function getAction()
   if UnitIsDeadOrGhost('player') then
     return 'none', 'ты мертв'
   end
-
-  if SpellIsTargeting() then
-    local info = ns.LastSpellAutoTarget()
-    if info == true then
-      return 'mouse1_center', 'делаем выбор области под себя' -- left mouse click in center screen
-    elseif info == false then
-      return 'mouse1', 'делаем выбор области' -- left mouse click
-    end
-    return 'none', 'ждем выбор области'
-  end
-
 
   local btn = ns.State.pressedButton
   if btn then

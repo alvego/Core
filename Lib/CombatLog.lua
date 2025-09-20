@@ -17,13 +17,13 @@ ns.AttachBeforeIdle(function()
     if ns.TimerLess("CombatLog", 3) then
         return -- последнее сооющение было недавно
     end
-    if ns.TimerLess("CombatLogReset", 10) then
+    if ns.TimerLess("CombatLogReset", 30) then
         return -- не частим со сбросом
     end
     -- сброс ComatLog
     CombatLogClearEntries()
     ns.TimerStart("CombatLogReset")
-    ns.Log("Reset CombatLog!")
+    --ns.Log("CombatLogClearEntries!")
 end
 )
 
