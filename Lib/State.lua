@@ -22,12 +22,12 @@ ns.State = {}
 local playerClass, playerColor = ns.UnitClassName()
 ns.State.playerClass = playerClass
 ns.State.playerColor = playerColor
-ns.State.playerGUID = UnitGUID('player')
 
 local eatBuff = { 'Пища', 'Питье' }
 ------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
 function ns.UpdateState()
+    ns.State.playerGUID = UnitGUID('player')
     ns.State.attack = ns.IsMouse(4)
     ns.State.stop = ns.IsMouse(5)
     ns.State.pressedButton = ns.ButtonIsPressed()

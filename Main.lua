@@ -48,7 +48,7 @@ local function getAction()
     return 'none', 'чат'
   end
 
-  if ns.State.mount or ns.State.vehicle then
+  if ns.State.mount or ns.State.vehicle or ns.HasBuff('Полет') then
     if ns.State.attack then
       return 'dismount', 'спешится, зажата атака'
     end

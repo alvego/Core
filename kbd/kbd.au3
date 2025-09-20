@@ -362,7 +362,7 @@ EndFunc
 ; Основной цикл
 Func MainLoop()
     While 1
-		if Not CheckWindow() Then
+		if Not CheckWindow() OR Not WinActive($hWnd) Then
 			Sleep($SLEEP_MAX)
 			ContinueLoop
 		EndIf

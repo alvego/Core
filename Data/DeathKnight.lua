@@ -20,14 +20,15 @@ local math_max = math.max
 local format = format
 ------------------------------------------------------------------------------------------------------------------
 local lastNumWoundedTargets = 0
-ns.AttachEvent('PLAYER_REGEN_ENABLED', function()
+local function regenTracker()
     lastNumWoundedTargets = 0
-end)
+end
+ns.AttachEvent('PLAYER_REGEN_ENABLED', regenTracker)
 ------------------------------------------------------------------------------------------------------------------
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
-                                                       sourceGUID, sourceName, sourceFlags,
-                                                       destGUID, destName, destFlags, ...)
-    if subEvent:match("_DAMAGE") and destGUID == ns.State.playerGUID then --SWING_DAMAGE
+local function damageTracker(event, timestamp, subEvent,
+                             sourceGUID, sourceName, sourceFlags,
+                             destGUID, destName, destFlags, ...)
+    if subEvent:match('_DAMAGE') and destGUID == ns.State.playerGUID then --SWING_DAMAGE
         if subEvent:match("SPELL_") then
             local spellName = select(2, ...)
             ns.Log('Получен урон заклинанием', spellName)
@@ -37,12 +38,13 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
             ns.TimerStart('SWING_DAMAGE')
         end
     end
-end)
+end
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', damageTracker)
 ------------------------------------------------------------------------------------------------------------------
 local ghoulGuid = nil
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
-                                                       sourceGUID, sourceName, sourceFlags,
-                                                       destGUID, destName, destFlags, ...)
+local function ghoulTracker(event, timestamp, subEvent,
+                            sourceGUID, sourceName, sourceFlags,
+                            destGUID, destName, destFlags, ...)
     if subEvent == "UNIT_DIED" and destGUID == ghoulGuid then
         ns.TimerReset('summonGhoul')
         ghoulGuid = nil
@@ -59,7 +61,8 @@ ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEven
         ghoulGuid = destGUID
         return
     end
-end)
+end
+ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', ghoulTracker)
 ------------------------------------------------------------------------------------------------------------------
 local function canUseSpell(spell)
     return IsUsableSpell(spell) and ns.CanUseAction(spell)
@@ -70,7 +73,7 @@ local function canUseGcdSpell(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
 local function canUseCurrentSpell(spell)
-    if ns.TimerLess('CurrentSpell', 0.5) then return false end
+    if ns.TimerLess('CurrentSpell', 0.1) then return false end
     if IsCurrentSpell(spell) then return false end
     if not canUseSpell(spell) then return false end
     ns.TimerStart('CurrentSpell')
@@ -148,14 +151,19 @@ local function getBloodAction()
     action, reason = 'none', 'кастую [%s]'
     if st.playerCasting then return action, format(reason, st.playerCasting) end
     -----------------------------------------------
+
+    local hasGhoul = ns.TimerLess('summonGhoul', 60) -- гуля призвали меньше минуты назад
+    action, reason = 'Смертельный союз', 'хилимся гулем' -- 40rp
+    if hasGhoul and canUseGcdSpell(action) then return action, reason end
+
     action, reason = 'Захват рун', 'хилися на 10% хп (нет цели)'
-    if st.invalidTarget and st.playerHP100 < 80 and canUseSpell(action) then return action, reason end
+    if st.invalidTarget and st.playerHP100 < (st.group and 40 or 80) and canUseSpell(action) then return action, reason end
 
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
 
     -----------------------------------------------
-    ns.TimerToggle('needHeal', st.playerHP100 < 65) -- таймер идет пока hp < 65
-    ns.TimerToggle('needMoreDamage', st.ttd > 10)   -- таймер идет пока ttd > 20
+    ns.TimerToggle('needHeal', st.playerHP100 < (st.group and 40 or 60)) -- таймер идет пока hp < 40
+    ns.TimerToggle('needMoreDamage', st.ttd > 10)                        -- таймер идет пока ttd > 20
     ns.TimerToggle('still', st.still)
     -----------------------------------------------
     local runicPower = UnitPower('player')
@@ -164,7 +172,7 @@ local function getBloodAction()
     local dancingRuneWeaponReady = ns.TimerMore('Танцующее руническое оружие', 90) -- 1.5m
 
     -- hp меньше половины уже 2 секунды
-    local needHeal = ns.TimerStarted('needHeal') and ns.TimerMore('needHeal', 1.5)
+    local needHeal = ns.TimerStarted('needHeal') and ns.TimerMore('needHeal', 1.5) and st.combatMode
     local needMoreDamage = ns.TimerStarted('needMoreDamage') and ns.TimerMore('needMoreDamage', 1)
     local still = ns.TimerStarted('still') and ns.TimerMore('still', 1)
     -- нужно бурстить
@@ -173,8 +181,7 @@ local function getBloodAction()
     local raiseDeadReady = ns.TimerMore('Воскрешение мертвых', 180) -- 3m
     --  [Смертельный союз], как раз должно быть готово
     local deathPactReady = ns.TimerMore('Смертельный союз', 120) -- 2m
-    local hasGhoul = ns.TimerLess('summonGhoul', 60) -- гуля призвали меньше минуты назад
-    local needDeathPact = needHeal and deathPactReady and (raiseDeadReady or hasGhoul)
+    local needDeathPact = hasGhoul or (needHeal and deathPactReady and raiseDeadReady)
     local goRunicAbils = not needBurst and not needDeathPact
     -----------------------------------------------
     local glyphofDisease = true     -- При использовании способности 'Мор' время действия болезней и их вторичных эффектов на цели обновляется.
@@ -239,13 +246,10 @@ local function getBloodAction()
     action, reason = 'Воскрешение мертвых', 'призываем гуля'
     if needDeathPact and (runicPower >= 40) and canUseGcdSpell(action) then return action, reason end
 
-    action, reason = 'Смертельный союз', 'хилимся гулем' -- 40rp
-    if hasGhoul and canUseGcdSpell(action) then return action, reason end
-
     action, reason = 'Захват рун', 'хилися на 10% хп'
-    if goBloodAbils and st.playerHP100 < 70 and canUseSpell(action) then return action, reason end
+    if goBloodAbils and needHeal and canUseSpell(action) then return action, reason end
 
-    if st.combatLock and st.playerHP100 < 80 then
+    if goRunicAbils and st.combatLock and st.playerHP100 < 90 then
         action, reason = 'Незыблемость льда', 'физ деф' -- 20rp
         if ns.TimerLess("SWING_DAMAGE", 2) and canUseSpell(action) then return action, reason end
 
@@ -265,7 +269,7 @@ local function getBloodAction()
         local spell, notinterrupt = ns.UnitNeedKick('target')
         local needKick = spell and not notinterrupt
         action, reason = 'Заморозка разума', 'кик в гкд [%s]' -- 20rp
-        if needKick and canUseSpell(action) then
+        if goRunicAbils and needKick and canUseSpell(action) then
             ns.TimerStart('KICK')
             return action, format(reason, spell)
         end
@@ -379,7 +383,7 @@ local function getBloodAction()
         if not st.pvp and canUseSpell(action) then return action, reason end
 
         action, reason = 'Истерия', 'бурст'
-        if st.playerHP100 > 80 and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
+        if not needHeal and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
             return action, reason
         end
     end
@@ -390,8 +394,8 @@ local function getBloodAction()
     action, reason = 'Танцующее руническое оружие', 'бурст' -- 60rp
     if needBurst and not needDeathPact and canUseGcdSpell(action) then return action, reason end
 
-    action, reason = 'Рунический удар', 'не aoe' -- 20rp goRunicAbils and
-    if numTargets < targetsForAOE and canUseCurrentSpell(action) then return action, reason end
+    action, reason = 'Рунический удар', 'не aoe' -- 20rp
+    if goRunicAbils and numTargets < targetsForAOE and canUseCurrentSpell(action) then return action, reason end
 
     action, reason = 'Пожинание', 'сливаем runic power' -- 32rp
     if goRunicAbils and runicPower > 80 and canUseGcdSpell(action) then return action, reason end
@@ -406,7 +410,7 @@ local function getBloodAction()
     local targetDebuffsFromMe = (bloodPlague and 1 or 0) + (frostFever and 1 or 0)
 
     action, reason = 'Удар смерти', 'хилимся, есть болезни'
-    if st.playerHP100 < (st.group and 40 or 80) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
+    if needHeal and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
         return action,
             reason
     end
@@ -417,8 +421,8 @@ local function getBloodAction()
             action, reason
     end
 
-    action, reason = 'Рунический удар', 'руник' -- 20rp goRunicAbils and
-    if canUseCurrentSpell(action) then return action, reason end
+    action, reason = 'Рунический удар', 'руник' -- 20rp
+    if goRunicAbils and canUseCurrentSpell(action) then return action, reason end
 
     action, reason = 'Удар смерти', 'дамажим, есть болезни'
     if (unholyRunes + frostRunes) > 1 and (not glyphofDeathStrike or runicPower >= 25) and targetDebuffsFromMe > 0 and canUseGcdSpell(action) then
