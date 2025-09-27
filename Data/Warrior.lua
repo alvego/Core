@@ -108,6 +108,7 @@ local function tryThreat(unit)
 
     if isTanking then return false end
     if ns.IsOneUnit('player', targetUnit) then return false end
+    if UnitExists('focus') and ns.IsOneUnit(unit, 'focus') then return false end
 
     -- Проверка удара грома (10 метров, вне АОЕ)
     action = 'Удар грома'
@@ -169,11 +170,14 @@ local function getProtoAction()
     local aoe    = ns.IsShift() or (st.numTargets > 2)
     local ctrl   = ns.IsCtr()
 
+    action, reason = 'Боевой железно-чешуйчатый плащ', '#используем парашют в падении'
+    if ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
+
     action, reason = 'Рунический флакон с лечебным зельем', '#хилимся на 20% хп'
     if st.playerHP100 < 20 and canUseItem(action) then return action, reason end
 
     action, reason = 'Аргуссианский компас', '#щит на 30% хп'
-    if st.playerHP100 < 30 and canUseItem(action) then return action, reason end
+    if IsEquippedItem('Аргуссианский компас') and st.playerHP100 < 50 and canUseItem(action) then return action, reason end
 
     action, reason = 'Оборонительная стойка', '#свитч в дэфстэнс в бою'
     if stance ~= 2 and st.combatLock then --ns.CanUseAction('Оборонительная стойка')
@@ -233,8 +237,8 @@ local function getProtoAction()
     end
    
     -- Удары которые можно сетить вне гкд
-    action, reason = 'Удар героя', '#соло заполнитель Удар героя, ярость > 80'
-    if not aoe and inMelee and canUseCurrentSpell(action) and rage >= 80 then
+    action, reason = 'Удар героя', '#соло заполнитель Удар героя, ярость > 56'
+    if not aoe and inMelee and canUseCurrentSpell(action) and rage >= 56 then
         return action, reason
     end
 
@@ -282,6 +286,16 @@ local function getProtoAction()
     end
 
     -- Основные атакующие способности
+
+    action, reason = 'Удар грома', '#1-ый приоритет в АОЕ'
+    if aoe and canUseGcdSpell(action) and inMelee then
+        return action, reason
+    end
+
+    action, reason = 'Ударная волна', '#2-ый приоритет в АОЕ'
+    if aoe and dist10 and not ns.IsReadySpell('Удар грома') and canUseGcdSpell(action) then
+        return action, reason
+    end
 
     action, reason = 'Реванш', '#по доступности приоритетно'
     if canUseGcdSpell(action) then
