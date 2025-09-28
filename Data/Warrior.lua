@@ -49,18 +49,123 @@ ns.AttachTelemetry(function()
 end)
 ------------------------------------------------------------------------------------------------------------------
 local function getArmsAction()
-    if st.playerCasting then -- возможно стоит перенести в ротацию (прерывание каста)
-        return 'none', 'кастую [' .. st.playerCasting .. ']'
-    end
+local action, reason
+
+    action, reason = 'none', 'кастую [%s]'
+    if st.playerCasting then return action, format(reason, st.playerCasting) end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local tarcmd, tarinfo = ns.TryTarget()
-    if tarcmd then
-        return tarcmd, tarinfo
+    local rage   = UnitMana('player')
+    local stance = GetShapeshiftForm()
+    local aoe    = ns.IsShift() or (st.numTargets > 2)
+    local ctrl   = ns.IsCtr()
+
+    action, reason = 'Боевой железно-чешуйчатый плащ', '#используем парашют в падении'
+    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
+
+    action, reason = 'Боевая стойка', '#свитч в боевую стойку'
+    if stance ~= 1 and st.combatLock then --ns.CanUseAction('Оборонительная стойка')
+        return action, reason
     end
-    -- тут ротацию ишем, можно использовать что можно прожать в гкд
-    if st.gcd then return 'none', 'гкд' end
-    -- то что требуется гкд
-    return 'none', 'пока всё'
+
+    action, reason = ns.TryTarget()
+    if action then return action, reason end
+
+    local inMelee = ns.IsSpellInRange('Кровопускание')
+    local dist10 = CheckInteractDistance('target', 3)
+    --local isRecentlyCharged = ns.TimerLess('Перехват', 1.5) or ns.TimerLess('Рывок', 1.5) or ns.TimerLess('Вмешательство', 1.5)
+    if st.attack then
+        -- Инициация боя: Рывок
+        action, reason = 'Рывок', 'зажата атака сокращаем дистанцию'
+        if canUseSpell(action) then
+            return action, reason
+        end
+        
+        -- Или Перехват
+        --[[ action, reason = 'Перехват', 'зажата атака сокращаем дистанцию'
+        if canUseSpell(action) then
+            return action, reason
+        end ]]
+        -- Или Вмешательство
+        -- if canUseSpell('Вмешательство') then
+        --     return 'Вмешательство', 'пригаем [Вмешательство] target-target'
+        -- end
+    end
+
+    -- часть ротации которую можно прожимать во время гкд
+
+    action, reason = 'Оберег скитальца', '#хп < 85, хилимся рассовой PVE-абилкой'
+    if not st.pvp and st.playerHP100 < 85 and canUseSpell(action) then
+        return action, reason
+    end
+
+    action, reason = 'Дар скитальца', '#хп < 75, хилимся рассовой PVP-абилкой'
+    if st.playerHP100 < 70 and not ns.HasBuff('Перемирие') and not st.instance and canUseSpell(action) then
+        return action, reason
+    end
+
+    action, reason = 'Глухая оборона', '#деф при hp < 40%'
+    if st.playerHP100 < 40 and rage >= 10 and canUseSpell(action) then
+        return action, reason
+    end
+
+    action, reason = 'Кровавая ярость', '#генерация ярости'
+    if st.combatLock and rage < 20 and canUseSpell(action) then
+        return action, reason
+    end
+   
+    -- Удары которые можно сетить вне гкд
+    action, reason = 'Удар героя', '#соло заполнитель Удар героя, ярость > 56'
+    if not aoe and inMelee and canUseCurrentSpell(action) and rage >= 56 then
+        return action, reason
+    end
+
+    action, reason = 'Рассекающий удар', '#aoe заполнитель Рассекающий'
+    if aoe and inMelee and canUseCurrentSpell(action) and rage >= 56 then
+        return action, reason
+    end
+
+    -- то что выполняется в рамках гкд
+
+--[[     action, reason = 'Безудержное восстановление', '#хилимся при hp < 35%'
+    if not st.gcd and st.playerHP100 < 35 and rage >= 15 and canUseSpell(action) then
+        return action, reason
+    end ]]
+    -- Основные атакующие способности
+
+    action, reason = 'Кровопускание', '#дотаем и увеличиваем входящий урон'
+    if canUseGcdSpell(action) and not ns.HasMyDebuff('Кровопускание') then
+        return action, reason
+    end
+
+    action, reason = 'Смертельный удар', '#по доступности'
+    if canUseGcdSpell(action) and inMelee then
+        return action, reason
+    end
+
+    action, reason = 'Превосходство', '#по доступности'
+    if canUseGcdSpell(action) and inMelee then
+        return action, reason
+    end
+
+    action, reason = 'Казнь', '#по доступности'
+    if canUseGcdSpell(action) and inMelee then
+        return action, reason
+    end
+
+
+
+--[[     action, reason = 'Боевой крик', '#поддерживаем при отсутствии других бафов на АП'
+    if inMelee and not (ns.HasMyBuff('Командирский крик') or ns.HasBuff('Боевой крик') or ns.HasBuff('благословение могущества')) and canUseGcdSpell(action) then
+        return action, reason
+    end
+
+    action, reason = 'Командирский крик', '#есть баф на АП, используем баф на ХП'
+    if inMelee and not ns.HasMyBuff('Боевой крик') and not ns.HasBuff('Командирский крик') and (ns.HasBuff('благословение могущества') or ns.HasBuff('Боевой крик')) and canUseGcdSpell(action) then
+        return action, reason
+    end ]]
+
+    action, reason = 'none', '#пока всё'
+    return action, reason
 end
 ------------------------------------------------------------------------------------------------------------------
 local function getFuryAction()
@@ -171,7 +276,7 @@ local function getProtoAction()
     local ctrl   = ns.IsCtr()
 
     action, reason = 'Боевой железно-чешуйчатый плащ', '#используем парашют в падении'
-    if ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
+    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
 
     action, reason = 'Рунический флакон с лечебным зельем', '#хилимся на 20% хп'
     if st.playerHP100 < 20 and canUseItem(action) then return action, reason end
