@@ -21,7 +21,7 @@ local math_max = math.max
 local format = format
 ------------------------------------------------------------------------------------------------------------------
 local function canUseSpell(spell)
-    return IsUsableSpell(spell) and ns.CanUseAction(spell)
+    return IsUsableSpell(spell) and ns.CanUseAction(spell) and not ns.IsSpellFailedRecently(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
 local function canUseGcdSpell(spell)
@@ -49,18 +49,19 @@ ns.AttachTelemetry(function()
 end)
 ------------------------------------------------------------------------------------------------------------------
 local function getArmsAction()
-local action, reason
+    local action, reason
 
     action, reason = 'none', 'кастую [%s]'
     if st.playerCasting then return action, format(reason, st.playerCasting) end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local rage   = UnitMana('player')
-    local stance = GetShapeshiftForm()
-    local aoe    = ns.IsShift() or (st.numTargets > 2)
-    local ctrl   = ns.IsCtr()
+    local rage     = UnitMana('player')
+    local stance   = GetShapeshiftForm()
+    local aoe      = ns.IsShift() or (st.numTargets > 2)
+    local ctrl     = ns.IsCtr()
 
     action, reason = 'Боевой железно-чешуйчатый плащ', '#используем парашют в падении'
-    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
+    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return
+        action, reason end
 
     action, reason = 'Боевая стойка', '#свитч в боевую стойку'
     if stance ~= 1 and st.combatLock then --ns.CanUseAction('Оборонительная стойка')
@@ -79,7 +80,7 @@ local action, reason
         if canUseSpell(action) then
             return action, reason
         end
-        
+
         -- Или Перехват
         --[[ action, reason = 'Перехват', 'зажата атака сокращаем дистанцию'
         if canUseSpell(action) then
@@ -112,7 +113,7 @@ local action, reason
     if st.combatLock and rage < 20 and canUseSpell(action) then
         return action, reason
     end
-   
+
     -- Удары которые можно сетить вне гкд
     action, reason = 'Удар героя', '#соло заполнитель Удар героя, ярость > 56'
     if not aoe and inMelee and canUseCurrentSpell(action) and rage >= 56 then
@@ -126,7 +127,7 @@ local action, reason
 
     -- то что выполняется в рамках гкд
 
---[[     action, reason = 'Безудержное восстановление', '#хилимся при hp < 35%'
+    --[[     action, reason = 'Безудержное восстановление', '#хилимся при hp < 35%'
     if not st.gcd and st.playerHP100 < 35 and rage >= 15 and canUseSpell(action) then
         return action, reason
     end ]]
@@ -154,7 +155,7 @@ local action, reason
 
 
 
---[[     action, reason = 'Боевой крик', '#поддерживаем при отсутствии других бафов на АП'
+    --[[     action, reason = 'Боевой крик', '#поддерживаем при отсутствии других бафов на АП'
     if inMelee and not (ns.HasMyBuff('Командирский крик') or ns.HasBuff('Боевой крик') or ns.HasBuff('благословение могущества')) and canUseGcdSpell(action) then
         return action, reason
     end
@@ -270,13 +271,14 @@ local function getProtoAction()
     action, reason = 'none', 'кастую [%s]'
     if st.playerCasting then return action, format(reason, st.playerCasting) end
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
-    local rage   = UnitMana('player')
-    local stance = GetShapeshiftForm()
-    local aoe    = ns.IsShift() or (st.numTargets > 2)
-    local ctrl   = ns.IsCtr()
+    local rage     = UnitMana('player')
+    local stance   = GetShapeshiftForm()
+    local aoe      = ns.IsShift() or (st.numTargets > 2)
+    local ctrl     = ns.IsCtr()
 
     action, reason = 'Боевой железно-чешуйчатый плащ', '#используем парашют в падении'
-    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return action, reason end
+    if IsEquippedItem(action) and ns.State.falling and not ns.HasBuff('Парашют') and ns.TimerMore('Falling', 2) then return
+        action, reason end
 
     action, reason = 'Рунический флакон с лечебным зельем', '#хилимся на 20% хп'
     if st.playerHP100 < 20 and canUseItem(action) then return action, reason end
@@ -302,7 +304,7 @@ local function getProtoAction()
         if canUseSpell(action) then
             return action, reason
         end
-        
+
         -- Или Перехват
         action, reason = 'Перехват', 'зажата атака сокращаем дистанцию'
         if canUseSpell(action) then
@@ -340,14 +342,14 @@ local function getProtoAction()
     if st.combatLock and rage < 20 and canUseSpell(action) then
         return action, reason
     end
-   
+
     -- Удары которые можно сетить вне гкд
     action, reason = 'Удар героя', '#соло заполнитель Удар героя, ярость > 56'
     if not aoe and inMelee and canUseCurrentSpell(action) and rage >= 56 then
         return action, reason
     end
 
-    action, reason = 'Удар героя', '#бесплатный Удар героя по проку'  
+    action, reason = 'Удар героя', '#бесплатный Удар героя по проку'
     if not aoe and inMelee and canUseCurrentSpell(action) and ns.HasMyBuff('Символ реванша') then
         return action, reason
     end
@@ -366,8 +368,8 @@ local function getProtoAction()
 
     -- Пуллтайм ротация
     local isPull = ns.TimerLess('combatLock', 3) -- Первые 3 секунды боя
-    if isPull and st.group then  -- только в группе
-        action, reason = 'Удар грома', '#пуллтайм в милизоне'            
+    if isPull and st.group then                  -- только в группе
+        action, reason = 'Удар грома', '#пуллтайм в милизоне'
         if canUseGcdSpell(action) and inMelee then
             return action, reason
         end
@@ -439,7 +441,7 @@ local function getProtoAction()
 
     --[[ action, reason = 'Мощный удар щитом', 'сливаем ярость щитом'
     if rage >= 36 and canUseGcdSpell(action) then
-        return action, reason 
+        return action, reason
     end ]]
 
     action, reason = 'Сокрушение', '#заполняем ротацию'

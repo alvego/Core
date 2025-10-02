@@ -7,6 +7,7 @@ local SpellIsTargeting = SpellIsTargeting
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsAFK = UnitIsAFK
+local CheckInteractDistance = CheckInteractDistance
 local type = type
 ------------------------------------------------------------------------------------------------------------------
 local function getAction()
@@ -17,7 +18,7 @@ local function getAction()
     elseif info == false then
       return 'mouse1', 'делаем выбор области' -- left mouse click
     end
-    return 'none', 'ждем выбор области'
+    return 'none', '#ждем выбор области'
   end
 
   if ns.IsPaused() then
@@ -28,30 +29,30 @@ local function getAction()
     return 'none', '#пауза'
   end
 
-  if UnitIsAFK('player') then
-    return 'skip_afk', 'сброс AFK'
+  if ns.useSkipAFK and UnitIsAFK('player') then
+    return 'skip_afk', '#сброс AFK'
   end
 
   if UnitIsDeadOrGhost('player') then
-    return 'none', 'ты мертв'
+    return 'none', '#ты мертв'
   end
 
   local btn = ns.State.pressedButton
   if btn then
     local btnName = ns.GetSlotName(btn)
     btnName = btnName and ' [' .. btnName .. ']' or ''
-    return 'none', 'зажата Button' .. btn .. btnName
+    return 'none', '#зажата Button' .. btn .. btnName
   end
 
   if GetCurrentKeyBoardFocus() then
-    return 'none', 'чат'
+    return 'none', '#чат'
   end
 
   if ns.State.mount or ns.State.vehicle or ns.HasBuff('Полет') then
     if ns.State.attack then
-      return 'dismount', 'спешится, зажата атака'
+      return 'dismount', '#спешится, зажата атака'
     end
-    return 'none', 'верхом'
+    return 'none', '#верхом'
   end
 
   if not ns.State.attack and ns.State.playerEat then
@@ -92,16 +93,17 @@ function ns.TryTarget()
   end
 
   if not ns.State.attack and not ns.State.combatTarget and not ns.State.autoattack then
-    return 'none', 'цель не в бою, не нажата атака, не вкл автоатака'
+    return 'none', '#цель не в бою, не нажата атака, не вкл автоатака'
   end
 
   local stopDebuff = not ns.State.attack and ns.HasDebuff(stopAttackDebuff)
+  local dist10 = CheckInteractDistance('target', 3)
   if ns.State.autoattack then
     if stopDebuff then
       return 'stopattack', 'не бъем в ' .. stopDebuff
     end
-  elseif not stopDebuff then
-    return 'startattack', '#автоатака'
+  elseif not stopDebuff and dist10 then
+    return 'startattack', '#автоатака dist < 10'
   end
   return false, ''
 end

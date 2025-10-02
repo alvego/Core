@@ -15,6 +15,7 @@ local IsCurrentSpell = IsCurrentSpell
 local GetRuneType = GetRuneType
 local GetTalentInfo = GetTalentInfo
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
+local IsEquippedItem = IsEquippedItem
 local type = type
 local math_max = math.max
 local format = format
@@ -65,7 +66,7 @@ end
 ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', ghoulTracker)
 ------------------------------------------------------------------------------------------------------------------
 local function canUseSpell(spell)
-    return IsUsableSpell(spell) and ns.CanUseAction(spell)
+    return IsUsableSpell(spell) and ns.CanUseAction(spell) and not ns.IsSpellFailedRecently(spell)
 end
 ------------------------------------------------------------------------------------------------------------------
 local function canUseGcdSpell(spell)
@@ -112,6 +113,7 @@ local function tryThreat(unit)
 
     if isTanking then return false end
     if ns.IsOneUnit('player', targetUnit) then return false end
+    if UnitExists('focus') and ns.IsOneUnit(unit, 'focus') then return false end
 
     if ns.TimerLess('Темная власть', 3) or ns.TimerLess('Хватка смерти', 3) then
         return false -- недавно прожали, не частим
@@ -385,6 +387,12 @@ local function getBloodAction()
         action, reason = 'Истерия', 'бурст'
         if not needHeal and not st.pvp and not ns.HasBuff('Истерия') and canUseSpell(action) then
             return action, reason
+        end
+
+        action, reason = 'Последний вдох', 'акс бурст'
+        if IsEquippedItem(action) and canUseItem(action) then
+            return action,
+                reason
         end
     end
 
