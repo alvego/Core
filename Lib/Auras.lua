@@ -14,7 +14,7 @@ local function matchBuff(buffName, name, debuffType, canStealOrPurge, spellId)
         return spellId == buffName
     end
     if buffName == debuffType then
-        return true --canStealOrPurge
+        return canStealOrPurge ~= nil
     end
     return ns.StrContains(name, buffName)
 end

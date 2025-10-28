@@ -10,6 +10,8 @@ local UnitIsAFK = UnitIsAFK
 local CheckInteractDistance = CheckInteractDistance
 local type = type
 ------------------------------------------------------------------------------------------------------------------
+local mountBuff = { 'Магический пузырь', 'Полет' }
+------------------------------------------------------------------------------------------------------------------
 local function getAction()
   if SpellIsTargeting() then
     local info = ns.LastSpellAutoTarget()
@@ -48,7 +50,7 @@ local function getAction()
     return 'none', '#чат'
   end
 
-  if ns.State.mount or ns.State.vehicle or ns.HasBuff('Полет') then
+  if ns.State.mount or ns.State.vehicle or ns.HasBuff(mountBuff) then
     if ns.State.attack then
       return 'dismount', '#спешится, зажата атака'
     end

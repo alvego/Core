@@ -15,10 +15,10 @@ local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitLevel = UnitLevel
 local UnitGUID = UnitGUID
-local UnitThreatSituation = UnitThreatSituation
 local hooksecurefunc = hooksecurefunc
 local GetNumTalents = GetNumTalents
 local GetTalentInfo = GetTalentInfo
+local UnitIsFriend = UnitIsFriend
 ------------------------------------------------------------------------------------------------------------------
 local classHex = {
     ['ROGUE'] = 'FFF468',
@@ -63,6 +63,7 @@ end
 function ns.IsInvalidTarget(unit)
     unit = unit or 'target'
     if not UnitExists(unit) then return 'остутствует ' .. unit end
+    if UnitIsFriend('player', unit) then return 'дружественная цель ' .. unit end
     if not UnitCanAttack('player', unit) then return 'не могу бить ' .. unit end
     if UnitIsDeadOrGhost(unit) and not ns.HasBuff('Притвориться мертвым', unit) then return unit .. ' мертв' end
     return false
