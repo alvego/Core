@@ -1,0 +1,77 @@
+-------------------------------------------------------------------------------
+-- By by Unknown Coder
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
+local wipe = wipe
+local select = select
+local pairs = pairs
+local next = next
+local db = {}
+-------------------------------------------------------------------------------
+local function needUpdateDotes()
+    if c.state.combatMode then return true end        -- в бою
+    if c.state.autoattack then return true end        -- автоатака
+    if c.attack then return true end                  -- зажата атака
+    if not c.state.invalidTarget then return true end -- есть валидный таргет
+    return false
+end
+
+-------------------------------------------------------------------------------
+local function updateDotes()
+    -- Не чичтим если нужно обновлять
+    if needUpdateDotes() then return end
+    if (next(db) ~= nil) then
+        -- Возвращаем все таблицы в пул перед очисткой db
+        for _, dotes in pairs(db) do
+            c.TablePoolRelease(dotes)
+        end
+        wipe(db)
+    end
+end
+c.AttachBeforeUpdate(updateDotes)
+
+-------------------------------------------------------------------------------
+local function addDotedUnit(guid, spell)
+    local dotes = db[guid]
+    if not dotes then
+        dotes = c.TablePoolAcquire()
+        db[guid] = dotes
+    end
+    dotes[spell] = dotes
+end
+
+------------------------------------------------------------------------------------------------------------------
+local function removeDotedUnit(guid, spell)
+    local dotes = db[guid]
+    if dotes then
+        dotes[spell] = nil
+    end
+end
+
+------------------------------------------------------------------------------------------------------------------
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+                                destFlags, ...)
+    -- если есть смысл
+    if not needUpdateDotes() then return end
+    -- Обрабатываем только мои ауры
+    if sourceGUID ~= c.state.playerGUID then return end
+    local spellName = select(2, ...)
+    if subEvent == 'SPELL_AURA_APPLIED' or subEvent == 'SPELL_AURA_REFRESH' then
+        addDotedUnit(destGUID, spellName)
+    elseif subEvent == 'SPELL_AURA_REMOVED' then
+        removeDotedUnit(destGUID, spellName)
+    end
+end
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+
+------------------------------------------------------------------------------------------------------------------
+function c.DotedUnitCount(spell) -- Count of units with my dote <spell>
+    local count = 0
+    for _, dotes in pairs(db) do
+        if dotes[spell] then count = count + 1 end
+    end
+    return count
+end
+
+------------------------------------------------------------------------------------------------------------------

@@ -1,21 +1,21 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local name, ns = ... -- namespace
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local _G = _G
 local ActionHasRange = ActionHasRange
-local format = format
 local wipe = wipe
-local error = error
+local type = type
+local tostring = tostring
 local GetMacroInfo = GetMacroInfo
 local GetActionInfo = GetActionInfo
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
 local GetActionTexture = GetActionTexture
-------------------------------------------------------------------------------------------------------------------
-function ns.GetSlotName(slot)
+-------------------------------------------------------------------------------
+function c.GetSlotName(slot)
     local name = nil
     local actiontype, id, subtype, spellId = GetActionInfo(slot)
     if actiontype == 'spell' then
@@ -27,25 +27,25 @@ function ns.GetSlotName(slot)
     elseif actiontype == 'macro' then
         name = GetMacroInfo(id)
     end
-    return name
+    return name, actiontype
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local actions = {}
 local updateActions = function()
     wipe(actions)
     for slot = 1, 120 do -- 12 x 10
-        local name = ns.GetSlotName(slot)
+        local name = c.GetSlotName(slot)
         if name then
             actions[name] = slot
         end
     end
 end
-ns.AttachEvent('ACTIONBAR_SLOT_CHANGED', updateActions)
-ns.AttachEvent('PLAYER_ENTERING_WORLD', updateActions)
+c.AttachEvent('ACTIONBAR_SLOT_CHANGED', updateActions)
+c.AttachEvent('PLAYER_ENTERING_WORLD', updateActions)
 
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local actionsCD = {}
 local function hook_SetCooldown(self, start, duration)
     local parent = self:GetParent()
@@ -55,132 +55,128 @@ local function hook_SetCooldown(self, start, duration)
     actionsCD[name] = start + duration
 end
 hooksecurefunc(getmetatable(ActionButton1Cooldown).__index, 'SetCooldown', hook_SetCooldown)
-------------------------------------------------------------------------------------------------------------------
-function ns.GetSlotCooldownLeft(slot)
+-------------------------------------------------------------------------------
+function c.GetSlotCooldownLeft(slot)
     if not slot then return 0 end
     local cd = actionsCD['BT4Button' .. slot]
     return cd and (cd - GetTime()) or 0
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.CanUseSlot(slot)
-    if slot == nil then
-        return false, 'not set'
-    end
-    if slot == 0 or slot > 120 then -- не проверяем кастомные слоты
-        return true, ''
+-------------------------------------------------------------------------------
+function c.CanUseSlot(slot, unit)
+    if type(slot) ~= 'number' or slot == nil or slot == 0 or slot > 120 then
+        return false, '!slot ' .. tostring(slot)
     end
     local isUsable, notEnoughMana = IsUsableAction(slot)
     if not isUsable or notEnoughMana then
         return false, notEnoughMana and '!mana' or '!usable'
     end
-    if ActionHasRange(slot) and IsActionInRange(slot) == 0 then
+    if ActionHasRange(slot) and IsActionInRange(slot, unit) == 0 then
         return false, '!range'
     end
-    if ns.GetSlotCooldownLeft(slot) > ns.State.latency then
+    if c.GetSlotCooldownLeft(slot) > c.latency then
         return false, '!ready'
     end
     return true, ''
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.GetSlot(action)
+-------------------------------------------------------------------------------
+function c.GetSlot(action)
     if action == 'none' then
         return 0
     end
     if not action then
-        ns.Error('Неверное действие. Используй none для бездействия.');
+        c.Error('Неверное действие. Используй none для бездействия.');
         return 0
-    end
-    if action == 'mouse1' then
-        return 1000 -- left mouse click
-    end
-    if action == 'mouse1_center' then
-        return 1001 -- left mouse click in center screen
-    end
-    if action == 'skip_afk' then
-        return 2000 -- Skip AFK state
     end
     local slot = actions[action]
     if not slot then
-        ns.Error('Не могу найти на панели [' .. action .. ']');
+        c.Error('Не могу найти на панели [' .. action .. ']');
         return 0
     end
     return slot
 end
 
-------------------------------------------------------------------------------------------------------------------
-local function formatIcon(icon)
-    return icon and '|T' .. icon .. ':24:24:0:0|t' or '       '
+-------------------------------------------------------------------------------
+function c.IsReadyAction(action)
+    local slot = c.GetSlot(action)
+    return c.GetSlotCooldownLeft(slot) < c.latency
 end
 
-function ns.ActionLog(icon, action, info, hex)
-    if string.sub(info, 1, 1) == "#" then
-        return -- игнорируем комментарии
-    end
-    ns.DebugChatNoSpam(format('%s [%s] %s', formatIcon(icon), action or '...', info or '???'), hex or 'FFFFFF')
+-------------------------------------------------------------------------------
+function c.CanUseAction(action, unit)
+    local slot = c.GetSlot(action)
+    return c.CanUseSlot(slot, unit)
 end
 
-------------------------------------------------------------------------------------------------------------------
-local lastSlot = 0
-local lastAction = nil
-function ns.UseAction(action, info)
-    if action == nil then
-        error(format('ns.UseAction(%s, %s) - action can be string', action or 'nil', info or 'nil'))
-    end
-    if info == nil then
-        ns.Error(format('ns.UseAction(%s, %s) - can have info!', action or 'nil', info or 'nil'))
-    end
-    local slot = ns.GetSlot(action)
-    local canuse, canuseinfo = ns.CanUseSlot(slot)
-
-
-    if action == 'none' then
-        if ns.showNoneReason then
-            ns.ActionLog(nil, action, info, '888888')
-        end
-    elseif not canuse then
-        ns.ActionLog(nil, action, info .. ' ' .. canuseinfo, 'ff8888')
-        slot = 0
-    end
-
-    if lastSlot ~= slot then
-        lastSlot = slot
-        ns.Semaphore(slot)
-        if slot ~= 0 and slot <= 120 then -- 12 * 10
-            local icon = GetActionTexture(slot)
-            ns.ActionLog(icon, action, info, '00BFFF')
-            lastAction = action
-        end
-    end
+-------------------------------------------------------------------------------
+function c.SlotIsPressed(slot)
+    if not slot then return false end
+    local btn = _G['BT4Button' .. slot]
+    if not btn then return false end
+    return btn:GetButtonState() == 'PUSHED'
 end
 
-function ns.GetLastAction()
-    return lastAction
-end
-
-------------------------------------------------------------------------------------------------------------------
-function ns.IsReadyAction(action)
-    local slot = ns.GetSlot(action)
-    return ns.GetSlotCooldownLeft(slot) < ns.State.latency
-end
-
-------------------------------------------------------------------------------------------------------------------
-function ns.CanUseAction(action)
-    local slot = ns.GetSlot(action)
-    return ns.CanUseSlot(slot)
-end
-
-------------------------------------------------------------------------------------------------------------------
-function ns.ButtonIsPressed()
+-------------------------------------------------------------------------------
+function c.ButtonIsPressed()
     for i = 1, 120 do -- 12 x 10
-        local btn = _G['BT4Button' .. i]
-        if btn and btn:GetButtonState() == 'PUSHED' and lastSlot ~= i then
-            lastAction = ns.GetSlotName(i)
+        if c.SlotIsPressed(i) then
             return i
         end
     end
     return nil
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+function c.IsActionPressed(action)
+    return c.SlotIsPressed(c.GetSlot(action))
+end
+
+-------------------------------------------------------------------------------
+local mouseButtons = {
+    [1] = 'LeftButton',
+    [2] = 'RightButton',
+    [3] = 'MiddleButton',
+    [4] = 'Button4',
+    [5] = 'Button5',
+}
+
+local whatHappend = ''
+
+function c.LogWhatHappend(msg, skipLogging)
+    if not msg then
+        c.Error('WhatHappend is "' .. tostring(msg) .. '"?!!')
+        return
+    end
+    if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
+    c.MessageLog(msg)
+end
+
+function c.DoAction(reason, name, target, btnNum)
+    if type(reason) ~= 'string' then
+        c.Error(format('DoAction: reason requared! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        return
+    end
+    if type(name) ~= 'string' then
+        c.Error(format('DoAction: name requared! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        return
+    end
+    if type(target) ~= 'string' then target = 'target' end
+    local button = mouseButtons[btnNum]
+    if type(button) ~= 'string' then
+        button = mouseButtons[1]
+    end
+
+    local slot = c.GetSlot(name)
+    local canuse, canuseinfo = c.CanUseSlot(slot, target)
+    if not canuse then
+        c.MessageLog(format('%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
+        return
+    end
+    c.LogWhatHappend(reason, true)
+    c.Message(reason, name, GetActionTexture(slot))
+    c.Action(slot, target, button)
+    c.lastAction = name
+end
+
+-------------------------------------------------------------------------------

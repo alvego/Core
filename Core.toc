@@ -1,32 +1,39 @@
 ## Author: Unknown Coder
 ## Title: Core
-## Version: 1.0
+## Version: 2.0
 ## DefaultState: Disabled
 ## Interface: 30300
-## SavedVariables: Paused
+## SavedVariables: CoreDB
 
-Lib\Globals.lua
+Core.lua
+
+Lib\External.lua
 Lib\TablePool.lua
 Lib\Timers.lua
 Lib\Misc.lua
 Lib\Data.lua
 Lib\Events.lua
 Lib\Debug.lua
-Lib\Semaphore.lua
 Lib\Chat.lua
 Lib\Telemetry.lua
 Lib\CombatLog.lua
 Lib\Units.lua
-Lib\Targets.lua
-Lib\Modificators.lua
+Lib\Duel.lua
+Lib\TimeToDie.lua
 Lib\Actions.lua
+Lib\ActionHooks.lua
 Lib\Spells.lua
 Lib\Range.lua
 Lib\Kick.lua
 Lib\Auras.lua
-Lib\Latency.lua
+Lib\Dotes.lua
+Lib\Objects.lua
+Lib\Targets.lua
+Lib\Direction.lua
 Lib\State.lua
+Lib\SpellStore.lua
 
+Common.lua
 
 Data\DeathKnight.lua
 Data\Druid.lua
@@ -38,5 +45,3 @@ Data\Rogue.lua
 Data\Shaman.lua
 Data\Warlock.lua
 Data\Warrior.lua
-
-Main.lua

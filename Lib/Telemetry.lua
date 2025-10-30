@@ -1,20 +1,25 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local name, ns = ...
+-------------------------------------------------------------------------------
+local c = Core
 local format = format
+local tostring = tostring
 local tinsert = tinsert
 local wipe = wipe
 local table_concat = table.concat
-------------------------------------------------------------------------------------------------------------------
-local frame = CreateFrame('Frame', name .. 'Telemetry', UIParent)
+local GetFramerate = GetFramerate
+local WrapTextInColorCode = WrapTextInColorCode
+local GetAddOnMemoryUsage = GetAddOnMemoryUsage
+local UnitIsPVP = UnitIsPVP
+-------------------------------------------------------------------------------
+local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
 frame:SetHeight(10)
 frame:SetWidth(10)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
 frame.text:SetFont("Fonts\\ARIALN.TTF", 10) -- Альтернативный шрифт
 frame.text:SetAllPoints()
-frame:SetPoint('TOPLEFT', 20, 0)
+frame:SetPoint('TOPLEFT', 0, 0)
 frame:SetScale(1);
 frame:SetAlpha(1)
 local texture = frame:CreateTexture('Texture', 'BACKGROUND')
@@ -22,7 +27,8 @@ texture:SetBlendMode('DISABLE')
 texture:SetTexture(0, 0, 0)
 texture:SetAlpha(0.5)
 texture:SetAllPoints(frame)
-------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
 local function updateTelemetryVisibility(visible)
     if visible then
         if not frame:IsVisible() then frame:Show() end
@@ -30,36 +36,43 @@ local function updateTelemetryVisibility(visible)
     end
     if frame:IsVisible() then frame:Hide() end
 end
-ns.AttachUpdateDebugState(updateTelemetryVisibility)
-------------------------------------------------------------------------------------------------------------------
+c.AttachUpdateDebugState(updateTelemetryVisibility)
 
+-------------------------------------------------------------------------------
 local list = {}
-function ns.AttachTelemetry(fn)
+function c.AttachTelemetry(fn)
     if type(fn) ~= 'function' then error('Telemetry fn must be a getter function') end
     tinsert(list, fn)
 end
 
-------------------------------------------------------------------------------------------------------------------
-
-function ns.TelemetryBool(label, value)
-    return value and '|cff00ff00' .. label .. '|r' or '|cff888888' .. label .. '|r'
+-------------------------------------------------------------------------------
+function c.TelemetryBool(label, value)
+    return WrapTextInColorCode(label, value and 'ff00ff00' or 'ff885555')
 end
 
-------------------------------------------------------------------------------------------------------------------
+function c.TelemetryRedBool(label, value)
+    return WrapTextInColorCode(label, value and 'ff558855' or 'ffff0000')
+end
+
+-------------------------------------------------------------------------------
 
 local data = {}
 local function createTelemetryMessage()
     for _, fn in pairs(list) do
-        tinsert(data, fn())
+        local msg = fn()
+        if msg then
+            tinsert(data, tostring(msg))
+        end
     end
     local label = table_concat(data, ', ')
     wipe(data)
     return label
 end
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 local function updateTelemetry()
     local telemetry = createTelemetryMessage()
-    if ns.IsChanged('ns.UpdateTelemetry', telemetry) then
+    if c.IsChanged('UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)
         local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
         local textHeight = frame.text:GetStringHeight()
@@ -67,29 +80,41 @@ local function updateTelemetry()
         frame:SetHeight(textHeight)
     end
 end
-ns.AttachAfterIdle(updateTelemetry)
-------------------------------------------------------------------------------------------------------------------
+c.AttachAfterUpdate(updateTelemetry)
 
-ns.AttachTelemetry(function()
-    return ns.TelemetryBool('RUN', not Paused)
+-------------------------------------------------------------------------------
+c.AttachTelemetry(function()
+    return c.TelemetryBool('RUN', not c.Paused())
 end)
 
-ns.AttachTelemetry(function()
-    return ns.TelemetryBool('BOSS', ns.State.bossTarget)
+-------------------------------------------------------------------------------
+c.AttachTelemetry(function()
+    return c.TelemetryBool('ATK', c.attack)
 end)
 
-ns.AttachTelemetry(function()
-    return ns.TelemetryBool('PVP', ns.State.pvp)
+-------------------------------------------------------------------------------
+-- c.AttachTelemetry(function()
+--     return format('TAR15: %03d', c.GetEnemyCount(15, 'player'))
+-- end)
+
+-------------------------------------------------------------------------------
+c.AttachTelemetry(function()
+    return format('SPD: %03d%%', c.Round(c.state.speed / 7 * 100))
 end)
 
-ns.AttachTelemetry(function()
-    return format('SPD: %03d%%', ns.Round(ns.State.speed / 7 * 100))
+-------------------------------------------------------------------------------
+-- c.AttachTelemetry(function()
+--     return format('Lag: %04dms', c.Round(c.latency * 1000))
+-- end)
+
+-------------------------------------------------------------------------------
+c.AttachTelemetry(function()
+    return format('FPS: %03d', GetFramerate())
 end)
 
-ns.AttachTelemetry(function()
-    return format('TAR: %02d', ns.State.numTargets)
-end)
+-------------------------------------------------------------------------------
+-- c.AttachTelemetry(function()
+--     return format('Mem: %.1fKB', GetAddOnMemoryUsage(c.name))
+-- end)
 
-ns.AttachTelemetry(function()
-    return format('TTD: %03ds', ns.Round(ns.State.ttd))
-end)
+-------------------------------------------------------------------------------

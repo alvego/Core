@@ -1,18 +1,19 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local name, ns = ... -- namespace
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local tinsert = tinsert
 local type = type
 local error = error
-------------------------------------------------------------------------------------------------------------------
+local GetTime = GetTime
+-------------------------------------------------------------------------------
 -- Инициализация скрытого фрейма для обработки событий
-local frame = CreateFrame('Frame', name .. 'Events', UIParent)
-------------------------------------------------------------------------------------------------------------------
+local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
+-------------------------------------------------------------------------------
 -- Список событие -> обработчики
 local eventList = {}
-function ns.AttachEvent(event, func)
+function c.AttachEvent(event, func)
     if type(func) ~= 'function' then error('Wrong type') end
     local funcList = eventList[event]
     if nil == funcList then
@@ -24,7 +25,7 @@ function ns.AttachEvent(event, func)
     eventList[event] = funcList
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Выполняем обработчики соответсвующего события
 local function onEvent(self, event, ...)
     if eventList[event] ~= nil then
@@ -37,43 +38,50 @@ local function onEvent(self, event, ...)
 end
 frame:SetScript('OnEvent', onEvent)
 
-------------------------------------------------------------------------------------------------------------------
-local listBeforeIdle = {}
-function ns.AttachBeforeIdle(func)
+-------------------------------------------------------------------------------
+local listBeforeUpdate = {}
+function c.AttachBeforeUpdate(func)
     if type(func) ~= 'function' then error('Wrong type') end
-    tinsert(listBeforeIdle, func)
+    tinsert(listBeforeUpdate, func)
 end
 
-------------------------------------------------------------------------------------------------------------------
-local listAfterIdle = {}
-function ns.AttachAfterIdle(func)
+-------------------------------------------------------------------------------
+local listAfterUpdate = {}
+function c.AttachAfterUpdate(func)
     if type(func) ~= 'function' then error('Wrong type') end
-    tinsert(listAfterIdle, func)
+    tinsert(listAfterUpdate, func)
 end
 
-------------------------------------------------------------------------------------------------------------------
-local busy = false -- we don't use ns.IsChnaged for speed reasons
-local function lockedIdle()
-    busy = true
-    for i = 1, #listBeforeIdle do
-        listBeforeIdle[i]()
-    end
-    if type(ns.Idle) == 'function' then ns.Idle() end
-    for i = 1, #listAfterIdle do
-        listAfterIdle[i]()
-    end
-    busy = false
+-------------------------------------------------------------------------------
+
+local skipNextUpdate = false -- skip next Update
+function c.SkipNextUpdate()
+    skipNextUpdate = true
 end
-------------------------------------------------------------------------------------------------------------------
-local update = 1
+
+-------------------------------------------------------------------------------
+local lastUpdate = 0
+
 -- Выполняем обработчики события OnUpdate
-local function onUpdate(frame, elapsed)
-    if busy then return end
-    update = update + elapsed
-    --if update < 0.125 then return end -- ждем 1/8 sec
-    if update < 0.501 then return end -- ждем 1/2 sec
-    update = 0
-    lockedIdle();
+local function onUpdate()
+    if GetTime() - lastUpdate < 0.2 then
+        return
+    end
+    ----------------------------------------------------------------
+    for i = 1, #listBeforeUpdate do
+        listBeforeUpdate[i]()
+    end
+    ----------------------------------------------------------------
+    if not (skipNextUpdate or c.Paused()) and type(c.Update) == 'function' then
+        c.Update()
+    end
+    skipNextUpdate = false
+    ----------------------------------------------------------------
+    for i = 1, #listAfterUpdate do
+        listAfterUpdate[i]()
+    end
+    ----------------------------------------------------------------
+    lastUpdate = GetTime() -- Обновляем таймер после вызова (плюс время выполнения)
 end
 frame:SetScript('OnUpdate', onUpdate)
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

@@ -1,27 +1,47 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ...
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local GetCVar = GetCVar
 local tinsert = tinsert
 local type = type
 local error = error
-------------------------------------------------------------------------------------------------------------------
+
+local debug = nil
+
+function c.Debug()
+    if debug == nil then
+        debug = GetCVar('scriptErrors') == '1'
+    end
+    return debug
+end
+
+-------------------------------------------------------------------------------
 local funcList = {}
-function ns.AttachUpdateDebugState(func)
+function c.AttachUpdateDebugState(func)
     if type(func) ~= 'function' then error('Wrong type') end
     tinsert(funcList, func)
 end
 
-------------------------------------------------------------------------------------------------------------------
-local function updateDebugState() -- call all subscribers
-    ns.Debug = GetCVar('scriptErrors') == '1'
-    if ns.IsChanged('ns.Debug', ns.Debug) then
+-------------------------------------------------------------------------------
+local function updateDebugStateHook(key, value)
+    if key ~= 'scriptErrors' then return end
+    debug = GetCVar('scriptErrors') == '1'
+    if c.IsChanged('Debug', debug) then
         for i = 1, #funcList do
-            funcList[i](ns.Debug)
+            funcList[i](debug)
         end
     end
 end
-ns.AttachBeforeIdle(updateDebugState)
-------------------------------------------------------------------------------------------------------------------
+hooksecurefunc('SetCVar', updateDebugStateHook)
+-------------------------------------------------------------------------------
+function c.DebugHook(funcName)
+    hooksecurefunc(funcName, function(...)
+        c.Log(funcName, ...)
+    end)
+end
+
+--c.DebugHook('SetCVar')
+-------------------------------------------------------------------------------
+

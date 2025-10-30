@@ -1,8 +1,12 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ...
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
+local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
+local IsControlKeyDown = IsControlKeyDown
+local IsAltKeyDown = IsAltKeyDown
+local IsShiftKeyDown = IsShiftKeyDown
 local UnitGUID = UnitGUID
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
@@ -16,70 +20,60 @@ local UnitAffectingCombat = UnitAffectingCombat
 local IsCurrentSpell = IsCurrentSpell
 local GetUnitSpeed = GetUnitSpeed
 local IsFalling = IsFalling
-------------------------------------------------------------------------------------------------------------------
-ns.State = {}
+local wipe = wipe
+-------------------------------------------------------------------------------
+local function updateState()
+    wipe(c.stateCache)
+    local gameFocus = not GetCurrentKeyBoardFocus()
+    c.state.ctrl = gameFocus and IsControlKeyDown() == 1
+    c.state.alt = gameFocus and IsAltKeyDown() == 1
+    c.state.shift = gameFocus and IsShiftKeyDown() == 1
 
-local playerClass, playerColor = ns.UnitClassName()
-ns.State.playerClass = playerClass
-ns.State.playerColor = playerColor
+    c.state.playerGUID = UnitGUID('player')
+    c.state.pressedButton = c.ButtonIsPressed()
 
-local eatBuff = { 'Пища', 'Питье' }
-------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------
-function ns.UpdateState()
-    ns.State.playerGUID = UnitGUID('player')
-    ns.State.attack = ns.IsMouse(4)
-    ns.State.stop = ns.IsMouse(5)
-    ns.State.pressedButton = ns.ButtonIsPressed()
-    ns.State.mount = IsMounted()
-    ns.State.vehicle = CanExitVehicle()
-    ns.State.playerCasting = ns.UnitCasting()
-    ns.State.playerEat = ns.HasBuff(eatBuff)
-    ns.State.playerHP100 = ns.UnitHealth100()
-    ns.State.playerMana100 = ns.UnitMana100()
-    ns.State.existsTarget = UnitExists('target')
-    ns.State.invalidTarget = ns.IsInvalidTarget()
-    ns.State.duel = ns.IsInDuel()
-    ns.State.numTargets = ns.GetNumTargets()
+    c.state.playerCasting = c.UnitCasting()
+    c.state.playerHP100 = c.UnitHealth100()
+    c.state.playerMana100 = c.UnitMana100()
+
+    c.state.existsTarget = UnitExists('target')
+    c.state.ttd = c.UnitTimeToDie('target')
+    c.state.invalidTarget = c.IsInvalidTarget()
 
     local inInstance, instanceType = IsInInstance()
-    ns.State.instance = inInstance ~= nil and instanceType ~= 'pvp' and instanceType ~= 'arena'
-    ns.State.battleground = inInstance ~= nil and instanceType == 'pvp'
-    ns.State.arena = inInstance ~= nil and instanceType == 'arena'
-    ns.State.pvp = ns.State.arena or ns.State.battleground or ns.State.duel or
-        (not ns.State.invalidTarget and UnitIsPlayer('target'))
-    ns.State.party = GetNumPartyMembers() > 0
-    ns.State.raid = GetNumRaidMembers() > 0
-    ns.State.group = ns.State.party or ns.State.raid
+    c.state.instance = inInstance ~= nil and instanceType ~= 'pvp' and instanceType ~= 'arena'
+    c.state.battleground = inInstance ~= nil and instanceType == 'pvp'
+    c.state.arena = inInstance ~= nil and instanceType == 'arena'
+    c.state.pvp = c.state.arena or c.state.battleground or c.duel or
+        (not c.state.invalidTarget and UnitIsPlayer('target'))
+    c.state.party = GetNumPartyMembers() > 0
+    c.state.raid = GetNumRaidMembers() > 0
+    c.state.group = c.state.party or c.state.raid
 
-    ns.State.combatLock = InCombatLockdown()
-    ns.TimerToggle('combatLock', ns.State.combatLock)
-    ns.State.combatTarget = ns.State.existsTarget and UnitAffectingCombat('target')
-    ns.State.bossTarget = ns.State.existsTarget and ns.UnitIsBoss('target')
-    ns.State.targetPlayer = ns.State.existsTarget and UnitIsPlayer('target')
-    ns.State.ttd = ns.TimeToDie('target')
-    ns.State.targetHard = ns.State.bossTarget or ns.State.targetPlayer or ns.State.ttd > 30
-    ns.State.targetImmune = ns.State.invalidTarget or ns.UnitIsImmune('target')
-    ns.State.targetImmuneMagic = ns.State.targetImmune or ns.UnitIsMagicImmune('target')
-    ns.State.targetVisible = ns.State.existsTarget and not ns.IsLOS()
-    ns.State.targetBehind = ns.State.existsTarget and not ns.IsNotBehind()
+    c.state.combatLock = InCombatLockdown()
+    c.TimerToggle('combatLock', c.state.combatLock)
+    c.state.combatTarget = c.state.existsTarget and UnitAffectingCombat('target')
+    c.state.bossTarget = c.state.existsTarget and c.UnitIsBoss('target')
+    c.state.targetPlayer = c.state.existsTarget and UnitIsPlayer('target')
 
-    if not ns.State.invalidTarget and ns.State.combatTarget then
-        ns.TimerStart('combatTarget')
+    c.state.targetImmune = c.state.invalidTarget or c.UnitIsImmune('target')
+    c.state.targetImmuneMagic = c.state.targetImmune or c.UnitIsMagicImmune('target')
+    c.state.targetVisible = c.state.existsTarget and c.UnitInLOS('player', 'target')
+    c.state.targetBehind = c.state.existsTarget and c.UnitBehind('target')
+
+    if not c.state.invalidTarget and c.state.combatTarget then
+        c.TimerStart('combatTarget')
     end
 
-    ns.State.autoattack = IsCurrentSpell('Автоматическая атака')
-    ns.State.combatMode = ns.State.attack or ns.TimerLess('combatTarget', 1)
+    c.state.autoattack = IsCurrentSpell('Автоматическая атака')
+    c.state.combatMode = c.attack or c.TimerLess('combatTarget', 1)
 
-    ns.State.speed = GetUnitSpeed('player')
-    ns.State.falling = IsFalling()
-    ns.TimerToggle('Falling', ns.State.falling)
-    ns.State.still = ns.State.speed == 0 and not ns.State.falling
-
-    ns.State.latency = ns.GetLatency()
-    ns.State.gcd = not ns.IsReadySpell(61304)
-    ns.State.lastUsedSpell = ns.LastUsedSpell()
+    c.state.speed = GetUnitSpeed('player') or 0
+    c.state.falling = IsFalling()
+    c.TimerToggle('Falling', c.state.falling)
+    c.state.still = c.state.speed == 0 and not c.state.falling
+    c.state.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
-
-ns.UpdateState() -- for init
-------------------------------------------------------------------------------------------------------------------
+c.AttachBeforeUpdate(updateState)
+updateState() -- for init
+-------------------------------------------------------------------------------

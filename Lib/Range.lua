@@ -1,14 +1,14 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ...
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local GetNumSpellTabs = GetNumSpellTabs
 local GetSpellTabInfo = GetSpellTabInfo
 local GetSpellBookItemInfo = GetSpellBookItemInfo
 local GetSpellBookItemName = GetSpellBookItemName
 local IsSpellInRange = IsSpellInRange
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local bookSpellIds = {}
 local function refreshBookSpells()
     local bookType = 'spell'
@@ -26,7 +26,7 @@ local function refreshBookSpells()
 
         if spellType == 'SPELL' then
             local currentSpellName = GetSpellBookItemName(spellBookId, bookType)
-            local currentSpellId = ns.GetSpellId(currentSpellName)
+            local currentSpellId = c.GetSpellId(currentSpellName)
 
             if currentSpellName and not bookSpellIds[currentSpellName] then
                 bookSpellIds[currentSpellName] = spellBookId
@@ -47,10 +47,10 @@ local function refreshBookSpells()
         end
     end
 end
-ns.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
-ns.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
-------------------------------------------------------------------------------------------------------------------
-function ns.IsSpellInRange(spell, unit)
+c.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
+c.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
+-------------------------------------------------------------------------------
+function c.IsSpellInRange(spell, unit)
     if next(bookSpellIds) == nil then refreshBookSpells() end
     if spell == nil then return false end
     if unit == nil then unit = 'target' end
@@ -64,4 +64,4 @@ function ns.IsSpellInRange(spell, unit)
     return inRange == 1
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

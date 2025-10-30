@@ -3,14 +3,16 @@
 -------------------------------------------------------------------------------
 local c = Core
 -------------------------------------------------------------------------------
-local UnitClass = UnitClass
+local hooksecurefunc = hooksecurefunc
 -------------------------------------------------------------------------------
-local className = select(2, UnitClass('player'))
--------------------------------------------------------------------------------
-if className ~= 'ROGUE' then return end
--------------------------------------------------------------------------------
-c.PrintLoadClassModuleMessage(className)
--------------------------------------------------------------------------------
-function c.Update()
-    c.Log(className)
+local function startDuel()
+    c.duel = false
 end
+hooksecurefunc('StartDuel', startDuel);
+-------------------------------------------------------------------------------
+local function duelUpdate(event)
+    c.duel = event == 'DUEL_REQUESTED'
+end
+c.AttachEvent('DUEL_REQUESTED', duelUpdate)
+c.AttachEvent('DUEL_FINISHED', duelUpdate)
+-------------------------------------------------------------------------------

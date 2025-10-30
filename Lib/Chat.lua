@@ -1,8 +1,8 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local name, ns = ... -- namespace
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
@@ -11,21 +11,27 @@ local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
 local format = format
-------------------------------------------------------------------------------------------------------------------
+local tostring = tostring
+local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
+local GRAY_FONT_COLOR = GRAY_FONT_COLOR
+local RED_FONT_COLOR = RED_FONT_COLOR
+local GREEN_FONT_COLOR = GREEN_FONT_COLOR
+local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
+-------------------------------------------------------------------------------
 -- Функция для получения текущего активного чата
 local function getDebugChatFrame()
     local debugChatFrame, tab
     -- Находим чат-фрейм с нашей вкладкой
     for i = 1, NUM_CHAT_WINDOWS do
         tab = _G['ChatFrame' .. i .. 'Tab']
-        if tab and tab:GetText() == name then
+        if tab and tab:GetText() == c.name then
             debugChatFrame = _G['ChatFrame' .. i]
             break
         end
     end
     return debugChatFrame, tab
 end
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Функция для управления видимостью вкладки
 local function updateDebugTabVisibility(visible)
     local chatFrame, tab = getDebugChatFrame()
@@ -52,8 +58,15 @@ local function updateDebugTabVisibility(visible)
         end
     end
 end
-ns.AttachUpdateDebugState(updateDebugTabVisibility)
-------------------------------------------------------------------------------------------------------------------
+c.AttachUpdateDebugState(updateDebugTabVisibility)
+
+
+-------------------------------------------------------------------------------
+local function renederDebugTab()
+    updateDebugTabVisibility(c.Debug())
+end
+c.AttachEvent('PLAYER_ENTERING_WORLD', renederDebugTab)
+-------------------------------------------------------------------------------
 -- Функция для получения свободного чат-фрейма
 local function getFreeChatIndex()
     local frame, tab
@@ -68,16 +81,16 @@ local function getFreeChatIndex()
     end
     return nil
 end
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Настройка чат-фрейма
 local function configureDebugChatFrame(chatFrame)
     -- Настраиваем чат-фрейм
     if not chatFrame then
-        ns.Chat('Debug: chatFrame is nil!', 'FF0000')
+        c.Chat('Debug: chatFrame is nil!')
         return
     end
     -- Устанавливаем имя вкладки
-    FCF_SetWindowName(chatFrame, name)
+    FCF_SetWindowName(chatFrame, c.name)
 
     -- Отключаем стандартные каналы чата
     ChatFrame_RemoveAllMessageGroups(chatFrame)
@@ -89,7 +102,7 @@ local function configureDebugChatFrame(chatFrame)
     chatFrame:SetResizable(true)
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Функция для создания вкладки чата
 local function createDebugChatTab()
     -- Проверяем, не существует ли уже вкладка с именем 'Debug'
@@ -99,72 +112,165 @@ local function createDebugChatTab()
     -- Находим свободный чат-фрейм, который не используется
     chatFrame = getFreeChatIndex()
     if not chatFrame then
-        ns.Chat('Нет свободных чат-фреймов для создания вкладки Debug! Закройте или удалите существующие вкладки.',
-            'FF0000')
+        c.Chat('Нет свободных чат-фреймов для создания вкладки Debug! Закройте или удалите существующие вкладки.')
         return
     end
-    print(1, chatFrame == nil)
     configureDebugChatFrame(chatFrame)
 end
-ns.AttachEvent('PLAYER_LOGIN', createDebugChatTab)
+c.AttachEvent('PLAYER_LOGIN', createDebugChatTab)
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local iconSuccess = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_green'
+local iconLog = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_black'
+local iconError = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_red'
+local iconEcho = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_orange'
+local iconMessage = 'Interface\\Icons\\Ability_Vehicle_ShellShieldGenerator'
+
+local function formatIcon(icon)
+    return icon and '|T' .. icon .. ':24:24:0:0|t' or '       '
+end
+
+local function formatMessage(icon, label, msg)
+    return format('%s [%s] %s', formatIcon(icon), label or '...', msg or '???')
+end
+
+-------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений
-function ns.DebugChat(msg, hex)
-    if not ns.Debug then return end
+local function debugChat(msg, title, icon, r, g, b)
+    if not c.Debug() then return end
     if msg == nil then return end
     local chatFrame = getDebugChatFrame()
-    if not chatFrame then return end
-    local r, g, b = ns.Hex2Rgb(hex or '88FF88')
-    chatFrame:AddMessage(msg, r, g, b)
+    if not chatFrame then
+        chatFrame = DEFAULT_CHAT_FRAME --failback
+    end
+    chatFrame:AddMessage(
+        formatMessage(
+            icon or iconMessage,
+            title or c.name,
+            msg
+        ),
+        r or YELLOW_FONT_COLOR.r,
+        g or YELLOW_FONT_COLOR.g,
+        b or YELLOW_FONT_COLOR.b
+    )
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений  без спама
-function ns.DebugChatNoSpam(msg, hex)
-    if not ns.IsChanged('ns.DebugChatNoSpam', msg .. hex) then
+function c.Message(msg, title, icon, r, g, b)
+    msg = tostring(msg)
+    title = tostring(title)
+    if not c.showNoneReason and string.sub(msg, 1, 1) == '#' then
+        return -- игнорируем комментарии
+    end
+    if not c.IsChanged('Message', msg .. title) then
         return
     end
-    ns.DebugChat(msg, hex)
+    debugChat(msg, title, icon, r, g, b)
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+function c.MessageLog(msg, title, icon, r, g, b)
+    c.Message(
+        msg,
+        title or c.GetCurrentTime(),
+        icon or iconLog,
+        r or GRAY_FONT_COLOR.r,
+        g or GRAY_FONT_COLOR.g,
+        b or GRAY_FONT_COLOR.b
+    )
+end
+
+-------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений без частого спама с указанием времени
-function ns.Log(...)
-    local log = ns.ToStr(...)
-    if not ns.IsChanged('ns.Log', log) and ns.TimerLess('ns.Log', 1) then
+local times = 0
+function c.Log(...)
+    local log = c.ToStr(...)
+    if not c.IsChanged('Log', log) and c.TimerLess('Log', 1) then
+        times = times + 1
         return
     end
-    ns.TimerStart('ns.Log')
-    ns.DebugChat(format('[%s]: %s', ns.GetCurrentTime(), log), '0066AA')
+    c.TimerStart('Log')
+    if times > 1 then
+        log = log .. ' (' .. times .. ')'
+    end
+    times = 0
+    debugChat(
+        log,
+        c.GetCurrentTime(),
+        iconLog,
+        GRAY_FONT_COLOR.r,
+        GRAY_FONT_COLOR.g,
+        GRAY_FONT_COLOR.b
+    )
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Функция для вывода сообщений об ошибках без спама
-function ns.Error(...)
-    local error = ns.ToStr(...)
-    if not ns.IsChanged('ns.Error', error) then return end
-    ns.DebugChat('Ошибка: ' .. error, 'FF0000')
+function c.Error(msg, icon)
+    if not c.IsChanged('Error', msg) then return end
+    debugChat(
+        msg,
+        'Ошибка',
+        icon or iconError,
+        RED_FONT_COLOR.r,
+        RED_FONT_COLOR.g,
+        RED_FONT_COLOR.b
+    )
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+function c.Success(msg, icon)
+    if not c.IsChanged('Succes', msg) then return end
+    debugChat(
+        msg,
+        'Успех',
+        icon or iconSuccess,
+        GREEN_FONT_COLOR.r,
+        GREEN_FONT_COLOR.g,
+        GREEN_FONT_COLOR.b
+    )
+end
+
+-------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений в общий чат
-function ns.Chat(msg, hexColor)
+function c.Chat(msg)
     if msg == nil then return end
-    hexColor = hexColor or '88FF88'
-    local key = 'ns.Chat:' .. hexColor
-    if not ns.IsChanged(key, msg) and ns.TimerLess(key, 2) then return end
-    local r, g, b = ns.Hex2Rgb(hexColor)
-    DEFAULT_CHAT_FRAME:AddMessage(msg, r, g, b);
-    ns.TimerStart(key)
+    msg = tostring(msg)
+    local key = 'Chat:'
+    if not c.IsChanged(key, msg) and c.TimerLess(key, 2) then return end
+    DEFAULT_CHAT_FRAME:AddMessage(
+        formatMessage(
+            iconSuccess,
+            c.name,
+            msg
+        ),
+        GREEN_FONT_COLOR.r,
+        GREEN_FONT_COLOR.g,
+        GREEN_FONT_COLOR.b);
+    c.TimerStart(key)
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Функция для вывода сообщений в центре экрана с затуханием (UIErrorsFrame)
-function ns.Echo(msg) -- Показ сообщения в UIErrorsFrame
+function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в UIErrorsFrame
     if msg == nil then return end
+    msg = tostring(msg)
+    title = tostring(title)
     UIErrorsFrame:Clear()
-    UIErrorsFrame:AddMessage(msg, 0.0, 1.0, 0.0, 53, 2);
+    UIErrorsFrame:AddMessage(
+        formatMessage(
+            icon or iconEcho,
+            title or c.Name,
+            msg
+        ),
+        r or ORANGE_FONT_COLOR.r,
+        g or ORANGE_FONT_COLOR.g,
+        b or ORANGE_FONT_COLOR.b,
+        53,
+        2
+    );
 end
 
-------------------------------------------------------------------------------------------------------------------
+UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+-------------------------------------------------------------------------------

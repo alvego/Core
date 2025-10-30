@@ -1,11 +1,11 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ...
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local GetNetStats = GetNetStats
-------------------------------------------------------------------------------------------------------------------
-local latency = 0
+local math_max = math.max
+-------------------------------------------------------------------------------
 local sendTime = nil
 local function updateLagTime(event, ...)
     local unit, spell = select(1, ...)
@@ -14,21 +14,22 @@ local function updateLagTime(event, ...)
             sendTime = GetTime()
         else
             if not sendTime then return end
-            latency = GetTime() - sendTime
-            ns.TimerStart('updateLagTime')
+            c.latency = math_max(GetTime() - sendTime, c.advance)
+            c.TimerStart('updateLagTime')
             sendTime = nil
         end
     end
 end
-ns.AttachEvent('UNIT_SPELLCAST_SENT', updateLagTime)
-ns.AttachEvent('UNIT_SPELLCAST_START', updateLagTime)
-ns.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', updateLagTime)
-ns.AttachEvent('UNIT_SPELLCAST_FAILED', updateLagTime)
-------------------------------------------------------------------------------------------------------------------
-function ns.GetLatency() -- Время сетевой задержки
-    if ns.TimerMore('updateLagTime', 15) then
-        latency = tonumber((select(3, GetNetStats()) or 0)) / 1000
-        ns.TimerStart('updateLagTime')
+c.AttachEvent('UNIT_SPELLCAST_SENT', updateLagTime)
+c.AttachEvent('UNIT_SPELLCAST_START', updateLagTime)
+c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', updateLagTime)
+c.AttachEvent('UNIT_SPELLCAST_FAILED', updateLagTime)
+-------------------------------------------------------------------------------
+local function updateLatency() -- Время сетевой задержки
+    if c.TimerMore('updateLagTime', 15) then
+        c.latency = math_max(tonumber((select(3, GetNetStats()) or 0)) / 1000, c.advance)
+        c.TimerStart('updateLagTime')
     end
-    return math.max(latency, ns.advance)
 end
+c.AttachBeforeUpdate(updateLatency)
+-------------------------------------------------------------------------------

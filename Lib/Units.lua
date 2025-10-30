@@ -1,9 +1,8 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ... -- namespace
-------------------------------------------------------------------------------------------------------------------
-local UnitClass = UnitClass
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitMana = UnitMana
@@ -14,44 +13,25 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitLevel = UnitLevel
-local UnitGUID = UnitGUID
-local hooksecurefunc = hooksecurefunc
 local GetNumTalents = GetNumTalents
 local GetTalentInfo = GetTalentInfo
 local UnitIsFriend = UnitIsFriend
-------------------------------------------------------------------------------------------------------------------
-local classHex = {
-    ['ROGUE'] = 'FFF468',
-    ['PRIEST'] = 'FFFFFF',
-    ['PALADIN'] = 'F48CBA',
-    ['HUNTER'] = 'AAD372',
-    ['DEATHKNIGHT'] = 'C41E3A',
-    ['MAGE'] = '3FC7EB',
-    ['DRUID'] = 'FF7C0A',
-    ['WARRIOR'] = 'C69B6D',
-    ['WARLOCK'] = '8788EE',
-    ['SHAMAN'] = '0070DD',
-}
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitClassName(unit)
-    local className = select(2, UnitClass(unit or 'player'))
-    return className, classHex[className]
-end
-
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitHealth100(unit)
+local GetActiveSpecGroup = GetActiveSpecGroup
+local UnitClass = UnitClass
+-------------------------------------------------------------------------------
+function c.UnitHealth100(unit)
     unit = unit or 'player'
     return UnitHealth(unit) * 100 / UnitHealthMax(unit)
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitMana100(unit)
+-------------------------------------------------------------------------------
+function c.UnitMana100(unit)
     unit = unit or 'player'
     return UnitMana(unit) * 100 / UnitManaMax(unit)
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitLostHP(unit)
+-------------------------------------------------------------------------------
+function c.UnitLostHP(unit)
     unit = unit or 'player'
     local hp = UnitHealth(unit)
     local maxhp = UnitHealthMax(unit)
@@ -59,110 +39,93 @@ function ns.UnitLostHP(unit)
     return lost
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.IsInvalidTarget(unit)
+-------------------------------------------------------------------------------
+function c.IsInvalidTarget(unit)
     unit = unit or 'target'
     if not UnitExists(unit) then return 'остутствует ' .. unit end
     if UnitIsFriend('player', unit) then return 'дружественная цель ' .. unit end
     if not UnitCanAttack('player', unit) then return 'не могу бить ' .. unit end
-    if UnitIsDeadOrGhost(unit) and not ns.HasBuff('Притвориться мертвым', unit) then return unit .. ' мертв' end
+    if UnitIsDeadOrGhost(unit) and not c.HasBuff('Притвориться мертвым', unit) then return unit .. ' мертв' end
     return false
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitIsNPC(unit)
+-------------------------------------------------------------------------------
+function c.UnitIsNPC(unit)
     unit = unit or 'target'
     return UnitExists(unit) and not (UnitIsPlayer(unit) or UnitPlayerControlled(unit) or UnitCanAttack('player', unit))
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitIsPet(unit)
+-------------------------------------------------------------------------------
+function c.UnitIsPet(unit)
     unit = unit or 'target'
-    return UnitExists(unit) and not ns.UnitIsNPC(unit) and not UnitIsPlayer(unit) and UnitPlayerControlled(unit)
+    return UnitExists(unit) and not c.UnitIsNPC(unit) and not UnitIsPlayer(unit) and UnitPlayerControlled(unit)
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitIsBoss(unit)
+-------------------------------------------------------------------------------
+function c.UnitIsBoss(unit)
     unit = unit or 'target'
     local lvl = UnitLevel(unit)
     return lvl == -1 or lvl > UnitLevel('player') + 3
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.IsOneUnit(unit1, unit2)
-    if not UnitExists(unit1) or not UnitExists(unit2) then return false end
-    return unit1 == unit2 or UnitGUID(unit1) == UnitGUID(unit2)
+-------------------------------------------------------------------------------
+
+local function hasAura(unit, id)
+    if c.UnitAuraByID(unit, id) then
+        return true
+    end
+    return false
 end
 
-------------------------------------------------------------------------------------------------------------------
-local inDuel = false
-local function startDuel()
-    inDuel = true
-end
-hooksecurefunc('StartDuel', startDuel);
+function c.UnitIsTank(unit)
+    unit = unit or 'player'
+    if not UnitExists(unit) or not UnitIsPlayer(unit) then
+        return false
+    end
 
-local function duelUpdate(event)
-    inDuel = event == 'DUEL_REQUESTED'
-end
-ns.AttachEvent('DUEL_REQUESTED', duelUpdate)
-ns.AttachEvent('DUEL_FINISHED', duelUpdate)
+    local _, class = UnitClass(unit)
+    if not class then
+        return false
+    end
 
-function ns.IsInDuel()
-    return inDuel
+    if class == "WARRIOR" then
+        return hasAura(unit, 71) -- Defensive Stance
+    end
+    if class == "PALADIN" then
+        return hasAura(unit, 25780) -- Righteous Fury
+    end
+    if class == "DRUID" then
+        return hasAura(unit, 5487) or hasAura(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
+    end
+    if class == "DEATHKNIGHT" then
+        return hasAura(unit, 48263) -- Frost Presence
+    end
+
+    return false
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local immuneList = { 'Божественный щит', 'Ледяная глыба', 'Сдерживание' }
-function ns.UnitIsImmune(unit)
+function c.UnitIsImmune(unit)
     unit = unit or 'target'
-    local aura = ns.HasBuff(immuneList, unit)
+    local aura = c.HasBuff(immuneList, unit)
     if aura then
         return aura
     end
-    aura = ns.HasDebuff('Смерч', unit)
+    aura = c.HasDebuff('Смерч', unit)
     return aura and aura or false
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local magicList = { 'Отражение заклинания', 'Антимагический панцирь', 'Рунический покров', 'Эффект тотема заземления' }
-function ns.UnitIsMagicImmune(unit)
+function c.UnitIsMagicImmune(unit)
     unit = unit or 'target'
-    local aura = ns.HasBuff(magicList, unit)
+    local aura = c.HasBuff(magicList, unit)
     return aura and aura or false
 end
 
-------------------------------------------------------------------------------------------------------------------
-local function resetTimers()
-    ns.TimerReset('notBehind')
-    ns.TimerReset('notVisible')
-end
-ns.AttachEvent('PLAYER_TARGET_CHANGED', resetTimers)
-------------------------------------------------------------------------------------------------------------------
-function ns.IsLOS()
-    return ns.TimerLess('notVisible', 0.5)
-end
-
-------------------------------------------------------------------------------------------------------------------
-function ns.IsNotBehind()
-    return ns.TimerLess('notBehind', 0.5)
-end
-
-------------------------------------------------------------------------------------------------------------------
-local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
-                                destFlags, ...)
-    if sourceGUID ~= ns.State.playerGUID then return end
-    if subEvent == 'SPELL_CAST_FAILED' then
-        local reason = select(4, ...)
-        if reason == 'Вы должны находиться позади цели.' then
-            ns.TimerStart('notBehind')
-        elseif reason == 'Цель вне поля зрения.' then
-            ns.TimerStart('notVisible')
-        end
-    end
-end
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
-------------------------------------------------------------------------------------------------------------------
-function ns.HasTalent(talent)
+-------------------------------------------------------------------------------
+function c.HasTalent(talent)
     local found = false;
     for i = 1, 7 do
         for j = 1, 3 do
@@ -175,8 +138,8 @@ function ns.HasTalent(talent)
     return found;
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.GetCurrentSpecID()
+-------------------------------------------------------------------------------
+function c.GetCurrentSpecID()
     local maxPoints = 0
     local specID = 0
 
@@ -196,4 +159,4 @@ function ns.GetCurrentSpecID()
     return specID
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

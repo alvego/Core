@@ -1,17 +1,33 @@
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- By by Unknown Coder
-------------------------------------------------------------------------------------------------------------------
-local _, ns = ...
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local GetTime = GetTime
 local GetSpellLink = GetSpellLink
 local GetSpellCooldown = GetSpellCooldown
 local IsUsableSpell = IsUsableSpell
+local GetSpellTexture = GetSpellTexture
+local WrapTextInColorCode = WrapTextInColorCode
 local div1000 = 0.001 -- 1 / 1000
-------------------------------------------------------------------------------------------------------------------
-function ns.UnitCasting(unit)
+local errorBuffer = {}
+local wipe = wipe
+local type = type
+-------------------------------------------------------------------------------
+local function pushError(message, spell)
+    if not c.showSpellError then return end
+    message = message or 'Что-то пошло не так'
+    if not spell then
+        local _spell = errorBuffer[message]
+        spell = type(_spell) == 'string' and spell or true
+    end
+    errorBuffer[message] = spell
+end
+
+-------------------------------------------------------------------------------
+function c.UnitCasting(unit)
     unit = unit or 'player'
     local channel = false
     local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(
@@ -23,134 +39,140 @@ function ns.UnitCasting(unit)
     end
     if spell == nil or not startTime or not endTime then return nil end
     local left = endTime * div1000 - GetTime()
-    if left < ns.State.latency then return nil end
+    if left < c.latency then return nil end
     local duration = (endTime - startTime) * div1000
     return spell, left, duration, channel, notInterruptible
 end
 
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 local spellToIdList = {}
-function ns.GetSpellId(name, rank)
+function c.GetSpellId(name, rank)
     local spellGUID = name
     if rank then
         spellGUID = name .. rank
     end
     local result = spellToIdList[spellGUID]
     if nil == result then
+        result = 0
         local link = GetSpellLink(name, rank)
-        if not link then
-            result = 0
+        if link then
+            result = result + link:match("spell:%d+"):match("%d+")
+            spellToIdList[spellGUID] = result
         else
-            result = 0 + link:match("spell:%d+"):match("%d+")
+            c.Chat(WrapTextInColorCode('[' .. name .. '] не найден ID', 'ffff0000'))
         end
-        spellToIdList[spellGUID] = result
     end
     return result
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.getSpellCooldownLeft(spell)
+-------------------------------------------------------------------------------
+function c.GetSpellCooldownLeft(spell)
     local start, duration = GetSpellCooldown(spell)
     if start then
-        return math.max(0, start + duration - GetTime())
+        return math.max(0, start + duration - GetTime()), duration
     end
-    return 0
+    return 0, 0
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.IsReadySpell(spell)
-    return ns.getSpellCooldownLeft(spell) < ns.State.latency
+-------------------------------------------------------------------------------
+function c.IsReadySpell(spell)
+    return c.GetSpellCooldownLeft(spell) < c.latency
 end
 
-------------------------------------------------------------------------------------------------------------------
-function ns.IsUsableSpell(spell, unit)
+-------------------------------------------------------------------------------
+function c.IsUsableSpell(spell, unit)
     local usable, _ = IsUsableSpell(spell)
     if not usable then return false end
-    if not ns.IsReadySpell(spell) then return false end
-    if unit ~= nil and not ns.IsSpellInRange(spell, unit) then return false end
+    if not c.IsReadySpell(spell) then return false end
+    if unit ~= nil and not c.IsSpellInRange(spell, unit) then return false end
     return true
 end
 
-------------------------------------------------------------------------------------------------------------------
-local lastUsedSpell = nil
+-------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
-    if sourceGUID ~= ns.State.playerGUID then return end
+    if sourceGUID ~= c.state.playerGUID then return end
     if subEvent:match('^SPELL_CAST') then
         local spellName = select(2, ...)
-        lastUsedSpell = spellName
-        if ns.showSpellError and subEvent == 'SPELL_CAST_FAILED' then
-            local reason = select(4, ...)
-            ns.ActionLog(nil, spellName or 'Ошибка', reason or 'Что-то пошло не так', 'AA0000')
+        c.lastUsedSpell = spellName
+        if subEvent == 'SPELL_CAST_FAILED' then
+            local message = select(4, ...)
+            pushError(message, spellName)
         end
     end
 end
-ns.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
 local failedSpell = nil
 local function onEvent(event, ...)
     local source, spellName = select(1, ...)
     if source ~= 'player' then return end
-    ns.TimerStart(spellName)
-    lastUsedSpell = spellName
+
+    c.lastUsedSpell = spellName
 
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
-        if ns.showSpellSuccess then
-            ns.DebugChat('>>>>[' .. spellName .. '] - успешно', '00FF00')
+        if spellName then
+            c.TimerStart(spellName)
+            if c.showSpellSuccess then
+                local spellId = c.GetSpellId(spellName)
+                local msg = spellId > 0 and
+                    format('%s ID: %s', GetSpellLink(spellId), WrapTextInColorCode(spellId, 'ff71d5ff')) or
+                    format('[%s]', spellName)
+                c.Success(msg, GetSpellTexture(spellName))
+            end
         end
         return
     end
 
     if event == 'UNIT_SPELLCAST_FAILED' then
         failedSpell = spellName
-        ns.TimerStart('Fail:' .. failedSpell)
+        c.TimerStart('Fail:' .. failedSpell)
     end
 end
-ns.AttachEvent('UNIT_SPELLCAST_START', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_STOP', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_DELAYED', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_INTERRUPTED', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_START', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
-ns.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_START', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_STOP', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_DELAYED', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_INTERRUPTED', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_CHANNEL_START', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
 
 
 local function onUIErrorMessage(event, ...)
-    if not ns.showSpellError then return end
-    local action = 'Ошибка'
-    if failedSpell and ns.TimerLess('Fail:' .. failedSpell, 0.1) then action = failedSpell end
+    if not c.showSpellError then return end
+    local action = nil
+    if failedSpell and c.TimerLess('Fail:' .. failedSpell, 0.1) then action = failedSpell end
     local message = ...
-    ns.ActionLog(nil, action, message or 'Что-то пошло не так', '880000')
+    pushError(message, action)
 end
-ns.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
+c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
 
-function ns.IsSpellFailedRecently(spellName)
-    return ns.TimerLess('Fail:' .. spellName, 0.2)
+local function onErrorUpdate()
+    for message, spellName in pairs(errorBuffer) do
+        if type(spellName) == 'string' then
+            print()
+            local spellId = c.GetSpellId(spellName)
+            c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
+        else
+            c.Error(format('%s', message))
+        end
+    end
+    wipe(errorBuffer)
+end
+c.AttachBeforeUpdate(onErrorUpdate)
+
+
+function c.IsSpellFailedRecently(spellName)
+    return c.TimerLess('Fail:' .. spellName, 0.2)
 end
 
-function ns.LastUsedSpell()
-    return lastUsedSpell
-end
-
--- if ns.TimerMore('Удар грома', 3) then
+-- if c.TimerMore('Удар грома', 3) then
 --     print('Удар грома не был или был более 3 секунд назад')
 -- end
 
--- if ns.TimerLess('Удар грома', 3) then
+-- if c.TimerLess('Удар грома', 3) then
 --     print('Удар грома был и был менее 3 секунд назад')
 -- end
-
-local autoTargetSpell = {}
-function ns.AddAutoTargetSpell(spellName, inCenter)
-    autoTargetSpell[spellName] = inCenter
-end
-
-function ns.LastSpellAutoTarget()
-    local lastAction = ns.GetLastAction()
-    if not lastAction then return nil end
-    return autoTargetSpell[lastAction]
-end
-
-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

@@ -1,0 +1,95 @@
+-------------------------------------------------------------------------------
+-- By by Unknown Coder
+-------------------------------------------------------------------------------
+local c = Core
+-------------------------------------------------------------------------------
+local GetTime = GetTime
+local bit = bit
+local wipe = wipe
+local next = next
+local select = select
+local pairs = pairs
+local UnitGUID = UnitGUID
+local UnitHealth = UnitHealth
+local math_max = math.max
+local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
+-------------------------------------------------------------------------------
+local db = {}
+-------------------------------------------------------------------------------
+local function needUpdateUnits()
+    if c.state.combatMode then return true end        -- в бою
+    if c.state.autoattack then return true end        -- автоатака
+    if c.attack then return true end                  -- зажата атака
+    if not c.state.invalidTarget then return true end -- есть валидный таргет
+    return false
+end
+-------------------------------------------------------------------------------
+local function clearUnits()
+    -- Не чиcтим если нужно обновлять
+    if needUpdateUnits() then return end
+    if (next(db) ~= nil) then
+        -- Возвращаем все таблицы в пул перед очисткой db
+        for _, unitInfo in pairs(db) do
+            c.TablePoolRelease(unitInfo)
+        end
+        wipe(db)
+    end
+end
+c.AttachBeforeUpdate(clearUnits)
+-------------------------------------------------------------------------------
+local function updateUnit(guid, amount)
+    -- Берем по гуиду, запоминаем начало боя и суммируем весь входящий в таргет урон, потом делим на время с начала
+    local unitInfo = db[guid]
+    if not unitInfo then
+        unitInfo = c.TablePoolAcquire()
+        unitInfo.amount = amount
+        unitInfo.startTime = GetTime()
+        db[guid] = unitInfo
+    else
+        unitInfo.amount = unitInfo.amount + amount
+    end
+end
+-------------------------------------------------------------------------------
+local function killUnit(guid)
+    local unitInfo = db[guid]
+    if unitInfo then
+        c.TablePoolRelease(unitInfo)
+        db[guid] = nil
+    end
+end
+-------------------------------------------------------------------------------
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+                                destFlags, ...)
+    -- Какое-то время уже не в бою
+    if not needUpdateUnits() then return end
+
+    -- Источник события - неодушевленный объект, ловушка, тотем, пропускаем
+    if bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_OBJECT) ~= 0 then return end
+    -- фильтр для игнорирования событий с участием союзников, чтобы фокусировался на боевых действиях против врагов.
+    if bit.band(sourceFlags, destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
+
+    local amount
+    if subEvent == 'SWING_DAMAGE' then
+        amount = select(1, ...)
+        updateUnit(destGUID, amount)
+    elseif subEvent == 'SPELL_DAMAGE' or subEvent == 'RANGE_DAMAGE' or subEvent == 'SPELL_PERIODIC_DAMAGE' then
+        amount = select(4, ...)
+        updateUnit(destGUID, amount)
+    elseif subEvent == 'UNIT_DIED' then
+        killUnit(destGUID)
+    end
+end
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+
+-------------------------------------------------------------------------------
+function c.UnitTimeToDie(unit)
+    unit = unit and unit or 'target'
+    local guid = UnitGUID(unit)
+    if not guid then return nil end
+    local unitInfo = db[guid]
+    if not unitInfo then return nil end
+    return UnitHealth(unit) / (unitInfo.amount / math_max(GetTime() - unitInfo.startTime, 2))
+end
+
+-------------------------------------------------------------------------------
