@@ -70,7 +70,8 @@ local update = 1
 local function onUpdate(frame, elapsed)
     if busy then return end
     update = update + elapsed
-    if update < 0.125 then return end -- ждем 1/8 sec
+    --if update < 0.125 then return end -- ждем 1/8 sec
+    if update < 0.501 then return end -- ждем 1/2 sec
     update = 0
     lockedIdle();
 end
