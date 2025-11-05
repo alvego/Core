@@ -114,11 +114,15 @@ end
 c.AttachEvent('PLAYER_ENTERING_WORLD', onLoad)
 
 -------------------------------------------------------------------------------
-local forbearanceId = 25771 -- Воздержанность
+--local forbearanceId = 25771 -- Воздержанность
 local function inForbearance(unit)
     if unit == nil then unit = "player" end
-    return (c.TimerLess('Гнев карателя', 30) or c.UnitAuraByID(forbearanceId, unit))
+    --return (c.TimerLess('Гнев карателя', 30) or c.UnitAuraByID(forbearanceId, unit))
+    return (c.TimerLess('Гнев карателя', 30) or c.HasDebuff('Воздержанность', unit))
 end
+
+-- TODO:  переписисать выбор цели, в приорете цели рядом, которые бьют меня.
+-- Добить отладочной информации для 'Длань возмездия', не работает
 
 local forbearanceSpells = { "Гнев карателя", "Божественный щит", "Возложение рук", "Божественная защита", "Длань защиты" }
 c.CustomCanUseSpell = function(spell, unit)
@@ -395,17 +399,7 @@ local function updateProto()
                 c.DoAction(reason, action)
                 return reason
             end
-        elseif c.State.combatLock and c.IsSpellNotUsed(tauntSpells, 0.5) then
-            -------------------------------------------------------------------------------
-            reason, action, unit = 'Снимаем агро', 'Праведная защита', 'target'
-            if c.CanUseSpell(action) then
-                unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 3) -- 3 red indicator
-                if unit then
-                    c.DoAction(reason, action, unit)                              -- мговенка
-                    return reason                                                 -- не частим
-                end
-            end
-
+        elseif c.state.combatLock and c.IsSpellNotUsed(tauntSpells, 0.5) then
             -------------------------------------------------------------------------------
             reason, action, unit = 'Таунт', 'Длань возмездия', 'target'
             if c.CanUseSpell(action) then
@@ -413,6 +407,16 @@ local function updateProto()
                 if unit then
                     c.DoAction(reason, action, unit) -- мговенка
                     return reason                    -- не частим
+                end
+            end
+
+            -------------------------------------------------------------------------------
+            reason, action, unit = 'Снимаем агро', 'Праведная защита', 'target'
+            if c.CanUseSpell(action) then
+                unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 3) -- 3 red indicator
+                if unit then
+                    c.DoAction(reason, action, unit)                              -- мговенка
+                    return reason                                                 -- не частим
                 end
             end
 

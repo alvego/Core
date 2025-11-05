@@ -4,11 +4,13 @@
 local c = Core
 -------------------------------------------------------------------------------
 local GetCVar = GetCVar
+local SetCVar = SetCVar
 local tinsert = tinsert
 local type = type
 local error = error
-
 local debug = nil
+
+SetCVar('Sound_EnableErrorSpeech', '0');
 
 function c.Debug()
     if debug == nil then
@@ -44,4 +46,3 @@ end
 
 --c.DebugHook('SetCVar')
 -------------------------------------------------------------------------------
-

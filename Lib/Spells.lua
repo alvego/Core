@@ -15,6 +15,7 @@ local div1000 = 0.001 -- 1 / 1000
 local errorBuffer = {}
 local wipe = wipe
 local type = type
+local tContains = tContains
 -------------------------------------------------------------------------------
 local function pushError(message, spell)
     if not c.showSpellError then return end
@@ -149,13 +150,21 @@ local function onUIErrorMessage(event, ...)
 end
 c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
 
+
+local skipErrors = {
+    'Заклинание пока недоступно.',
+    'Еще не готово.'
+}
+
 local function onErrorUpdate()
     for message, spellName in pairs(errorBuffer) do
-        if type(spellName) == 'string' then
-            local spellId = c.GetSpellId(spellName, nil, true)
-            c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
-        else
-            c.Error(format('%s', message))
+        if not tContains(skipErrors, message) then
+            if type(spellName) == 'string' then
+                local spellId = c.GetSpellId(spellName, nil, true)
+                c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
+            else
+                c.Error(format('%s', message))
+            end
         end
     end
     wipe(errorBuffer)
