@@ -18,6 +18,8 @@ local GetTalentInfo = GetTalentInfo
 local UnitIsFriend = UnitIsFriend
 local GetActiveSpecGroup = GetActiveSpecGroup
 local UnitClass = UnitClass
+local UnitInRaid = UnitInRaid
+local UnitInParty = UnitInParty
 -------------------------------------------------------------------------------
 function c.UnitHealth100(unit)
     unit = unit or 'player'
@@ -69,6 +71,9 @@ function c.UnitIsBoss(unit)
 end
 
 -------------------------------------------------------------------------------
+function c.UnitInGroup(unit)
+    return UnitInRaid(unit) or UnitInParty(unit)
+end
 
 local function hasAura(unit, id)
     if c.UnitAuraByID(unit, id) then

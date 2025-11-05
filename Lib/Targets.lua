@@ -27,7 +27,7 @@ for i = 0, MAX_RAID_MEMBERS do
 end
 local playerUnits = { 'player' }
 -------------------------------------------------------------------------------
-function c.GetGroupUnits(args)
+function c.GetGroupUnits()
     if c.state.raid then
         return raidUnits
     end

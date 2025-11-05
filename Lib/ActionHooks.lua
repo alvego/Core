@@ -122,7 +122,7 @@ local function startActionHook()
     c.start = true
     c.Paused(false)
 end
-c.AttachActionHook('attack', startActionHook)
+c.AttachActionHook('start', startActionHook)
 
 -------------------------------------------------------------------------------
 local function updateStart()

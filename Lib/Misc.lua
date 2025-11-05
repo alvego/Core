@@ -13,6 +13,8 @@ local wipe = wipe
 local format = format
 local time = time
 local WrapTextInColorCode = WrapTextInColorCode
+local UnitClass = UnitClass
+local UnitCreatureType = UnitCreatureType
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local strlower = strlower
 local IsMouseButtonDown = IsMouseButtonDown
@@ -37,6 +39,15 @@ function c.ToStr(...)
     local str = table_concat(toStrBuffer, ' ')
     wipe(toStrBuffer)
     return str
+end
+
+-------------------------------------------------------------------------------
+function c.FindValue(values, checkFn, ...)
+    for i = 1, #values do
+        local value = checkFn(values[i], ...)
+        if value then return value end
+    end
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -111,3 +122,27 @@ function c.Distance(x1, y1, z1, x2, y2, z2)
 end
 
 -------------------------------------------------------------------------------
+local creatureColors = {
+    ["Гуманоид"] = "ffff00ff", -- жёлтый
+    ["Зверь"] = "ff00ff00", -- зелёный
+    ["Демон"] = "ffff0000", -- красный
+    ["Нежить"] = "ffa0a0a0", -- серый
+    ["Элементаль"] = "ff00ffff", -- голубой
+}
+function c.GetUnitColorHex(unit)
+    unit = unit or 'target'
+    if not UnitExists(unit) then return "ffffffff" end
+
+    local _, class = UnitClass(unit)
+    if class and RAID_CLASS_COLORS[class] then
+        local c = RAID_CLASS_COLORS[class]
+        return string.format("ff%02x%02x%02x",
+            math.floor(c.r * 255),
+            math.floor(c.g * 255),
+            math.floor(c.b * 255))
+    end
+
+    -- Fallback: цвет по типу существа
+    local ctype = UnitCreatureType(unit)
+    return creatureColors[ctype] or "ffffffff"
+end

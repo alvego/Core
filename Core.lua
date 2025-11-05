@@ -40,7 +40,8 @@ function c.Paused(value)
     if type(value) == 'boolean' then
         db.paused = value
     end
-    return db.paused or UnitIsAFK('player')
+    if (UnitIsAFK('player') == 1) then return true end
+    return db.paused
 end
 
 -------------------------------------------------------------------------------

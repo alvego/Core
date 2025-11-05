@@ -46,7 +46,7 @@ end
 
 -------------------------------------------------------------------------------
 local spellToIdList = {}
-function c.GetSpellId(name, rank)
+function c.GetSpellId(name, rank, skipError)
     local spellGUID = name
     if rank then
         spellGUID = name .. rank
@@ -58,7 +58,7 @@ function c.GetSpellId(name, rank)
         if link then
             result = result + link:match("spell:%d+"):match("%d+")
             spellToIdList[spellGUID] = result
-        else
+        elseif not skipError then
             c.Chat(WrapTextInColorCode('[' .. name .. '] не найден ID', 'ffff0000'))
         end
     end
@@ -114,7 +114,7 @@ local function onEvent(event, ...)
         if spellName then
             c.TimerStart(spellName)
             if c.showSpellSuccess then
-                local spellId = c.GetSpellId(spellName)
+                local spellId = c.GetSpellId(spellName, nil, true)
                 local msg = spellId > 0 and
                     format('%s ID: %s', GetSpellLink(spellId), WrapTextInColorCode(spellId, 'ff71d5ff')) or
                     format('[%s]', spellName)
@@ -152,8 +152,7 @@ c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
 local function onErrorUpdate()
     for message, spellName in pairs(errorBuffer) do
         if type(spellName) == 'string' then
-            print()
-            local spellId = c.GetSpellId(spellName)
+            local spellId = c.GetSpellId(spellName, nil, true)
             c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
         else
             c.Error(format('%s', message))

@@ -111,12 +111,17 @@ function c.TryTarget()
     return nil
 end
 
+c.CustomCanUseSpell = function(spell, unit)
+    return
+end
+
 -------------------------------------------------------------------------------
 function c.CanUseSpell(spell, unit, interval)
     if not spell or type(spell) ~= 'string' then return false end
     if interval and not c.TimerMore(spell, interval) then return false end
     if c.IsSpellFailedRecently(spell) then return false end
     if not IsUsableSpell(spell) then return false end
+    if not c.CustomCanUseSpell(spell, unit) then return false end
     return c.CanUseAction(spell, unit)
 end
 
