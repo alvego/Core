@@ -254,7 +254,7 @@ local function updateProto()
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     -------------------------------------------------------------------------------
     local mana100 = c.UnitMana100('player')
-    local useMana = st.attack or (mana100 > 50)
+    local useMana = c.attack or (mana100 > 50)
     -------------------------------------------------------------------------------
     -- автовключание если в группе и есть отметка что танк
     reason, action, unit = 'Влючаем баф для танкования', 'Праведное неистовство', 'player'
@@ -484,8 +484,11 @@ local function updateProto()
         return reason
     end
     -------------------------------------------------------------------------------
-    reason, action, unit = 'Нужно пустить лужу', 'Освящение', 'target'
-    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or mana100 > 90 or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
+    reason, action, unit =
+        'Нужно пустить лужу - ' ..
+        (c.targetHard and 'страшно' or 'враги окружили'),
+        'Освящение', 'target'
+    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end

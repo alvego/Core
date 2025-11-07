@@ -94,10 +94,10 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#' .. st.invalidTarget
     end
 
-    if not st.attack and not st.combatTarget and not st.autoattack then
+    if not c.attack and not st.combatTarget and not st.autoattack then
         return '#цель не в бою, не нажата атака, не вкл автоатака'
     end
-    local stopDebuff = not st.attack and c.HasDebuff(stopAttackDebuff)
+    local stopDebuff = not c.attack and c.HasDebuff(stopAttackDebuff)
     if st.autoattack then
         if stopDebuff then
             local stopAttackReason = '#не бъем в ' .. stopDebuff

@@ -23,15 +23,18 @@ Lib\TimeToDie.lua
 Lib\Actions.lua
 Lib\ActionHooks.lua
 Lib\Spells.lua
-Lib\Range.lua
-Lib\Kick.lua
+Lib\SpellStore.lua
+Lib\SpellRange.lua
+Lib\SpellKick.lua
 Lib\Auras.lua
 Lib\Dotes.lua
 Lib\Objects.lua
 Lib\Targets.lua
 Lib\Direction.lua
+Lib\Loot.lua
 Lib\State.lua
-Lib\SpellStore.lua
+Lib\StateHooks.lua
+Lib\DebugHooks.lua
 
 Common.lua
 

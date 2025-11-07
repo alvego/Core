@@ -38,11 +38,10 @@ local function updateDebugStateHook(key, value)
 end
 hooksecurefunc('SetCVar', updateDebugStateHook)
 -------------------------------------------------------------------------------
-function c.DebugHook(funcName)
+function c.DebugHook(funcName) --c.DebugHook('SetCVar')
     hooksecurefunc(funcName, function(...)
         c.Log(funcName, ...)
     end)
 end
 
---c.DebugHook('SetCVar')
 -------------------------------------------------------------------------------
