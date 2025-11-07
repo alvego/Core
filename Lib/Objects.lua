@@ -11,13 +11,12 @@ local objects = {}
 local units = {}
 local targets = {}
 -------------------------------------------------------------------------------
-local function resetObjectCache()
+c.AttachBeforeUpdate(function()
     if c.TimerMore('resetObjectCache', 1.5) then
         actual = false
         c.TimerStart('resetObjectCache')
     end
-end
-c.AttachBeforeUpdate(resetObjectCache)
+end)
 -------------------------------------------------------------------------------
 local function updateObject()
     if actual then return end
@@ -42,20 +41,13 @@ local function updateObject()
 end
 
 -------------------------------------------------------------------------------
-function c.GetEnemyCount(range, aroundUnit)
+c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     aroundUnit = aroundUnit or 'player'
-
-    local key = c.ToStr('GetEnemyCount', range, aroundUnit)
-    local value = c.stateCache[key]
-    if value then return value end
-
-    updateObject();
     local result = 0
-
+    updateObject();
     local count = #targets
     if count < 1 then return result end
     local x, y, z = c.UnitPosition(aroundUnit)
-
     for i = 1, count do
         local unit = targets[i]
         if UnitCanAttack('player', unit) then
@@ -65,10 +57,8 @@ function c.GetEnemyCount(range, aroundUnit)
             end
         end
     end
-
-    c.stateCache[key] = result
     return result
-end
+end)
 
 -------------------------------------------------------------------------------
 function c.GetTargets()

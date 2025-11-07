@@ -45,7 +45,7 @@ end
 function c.FindValue(values, checkFn, ...)
     for i = 1, #values do
         local value = checkFn(values[i], ...)
-        if value then return value end
+        if value ~= nil then return value end
     end
     return nil
 end

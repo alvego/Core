@@ -72,8 +72,8 @@ local function hookUseAction(slot, target, button)
     end
 end
 hooksecurefunc('UseAction', hookUseAction)
--------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
 local function updateUserAction()
     if userAction.slot == nil then
         return
@@ -100,68 +100,7 @@ local function updateUserAction()
 end
 c.AttachAfterUpdate(updateUserAction)
 -------------------------------------------------------------------------------
-local function attackActionHook()
-    c.attack = true
-    c.Paused(false)
-    c.TurnTo('target')
-end
-c.AttachActionHook('attack', attackActionHook)
-
--------------------------------------------------------------------------------
-local function updateAttack()
-    c.attack = c.IsActionPressed('attack') or c.IsMouse(4)
-    if c.attack then
-        c.Paused(false)
-        c.TurnTo('target')
-    end
-end
-c.AttachBeforeUpdate(updateAttack)
-
--------------------------------------------------------------------------------
-local function startActionHook()
-    c.start = true
-    c.Paused(false)
-end
-c.AttachActionHook('start', startActionHook)
-
--------------------------------------------------------------------------------
-local function updateStart()
-    c.start = c.IsActionPressed('start') or c.IsMouse(3)
-    if c.start then
-        c.Paused(false)
-    end
-end
-c.AttachBeforeUpdate(updateStart)
-
--------------------------------------------------------------------------------
-local function stopActionHook()
-    if c.attack then return end
-    c.Paused(true)
-end
-c.AttachActionHook('stop', stopActionHook)
--------------------------------------------------------------------------------
-local function updateStop()
-    if c.attack then return end
-    if c.IsActionPressed('stop') or c.IsMouse(5) or UnitIsDeadOrGhost('player') then
-        c.Paused(true)
-    end
-end
-c.AttachBeforeUpdate(updateStop)
--------------------------------------------------------------------------------
-local function debugActionHook()
-    SetCVar("scriptErrors", GetCVar("scriptErrors") == "1" and 0 or 1)
-end
-c.AttachActionHook('debug', debugActionHook)
-
--------------------------------------------------------------------------------
-local function targetActionHook()
-    c.FindAndSelectNewTarget()
-end
-c.AttachActionHook('target', targetActionHook)
-
-
--------------------------------------------------------------------------------
-local function auraActionHook() -- for debug
+c.AttachActionHook('aura', function() -- for debug
     local target = 'target'
     if not UnitExists(target) then
         target = 'player'
@@ -193,13 +132,74 @@ local function auraActionHook() -- for debug
         end
         idx = idx + 1
     until false
-end
-c.AttachActionHook('aura', auraActionHook)
+end)
 
 -------------------------------------------------------------------------------
-local function testActionHook()
-    c.Target(nil)
+c.AttachBeforeUpdate(function()
+    c.attack = c.IsActionPressed('attack') or c.IsMouse(4)
+    c.start = c.IsActionPressed('start') or c.IsMouse(3)
+    local stop = c.IsActionPressed('stop') or c.IsMouse(5) or UnitIsDeadOrGhost('player')
+    if c.attack then c.TurnTo('target') end
+    if c.attack or c.start then
+        c.Paused(false)
+    elseif stop then
+        c.Paused(true)
+    end
+end)
+
+-------------------------------------------------------------------------------
+c.AttachActionHook('attack', function()
+    c.attack = true
+    c.Paused(false)
+    c.TurnTo('target')
+end)
+
+-------------------------------------------------------------------------------
+c.AttachActionHook('start', function()
+    c.start = true
+    c.Paused(false)
+end)
+
+-------------------------------------------------------------------------------
+c.AttachActionHook('stop', function()
+    if c.attack then return end
+    c.Paused(true)
+end)
+
+-------------------------------------------------------------------------------
+c.AttachActionHook('debug', function()
+    SetCVar("scriptErrors", GetCVar("scriptErrors") == "1" and 0 or 1)
+end)
+
+-------------------------------------------------------------------------------
+
+local function getUnitUid(unit)
+    local targets = c.GetTargets()
+    local count = #targets
+    if count < 1 then return result end
+    local x, y, z = c.UnitPosition(aroundUnit)
+    for i = 1, count do
+        local uid = targets[i]
+        if UnitIsUnit('target', uid) then
+            return uid
+        end
+    end
 end
 
-c.AttachActionHook('test', testActionHook)
+c.AttachActionHook('test', function()
+    local target = 'target'
+    local uid = getUnitUid(target)
+    if uid and UnitExists(uid) and UnitExists(target) then
+        print('uid', UnitName(uid), UnitName(target))
+        uidTar = uid .. '-target'
+        targetTar = target .. '-target'
+        print('uid', UnitExists(uidTar), UnitExists(targetTar))
+    end
+end)
+
+-------------------------------------------------------------------------------
+c.AttachActionHook('target', function()
+    c.FindAndSelectNewTarget(false)
+end)
+
 -------------------------------------------------------------------------------

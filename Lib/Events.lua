@@ -67,6 +67,10 @@ local function onUpdate()
     if GetTime() - lastUpdate < 0.2 then
         return
     end
+
+    if c.IsNeedEnableExtended() then
+        c.Echo('Enable Extended Func!', 'Warning')
+    end
     ----------------------------------------------------------------
     for i = 1, #listBeforeUpdate do
         listBeforeUpdate[i]()

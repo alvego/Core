@@ -86,12 +86,11 @@ local stopAttackDebuff = {
     -- 'Ментальный крик'
 }
 
-function c.TryTarget()
+function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode then
-            c.FindAndSelectNewTarget()
+            c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) -- enable by default
         end
-
         return '#' .. st.invalidTarget
     end
 

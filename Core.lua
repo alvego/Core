@@ -19,9 +19,9 @@ c.gcdSpellId = 61304
 c.lastUsedSpell = nil
 c.duel = false
 -------------------------------------------------------------------------------
-c.showSpellSuccess = true
+c.showSpellSuccess = false --true
 c.showSpellError = true
-c.showNoneReason = true
+c.showNoneReason = false   --true
 -------------------------------------------------------------------------------
 
 local state = {}
@@ -42,6 +42,21 @@ function c.Paused(value)
     end
     if (UnitIsAFK('player') == 1) then return true end
     return db.paused
+end
+
+-------------------------------------------------------------------------------
+local stateCacheIndex = 0
+function c.GetCachedFunc(func)
+    stateCacheIndex = stateCacheIndex + 1
+    local name = '#' .. stateCacheIndex
+    return function(...)
+        local key = c.ToStr(name, ...)
+        local value = c.stateCache[key]
+        if value then return value end
+        value = func(...)
+        c.stateCache[key] = value
+        return value
+    end
 end
 
 -------------------------------------------------------------------------------

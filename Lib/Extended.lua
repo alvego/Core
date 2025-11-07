@@ -200,8 +200,8 @@ function c.Action(slot, target, button)
 end
 
 -------------------------------------------------------------------------------
-function c.IsExternalEnabled()
-    return type(oHelp) == 'function'
+function c.IsNeedEnableExtended()
+    return type(oHelp) ~= 'function'
 end
 
 -------------------------------------------------------------------------------
