@@ -19,9 +19,9 @@ c.gcdSpellId = 61304
 c.lastUsedSpell = nil
 c.duel = false
 -------------------------------------------------------------------------------
-c.showSpellSuccess = false
-c.showSpellError = false
-c.showNoneReason = false
+c.showSpellSuccess = true
+c.showSpellError = true
+c.showNoneReason = true
 -------------------------------------------------------------------------------
 
 local state = {}

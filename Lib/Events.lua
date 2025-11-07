@@ -67,7 +67,7 @@ local function onUpdate()
         return
     end
 
-    if c.TimerMore('CheckExtended', 2) and c.IsNeedEnableExtended() then
+    if c.TimerMore('CheckExtended', 5) and c.IsNeedEnableExtended() then
         c.Echo('Enable Extended Func!', 'Warning')
         c.TimerStart('CheckExtended')
     end
