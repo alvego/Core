@@ -75,13 +75,6 @@ function c.UnitInGroup(unit)
     return UnitInRaid(unit) or UnitInParty(unit)
 end
 
-local function hasAura(unit, id)
-    if c.UnitAuraByID(unit, id) then
-        return true
-    end
-    return false
-end
-
 function c.UnitIsTank(unit)
     unit = unit or 'player'
     if not UnitExists(unit) or not UnitIsPlayer(unit) then
@@ -94,16 +87,17 @@ function c.UnitIsTank(unit)
     end
 
     if class == "WARRIOR" then
-        return hasAura(unit, 71) -- Defensive Stance
+        return c.HasAuraByID(unit, 71) -- Defensive Stance
     end
     if class == "PALADIN" then
-        return hasAura(unit, 25780) -- Righteous Fury
+        return c.HasAuraByID(unit, 25780) -- Righteous Fury
     end
     if class == "DRUID" then
-        return hasAura(unit, 5487) or hasAura(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
+        return c.HasAuraByID(unit, 5487) or
+            c.HasAuraByID(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
     end
     if class == "DEATHKNIGHT" then
-        return hasAura(unit, 48263) -- Frost Presence
+        return c.HasAuraByID(unit, 48263) -- Frost Presence
     end
 
     return false

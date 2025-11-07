@@ -60,16 +60,16 @@ function c.SkipNextUpdate()
 end
 
 -------------------------------------------------------------------------------
-local lastUpdate = 0
-
+c.TimerStart('CheckExtended')
 -- Выполняем обработчики события OnUpdate
 local function onUpdate()
-    if GetTime() - lastUpdate < 0.2 then
+    if c.TimerLess('UPDATE', 0.2) then
         return
     end
 
-    if c.IsNeedEnableExtended() then
+    if c.TimerMore('CheckExtended', 2) and c.IsNeedEnableExtended() then
         c.Echo('Enable Extended Func!', 'Warning')
+        c.TimerStart('CheckExtended')
     end
     ----------------------------------------------------------------
     for i = 1, #listBeforeUpdate do
@@ -85,7 +85,7 @@ local function onUpdate()
         listAfterUpdate[i]()
     end
     ----------------------------------------------------------------
-    lastUpdate = GetTime() -- Обновляем таймер после вызова (плюс время выполнения)
+    c.TimerStart('UPDATE') -- Обновляем таймер после вызова (плюс время выполнения)
 end
 frame:SetScript('OnUpdate', onUpdate)
 -------------------------------------------------------------------------------

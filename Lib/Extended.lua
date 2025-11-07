@@ -123,12 +123,12 @@ function c.UnitFacing(unit)
 end
 
 -------------------------------------------------------------------------------
-function c.UnitDistance(unit1, unit2)
+c.UnitDistance = c.GetCachedFunc(function(unit1, unit2)
     if type(oUnitDistance) == 'function' then
         return oUnitDistance(unit1, unit2)
     end
     return 0
-end
+end)
 
 -------------------------------------------------------------------------------
 function c.UnitAuraByID(unit, spellIds, isMine)
@@ -145,6 +145,8 @@ function c.UnitAuraByID(unit, spellIds, isMine)
     end
     return nil
 end
+
+c.HasAuraByID = c.GetCachedFunc(c.UnitAuraByID)
 
 -------------------------------------------------------------------------------
 function c.UnitAuraByIndex(unit, idx)

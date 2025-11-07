@@ -121,7 +121,7 @@ c.AttachEvent('PLAYER_ENTERING_WORLD', onLoad)
 --local forbearanceId = 25771 -- Воздержанность
 local function inForbearance(unit)
     if unit == nil then unit = "player" end
-    --return (c.TimerLess('Гнев карателя', 30) or c.UnitAuraByID(forbearanceId, unit))
+    --return (c.TimerLess('Гнев карателя', 30) or c.HasAuraByID(forbearanceId, unit))
     return (c.TimerLess('Гнев карателя', 30) or c.HasDebuff('Воздержанность', unit))
 end
 
@@ -156,7 +156,7 @@ local isTank = false
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if not isLoaded then return end
-    isTank = c.UnitAuraByID('player', spell['Праведное неистовство'])
+    isTank = c.HasAuraByID('player', spell['Праведное неистовство'])
     return c.TelemetryRedBool('TANK', isTank)
 end)
 
@@ -225,7 +225,7 @@ local function checkFinishTarget(target, action)
     if not UnitCanAttack('player', target) then return end
     if not UnitAffectingCombat(target) then return end
     if UnitIsTapped(target) and not UnitIsTappedByPlayer(target) then return end
-    if c.UnitHealth100(target) > 19.9 then return end
+    if not (c.UnitHealth100(target) < 19.9) then return end
     if not c.IsSpellInRange(action, target) then return end
     if not c.UnitInLOS('player', target) then return end
     return target
@@ -261,6 +261,33 @@ local function updateProto()
         c.DoAction(reason, action, unit)
         return reason
     end
+
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Деф PVE с созвездия', 'Криво-пружинный механизм', 'player'
+    if not st.pvp and needHeal and c.CanUseSpell(action, unit) then
+        c.DoAction(reason, action, unit) -- мгновенка
+        return reason
+    end
+    -------------------------------------------------------------------------------
+
+    reason, action, unit = format('group: Хилка без каста на %s%% hp', c.Round(st.playerHP100)),
+        (st.playerHP100 < 85) and 'Свет небес' or 'Вспышка Света', 'player'
+    if not st.gcd and st.playerHP100 < 99 and c.CanUseGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Очень мало хп в бою, нужен хил', 'Возложение рук', 'player'
+    if st.combatMode and st.playerHP100 < 20 and c.CanUseGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Мало хп в бою, нужен деф', 'Божественная защита', 'player'
+    if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
+        c.DoAction(reason, action, unit) -- мгновенка
+    end
     -------------------------------------------------------------------------------
     unit = 'mouseover'
     if c.start and UnitExists(unit) then
@@ -294,7 +321,7 @@ local function updateProto()
             if stance then
                 -- на мне ecть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
-                if stance == spell['Аура воина Света'] and not c.UnitAuraByID(unit, spell[action]) then
+                if stance == spell['Аура воина Света'] and not c.HasAuraByID(unit, spell[action]) then
                     c.DoAction(reason, action, unit) --  переключаемся в атуальную стойку
                     return reason
                 end
@@ -328,17 +355,7 @@ local function updateProto()
         end
         -------------------------------------------------------------------------------
     end
-    -------------------------------------------------------------------------------
-    reason, action, unit = 'Очень мало хп в бою, нужен хил', 'Возложение рук', 'player'
-    if st.combatMode and st.playerHP100 < 20 and c.CanUseGcdSpell(action, unit) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-    -------------------------------------------------------------------------------
-    reason, action, unit = 'Мало хп в бою, нужен деф', 'Божественная защита', 'player'
-    if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
-        c.DoAction(reason, action, unit) -- мгновенка
-    end
+
     -------------------------------------------------------------------------------
     local dist = c.UnitDistance('target', 'player')
     -------------------------------------------------------------------------------
@@ -393,37 +410,13 @@ local function updateProto()
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------
-    reason, action, unit = 'Деф PVE с созвездия по кд', 'Криво-пружинный механизм', 'player'
-    if not st.pvp and c.CanUseSpell(action, unit) then
-        c.DoAction(reason, action, unit) -- мгновенка
+    reason, action, unit = 'Экзорцизм без каста', 'Экзорцизм', 'target'
+    if useMana and st.playerHP100 >= 99 and c.CanUseGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
+        c.DoAction(reason, action, unit)
+        return reason
     end
-    -------------------------------------------------------------------------------
-    if not st.gcd and c.HasBuff('Криво-пружинный механизм') then
-        if st.group then
-            reason, action, unit = format('group: Хилка без каста на %s%% hp', c.Round(st.playerHP100)), 'Свет небес',
-                'player'
-            if needHeal and c.CanUseGcdSpell(action, unit) then
-                c.DoAction(reason, action, unit)
-                return reason
-            end
-        else
-            reason, action, unit = format('solo: Хилка без каста на %s%% hp', c.Round(st.playerHP100)),
-                (st.playerHP100 < 70 and useMana) and 'Свет небес' or 'Вспышка Света', 'player'
-            if (useMana or needHeal) and st.playerHP100 < 90 and c.CanUseGcdSpell(action, unit) then
-                c.DoAction(reason, action, unit)
-                return reason
-            end
-        end
-
-        reason, action, unit = 'Экзорцизм без каста', 'Экзорцизм', 'target'
-        if useMana and c.CanUseGcdSpell(action, unit) then
-            c.DoAction(reason, action, unit)
-            return reason
-        end
-    end
-    -------------------------------------------------------------------------------
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
-    if c.CanUseGcdSpell(action, unit) and not c.UnitAuraByID(unit, spell[action]) then
+    if c.CanUseGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -448,7 +441,7 @@ local function updateProto()
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Урон агрилкой', 'Длань возмездия', 'target'
-    if useMana and (isTank or not st.group) and not UnitIsUnit('target-target', 'player') and c.CanUseSpell(action, unit) then
+    if useMana and (isTank or not st.group) and (not UnitExists('target-target') or not UnitIsUnit('target-target', 'player')) and c.CanUseSpell(action, unit) then
         c.DoAction(reason, action, unit) -- мгновенка
     end
     -------------------------------------------------------------------------------
@@ -463,7 +456,7 @@ local function updateProto()
     -------------------------------------------------------------------------------
     reason, action, unit = 'Сало на троих', 'Щит мстителя', 'target'
     if useMana and not st.gcd and c.IsUsableSpell(action) then
-        unit = c.FindValue(c.GetTargets(), checkCastTarget, action) or unit
+        unit = c.FindValue(c.GetTargets(), checkCastTarget, action)
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -513,7 +506,7 @@ function c.Update()
         -------------------------------------------------------------------------------
         if stopReason == c.stopReasonMount then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
-            if not c.UnitAuraByID(unit, spell[action]) and c.CanUseGcdSpell(action, unit) then
+            if not c.HasAuraByID(unit, spell[action]) and c.CanUseGcdSpell(action, unit) then
                 c.DoAction(reason, action, unit)
                 stopReason = reason
             end
