@@ -156,7 +156,7 @@ local isTank = false
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if not isLoaded then return end
-    isTank = c.HasAuraByID('player', spell['Праведное неистовство'])
+    isTank = c.HasAuraByID('player', spell['Праведное неистовство']) and true or false
     return c.TelemetryRedBool('TANK', isTank)
 end)
 
@@ -404,23 +404,6 @@ local function updateProto()
         end
     end -- isTank
     -------------------------------------------------------------------------------
-    reason = c.TryTarget(not isTank, 40, c.attack or IsMouselooking())
-    -- есть ли причина для отстановки?
-    if reason then return reason end
-    -------------------------------------------------------------------------------
-    -- Дальше считаем что у нас есть валидная цель
-    -------------------------------------------------------------------------------
-    reason, action, unit = 'Экзорцизм без каста', 'Экзорцизм', 'target'
-    if useMana and st.playerHP100 >= 99 and c.CanUseGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-    reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
-    if c.CanUseGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-    -------------------------------------------------------------------------------
     reason, action, unit = 'Пробуем снять ', 'Очищение', 'player'
     if c.IsSpellFailedRecently(action) then
         c.TimerStart(action) -- считаем что использовали
@@ -434,6 +417,18 @@ local function updateProto()
         end
     end
     -------------------------------------------------------------------------------
+    reason = c.TryTarget(not isTank, 40, c.attack or IsMouselooking())
+    -- есть ли причина для отстановки?
+    if reason then return reason end
+    -------------------------------------------------------------------------------
+    -- Дальше считаем что у нас есть валидная цель
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
+    if c.CanUseGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+    -------------------------------------------------------------------------------
     reason, action, unit = 'Нужнен баф на блокирование', 'Щит небес', 'player'
     if not st.gcd and dist < 10 and useMana and c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
@@ -441,8 +436,14 @@ local function updateProto()
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Урон агрилкой', 'Длань возмездия', 'target'
-    if useMana and (isTank or not st.group) and (not UnitExists('target-target') or not UnitIsUnit('target-target', 'player')) and c.CanUseSpell(action, unit) then
+    if useMana and (isTank or not st.group) and not (UnitExists(unit .. '-target') and UnitIsUnit(unit .. '-target', 'player') == 1) and c.CanUseSpell(action, unit) then
         c.DoAction(reason, action, unit) -- мгновенка
+    end
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Экзорцизм без каста', 'Экзорцизм', 'target'
+    if useMana and st.playerHP100 >= 99 and c.CanUseGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
+        c.DoAction(reason, action, unit)
+        return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Добивание', 'Молот гнева', 'target'
@@ -457,8 +458,10 @@ local function updateProto()
     reason, action, unit = 'Сало на троих', 'Щит мстителя', 'target'
     if useMana and not st.gcd and c.IsUsableSpell(action) then
         unit = c.FindValue(c.GetTargets(), checkCastTarget, action)
-        c.DoAction(reason, action, unit)
-        return reason
+        if unit then
+            c.DoAction(reason, action, unit)
+            return reason -- не частим
+        end
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Молот в 3 цели', 'Молот праведника', 'target'
