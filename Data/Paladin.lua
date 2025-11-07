@@ -20,6 +20,7 @@ local UnitThreatSituation = UnitThreatSituation
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitExists = UnitExists
+local UnitOnTaxi = UnitOnTaxi
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 local UnitIsPlayer = UnitIsPlayer
@@ -235,7 +236,7 @@ local function updateProto()
     local reason, action, unit
     -------------------------------------------------------------------------------
     -- иногда в ротации есть необходимость прерывания своего каста
-    reason = 'кастую [%s]'
+    reason = '#cast [%s]'
     if st.playerCasting then return format(reason, st.playerCasting) end
 
     -------------------------------------------------------------------------------
@@ -507,7 +508,7 @@ function c.Update()
         -------------------------------------------------------------------------------
         -- только для палладина, врубаем коня на маунте
         -------------------------------------------------------------------------------
-        if stopReason == c.stopReasonMount then
+        if stopReason == c.stopReasonMount and not UnitOnTaxi("player") then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
             if not c.HasAuraByID(unit, spell[action]) and c.CanUseGcdSpell(action, unit) then
                 c.DoAction(reason, action, unit)

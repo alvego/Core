@@ -172,34 +172,13 @@ c.AttachActionHook('debug', function()
 end)
 
 -------------------------------------------------------------------------------
+c.AttachActionHook('log', function()
+    c.showSpellSuccess = not c.showSpellSuccess
+    c.showSpellError = not c.showSpellError
+    c.showNoneReason = not c.showNoneReason
+end)
 
-local function getUnitUid(unit)
-    local targets = c.GetTargets()
-    local count = #targets
-    if count < 1 then return result end
-    local x, y, z = c.UnitPosition(aroundUnit)
-    for i = 1, count do
-        local uid = targets[i]
-        if UnitIsUnit('target', uid) then
-            return uid
-        end
-    end
-end
-
+-------------------------------------------------------------------------------
 c.AttachActionHook('test', function()
-    local target = 'target'
-    local uid = getUnitUid(target)
-    if uid and UnitExists(uid) and UnitExists(target) then
-        print('uid', UnitName(uid), UnitName(target))
-        uidTar = uid .. '-target'
-        targetTar = target .. '-target'
-        print('uid', UnitExists(uidTar), UnitExists(targetTar))
-    end
-end)
 
--------------------------------------------------------------------------------
-c.AttachActionHook('target', function()
-    c.FindAndSelectNewTarget(false)
 end)
-
--------------------------------------------------------------------------------
