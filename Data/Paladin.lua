@@ -31,7 +31,7 @@ local format = format
 local tostring = tostring
 local tinsert = tinsert
 -------------------------------------------------------------------------------
-local isLoaded = false;
+local isLoaded = false
 local cleanseTypes = { 'Magic', 'Disease', 'Poison' }
 local sealAuras, stanceAuras, stanceDefenceAuras, blessingAuras, tauntSpells
 -------------------------------------------------------------------------------
