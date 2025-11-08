@@ -45,5 +45,5 @@ function c.DebugHook(funcName)
 end
 
 --c.DebugHook('SetCVar')
-c.DebugHook('InteractUnit')
+--c.DebugHook('InteractUnit')
 -------------------------------------------------------------------------------

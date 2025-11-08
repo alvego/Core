@@ -92,11 +92,11 @@ c.AttachEvent('MERCHANT_SHOW', function()
                 cnt = cnt + 1
                 if sellPrice > 0 then
                     sum = sum + sellPrice
-                    c.MessageLog(format('Продаем хлам %s из сумок за %s', link, GetCoinTextureString(sellPrice)),
+                    c.MessageLog(format('%s за %s', link, GetCoinTextureString(sellPrice)),
                         'Продажа', icon)
                     UseContainerItem(bag, slot)
                 else
-                    c.MessageLog(format('Выбрасываем хлам %s из сумок', link), 'Очистка', icon)
+                    c.MessageLog(format('%s выбрасываем из сумок', link), 'Очистка', icon)
                     PickupContainerItem(bag, slot)
                     DeleteCursorItem()
                 end
