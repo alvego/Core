@@ -14,26 +14,27 @@ c.PrintLoadClassModuleMessage(className)
 local st = c.state
 local IsMouselooking = IsMouselooking
 -------------------------------------------------------------------------------
+local function HasMagmaTotem()
+    local haveTotem, name = GetTotemInfo(1)
+    return haveTotem and name == 'Тотем магмы VII'
+end
+-------------------------------------------------------------------------------
 local function updateEnhance()
     local reason, action, unit
-
     -------------------------------------------------------------------------------
     -- иногда в ротации есть необходимость прерывания своего каста
     reason = '#cast [%s]'
     if st.playerCasting then return format(reason, st.playerCasting) end
     -------------------------------------------------------------------------------
     c.TimerToggle('needHeal', st.playerHP100 < (st.group and 35 or 60))
-    local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 2) and st.combatMode
+    c.TimerToggle('still', st.still)
+    local still = c.TimerStarted('still') and c.TimerMore('still', 1)
+    local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 2)
     local mana100 = c.UnitMana100('player')
     local aoe = c.GetEnemyCount(10, 'player') > 2
     local _, _, stacks = c.HasMyBuff('Оружие Водоворота')
     local dist = c.UnitDistance('target', 'player')
-    local function HasMagmaTotem()
-        local haveTotem, name = GetTotemInfo(1)
-        return haveTotem and name == 'Тотем магмы VII'
-    end
     -------------------------------------------------------------------------------
-    
     reason, action, unit = 'Хп упало, дэф', 'Ярость шамана', 'player'
     if st.combatMode and st.playerHP100 < 40 and c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
@@ -59,67 +60,67 @@ local function updateEnhance()
     -- Дальше считаем что у нас есть валидная цель
     ------------------------------------------------------------------------------- 
     reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
-    if not aoe and c.CanUseGcdSpell(action) and c.HasMyDebuff('Огненный шок', target, 1) and stacks == 5 then
+    if not aoe and c.CanUseGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', target, 1) and stacks > 4 then
         c.DoAction(reason, action, unit)
         return reason
     end
     
     reason, action, unit = 'АОЕшим или просто дамажим пока есть мана', 'Цепная молния', 'target'
-    if (aoe or mana100 >= 50) and c.CanUseGcdSpell(action) and stacks == 5 then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-
-    reason, action, unit = 'Ставим АОЕ тотем всегда', 'Тотем магмы', 'target'
-    if mana100 >= 30 and c.CanUseGcdSpell(action) and dist < 6 and not HasMagmaTotem() then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-
-    reason, action, unit = 'Кольцо огня с тотема', 'Кольцо огня', 'target'
-    if aoe and c.CanUseGcdSpell(action) and HasMagmaTotem() then
+    if mana100 > 40 and c.CanUseGcdSpell(action, unit) and stacks > 4 then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Уплотняем ротацию', 'Молния', 'target'
-    if mana100 < 50 and c.CanUseGcdSpell(action) and stacks == 5 then
+    if c.CanUseGcdSpell(action, unit) and stacks == 5 then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Основной мили удар', 'Удар бури', 'target'
-    if c.CanUseGcdSpell(action) then
+    if c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Ставим АОЕ тотем всегда', 'Тотем магмы', 'target'
+    if mana100 >= 30 and still and c.CanUseGcdSpell(action) and dist < 6 and not HasMagmaTotem() then
+        c.DoAction(reason, action)
+        return reason
+    end
+
+    reason, action, unit = 'Кольцо огня с тотема', 'Кольцо огня', 'target'
+    if aoe and c.CanUseGcdSpell(action) and HasMagmaTotem() then
+        c.DoAction(reason, action)
         return reason
     end
 
     reason, action, unit = 'Подбаф расовый', 'Варварский ритуал', 'target'
     if c.CanUseGcdSpell(action) and dist < 8 then
-        c.DoAction(reason, action, unit)
+        c.DoAction(reason, action)
         return reason
     end
 
     reason, action, unit = 'Второй мили удар', 'Вскипание лавы', 'target'
-    if c.CanUseGcdSpell(action) then
+    if c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Поджигаем', 'Огненный шок', 'target'
-    if c.CanUseGcdSpell(action) and not c.HasMyDebuff('Огненный шок', target, 1) then
+    if c.CanUseGcdSpell(action, unit) and not c.HasMyDebuff('Огненный шок', target, 1) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Приземляем', 'Земной шок', 'target'
-    if c.CanUseGcdSpell(action) then
+    if c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Морозим когда в ренже', 'Ледяной шок', 'target'
-    if c.CanUseGcdSpell(action) then
+    if c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
