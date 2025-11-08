@@ -111,7 +111,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
 end
 
 c.CustomCanUseSpell = function(spell, unit)
-    return
+    return true
 end
 
 -------------------------------------------------------------------------------

@@ -45,7 +45,7 @@ function c.Update()
         c.LogWhatHappend(stopReason)
         return
     end
-
+    
     c.LogWhatHappend(updateEnhance())
 end
 
