@@ -40,7 +40,10 @@ function c.Paused(value)
     if type(value) == 'boolean' then
         db.paused = value
     end
-    if (UnitIsAFK('player') == 1) then return true end
+    if (UnitIsAFK('player') == 1) then
+        c.Echo('AFK')
+        return true
+    end
     return db.paused
 end
 
