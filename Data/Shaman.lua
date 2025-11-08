@@ -29,12 +29,62 @@ local function updateEnhance()
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------
+    local aoe = c.GetEnemyCount(10, 'player') > 2
+    local _, _, stacks = c.HasMyBuff('Оружие Водоворота')
+    local function HasMagmaTotem()
+        local haveTotem, name = GetTotemInfo(1)
+        return haveTotem and name == 'Тотем магмы VII'
+    end 
 
-    reason, action, unit = 'Заплонитель', 'Молния', 'target'
+    reason, action, unit = 'АОЕшим', 'Цепная молния', 'target'
+    if aoe and c.CanUseGcdSpell(action) and stacks == 5 then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+
+    reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
+    if not aoe and c.CanUseGcdSpell(action) and c.HasMyDebuff('Огненный шок', target, 1) and stacks == 5 then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Уплотняем ротацию', 'Молния', 'target'
+    if not aoe and c.CanUseGcdSpell(action) and stacks == 5 then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Основной мили удар', 'Удар бури', 'target'
     if c.CanUseGcdSpell(action) then
         c.DoAction(reason, action, unit)
         return reason
     end
+
+    reason, action, unit = 'Подбаф расовый', 'Варварский ритуал', 'target'
+    if c.CanUseGcdSpell(action) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Второй мили удар', 'Вскипание лавы', 'target'
+    if c.CanUseGcdSpell(action) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Поджигаем', 'Огненный шок', 'target'
+    if c.CanUseGcdSpell(action) and not c.HasMyDebuff('Огненный шок', target, 1) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Приземляем', 'Земной шок', 'target'
+    if c.CanUseGcdSpell(action) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
     if st.gcd then return '#gcd' end
     return '#none'
 end
