@@ -41,6 +41,24 @@ local function updateObject()
 end
 
 -------------------------------------------------------------------------------
+function c.GetTargets()
+    updateObject()
+    return targets
+end
+
+-------------------------------------------------------------------------------
+function c.GetUnits()
+    updateObject()
+    return units
+end
+
+-------------------------------------------------------------------------------
+function c.GetObjects()
+    updateObject()
+    return objects
+end
+
+-------------------------------------------------------------------------------
 c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     aroundUnit = aroundUnit or 'player'
     local result = 0
@@ -59,11 +77,5 @@ c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     end
     return result
 end)
-
--------------------------------------------------------------------------------
-function c.GetTargets()
-    updateObject()
-    return targets
-end
 
 -------------------------------------------------------------------------------

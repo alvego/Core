@@ -100,9 +100,9 @@ function c.UnitInLOS(unit1, unit2)
 end
 
 -------------------------------------------------------------------------------
-function c.UnitClick(unit)
+function c.UnitClick(unit, use)
     if type(oUnitClick) == 'function' then
-        oUnitClick(unit)
+        oUnitClick(unit, use and '1' or nil)
     end
 end
 

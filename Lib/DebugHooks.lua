@@ -53,9 +53,38 @@ c.AttachActionHook('log', function()
 end)
 
 -------------------------------------------------------------------------------
+
+-- local offsets = {}
+-- local ignored = { 168, 169 }
+-- --local ignored = { 191, 171, 168, 169, 170 }
+-- local function findOffset()
+--     --if UnitExists('target') and UnitIsDead('target') then
+--     if UnitExists('target') then
+--         local ptr = c.UnitPtr('target')
+
+--         print('-----------------------------------------------')
+--         -- print('test8', c.ReadByte(ptr, 168)) --171
+--         --if true then return end
+--         for i = 1, 300 do
+--             if not tContains(ignored, i) then
+--                 local data = c.ReadByte(ptr, i)
+
+--                 if offsets[i] ~= data then
+--                     if offsets[i] ~= nil then
+--                         print('#' .. i, offsets[i], '!=', data)
+--                     end
+
+--                     offsets[i] = data
+--                     --break
+--                 end
+--             end
+--         end
+--     end
+-- end
+
 c.AttachActionHook('test', function()
-    local spell = 'Снятие шкур'
-    --    print(1)
-    c.DoAction('test', spell, 'target')
-    c.ClearCursor()
+    -- print(IsSpellTarget)
 end)
+
+
+--c.AttachBeforeUpdate(findOffset)

@@ -20,6 +20,7 @@ local strlower = strlower
 local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
 local GetCursorInfo = GetCursorInfo
+local ClearCursor = ClearCursor
 -------------------------------------------------------------------------------
 function c.StrContains(str, sub)
     if (not str or not sub) then
@@ -124,7 +125,7 @@ end
 -------------------------------------------------------------------------------
 local creatureColors = {
     ["Гуманоид"] = "ffff00ff", -- жёлтый
-    ["Зверь"] = "ff00ff00", -- зелёный
+    ["Животное"] = "ff00ff00", -- зелёный
     ["Демон"] = "ffff0000", -- красный
     ["Нежить"] = "ffa0a0a0", -- серый
     ["Элементаль"] = "ff00ffff", -- голубой
