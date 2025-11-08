@@ -493,14 +493,14 @@ local function updateProto()
         return reason
     end
     -------------------------------------------------------------------------------
-    reason, action, unit = 'Заплонитель', 'Щит праведности', 'target'
+    reason, action, unit = 'Заполнитель', 'Щит праведности', 'target'
     if useMana and c.CanUseGcdSpell(action) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
-    if st.gcd then return '#gcd' end
-    if not useMana then return '#mana' end
+    --if st.gcd then return '#gcd' end
+    --if not useMana then return '#mana' end
     return '#none'
 end
 -------------------------------------------------------------------------------

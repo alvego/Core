@@ -19,7 +19,7 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local strlower = strlower
 local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
-local bit = bit
+local GetCursorInfo = GetCursorInfo
 -------------------------------------------------------------------------------
 function c.StrContains(str, sub)
     if (not str or not sub) then
@@ -145,4 +145,16 @@ function c.GetUnitColorHex(unit)
     -- Fallback: цвет по типу существа
     local ctype = UnitCreatureType(unit)
     return creatureColors[ctype] or "ffffffff"
+end
+
+-------------------------------------------------------------------------------
+
+
+function c.ClearCursor()
+    local infoType = GetCursorInfo()
+    if infoType then
+        -- Курсор держит что-то (например, item, spell и т.д.)
+        c.Log("#ClearCursor from " .. infoType)
+        ClearCursor() -- Очищаем, если нужно
+    end
 end

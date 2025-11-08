@@ -256,12 +256,11 @@ end
 function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в UIErrorsFrame
     if msg == nil then return end
     msg = tostring(msg)
-    title = tostring(title)
     UIErrorsFrame:Clear()
     UIErrorsFrame:AddMessage(
         formatMessage(
             icon or iconEcho,
-            title or c.Name,
+            title or c.name,
             msg
         ),
         r or ORANGE_FONT_COLOR.r,
@@ -273,4 +272,14 @@ function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в U
 end
 
 UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+-------------------------------------------------------------------------------
+function c.LogWhatHappend(msg, skipLogging)
+    if not msg then
+        c.Error('WhatHappend is "' .. tostring(msg) .. '"?!!')
+        return
+    end
+    if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
+    c.MessageLog(msg)
+end
+
 -------------------------------------------------------------------------------

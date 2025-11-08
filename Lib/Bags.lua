@@ -64,52 +64,50 @@ ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipHook)
 -------------------------------------------------------------------------------
 c.AttachActionHook('junk', function()
     ClearCursor()
-    c.TimerStart('junk')
-    local count = 0
+    local cnt = 0
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 and lootable ~= 1 and isJunk(link) then
+            cnt = cnt + 1
             c.MessageLog(format('Выбрасываем хлам %s из сумок', link), 'Очистка', icon)
             PickupContainerItem(bag, slot)
             DeleteCursorItem()
-            count = count + 1
         end
     end)
-    if count > 0 then
-        c.Message(format("Освободили %s слотов, за %s", count,
-            SecondsToTime(c.TimerElapsed('junk'))), 'Очистка')
+    if cnt > 0 then
+        c.Message(format("Освободили %s слот(ов). Свободно %s слот(а).", cnt, c.GetBagsFreeSlots()), 'Очистка')
     end
 end
 )
 -------------------------------------------------------------------------------
 c.AttachEvent('MERCHANT_SHOW', function()
     ClearCursor()
-    c.TimerStart('junk')
     local sum = 0
-    local count = 0
+    local cnt = 0
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 and lootable ~= 1 then
             local isTrash, sellPrice = isJunk(link)
             if isTrash then
+                cnt = cnt + 1
                 if sellPrice > 0 then
+                    sum = sum + sellPrice
                     c.MessageLog(format('Продаем хлам %s из сумок за %s', link, GetCoinTextureString(sellPrice)),
                         'Продажа', icon)
                     UseContainerItem(bag, slot)
-                    sum = sum + sellPrice
                 else
                     c.MessageLog(format('Выбрасываем хлам %s из сумок', link), 'Очистка', icon)
                     PickupContainerItem(bag, slot)
                     DeleteCursorItem()
                 end
-                count = count + 1
             end
         end
     end)
     if sum > 0 then
         c.Message(format("Итого продали на %s", GetCoinTextureString(sum)), 'Продажа')
-        c.Message(format("Освободили %s слотов, за %s", count,
-            SecondsToTime(c.TimerElapsed('junk'))), 'Продажа')
+    end
+    if cnt > 0 then
+        c.Message(format("Освободили %s слот(ов). Свободно %s слот(а).", cnt, c.GetBagsFreeSlots()), 'Продажа')
     end
     if CanMerchantRepair() then
         RepairAllItems(1) -- сперва пробуем за счет ги банка

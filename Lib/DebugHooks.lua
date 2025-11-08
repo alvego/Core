@@ -54,5 +54,8 @@ end)
 
 -------------------------------------------------------------------------------
 c.AttachActionHook('test', function()
-
+    local spell = 'Снятие шкур'
+    --    print(1)
+    c.DoAction('test', spell, 'target')
+    c.ClearCursor()
 end)

@@ -15,8 +15,6 @@ local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
 local GetActionTexture = GetActionTexture
 local WrapTextInColorCode = WrapTextInColorCode
-local GetCursorInfo = GetCursorInfo
-local ClearCursor = ClearCursor
 -------------------------------------------------------------------------------
 function c.GetSlotName(slot)
     local name = nil
@@ -144,25 +142,6 @@ local mouseButtons = {
     [5] = 'Button5',
 }
 
-
-local function checkAndClearCursor()
-    local infoType = GetCursorInfo()
-    if infoType then
-        -- Курсор держит что-то (например, item, spell и т.д.)
-        c.Log("#ClearCursor from " .. infoType)
-        ClearCursor() -- Очищаем, если нужно
-    end
-end
-
-function c.LogWhatHappend(msg, skipLogging)
-    if not msg then
-        c.Error('WhatHappend is "' .. tostring(msg) .. '"?!!')
-        return
-    end
-    if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
-    c.MessageLog(msg)
-end
-
 function c.DoAction(reason, name, target, btnNum)
     if type(reason) ~= 'string' then
         c.Error(format('DoAction: reason requared! - [%s]', c.ToStr(reason, name, target, btnNum)))
@@ -185,7 +164,7 @@ function c.DoAction(reason, name, target, btnNum)
     c.LogWhatHappend(reason, true)
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. WrapTextInColorCode(' @' .. targetName, c.GetUnitColorHex(target)) end
-    checkAndClearCursor()
+    c.ClearCursor()
     c.Message(reason, name, GetActionTexture(slot))
     c.Action(slot, target, button)
     c.lastAction = name

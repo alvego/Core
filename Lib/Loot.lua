@@ -2,11 +2,10 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local GetLootMethod = GetLootMethod
 -------------------------------------------------------------------------------
 c.AttachBeforeUpdate(function()
-    local lootMethod = GetLootMethod()
-    if lootMethod ~= 'freeforall' then return end
-end
-)
+    if not st.group or (GetLootMethod() == 'freeforall') then return end
+end)
