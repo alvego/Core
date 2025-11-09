@@ -9,7 +9,6 @@ local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 -------------------------------------------------------------------------------
 local actual = false
-local objects = {}
 local units = {}
 local targets = {}
 -------------------------------------------------------------------------------
@@ -22,7 +21,6 @@ end)
 -------------------------------------------------------------------------------
 local function updateObject()
     if actual then return end
-    wipe(objects)
     wipe(units)
     wipe(targets)
     local count = c.UnitsCount()
@@ -34,8 +32,6 @@ local function updateObject()
                 if UnitCanAttack('player', unit) then
                     tinsert(targets, unit)
                 end
-            else
-                tinsert(objects, unit)
             end
         end
     end
@@ -52,12 +48,6 @@ end
 function c.GetUnits()
     updateObject()
     return units
-end
-
--------------------------------------------------------------------------------
-function c.GetObjects()
-    updateObject()
-    return objects
 end
 
 -------------------------------------------------------------------------------
@@ -85,12 +75,25 @@ local function checkSameUnit(uid, unit)
     if not UnitIsUnit(uid, unit) then return end
     return uid
 end
+
 c.GetUnitID = c.GetCachedFunc(function(unit)
     if not UnitExists(unit) then return end
-    local result = 0
     updateObject();
     local count = #units
-    if count < 1 then return result end
+    if count < 1 then return end
     return c.FindValue(units, checkSameUnit, unit)
 end)
 -------------------------------------------------------------------------------
+local function checkSameGuid(uid, guid)
+    if UnitExists(uid) then return end
+    if UnitGUID(uid) ~= guid then return end
+    return uid
+end
+
+c.GetUnitIdByGUID = c.GetCachedFunc(function(guid)
+    if not guid then return end
+    updateObject();
+    local count = #units
+    if count < 1 then return end
+    return c.FindValue(units, checkSameGuid, guid)
+end)
