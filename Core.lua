@@ -23,6 +23,7 @@ c.showSpellSuccess = true
 c.showSpellError = true
 c.showNoneReason = true
 -------------------------------------------------------------------------------
+c.canMove = true
 
 local state = {}
 c.state = state

@@ -6,14 +6,14 @@ local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
 local UnitIsUnit = UnitIsUnit
-local UnitCanAttack = UnitCanAttack
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitGUID = UnitGUID
-local IsMouselooking = IsMouselooking
 local wipe = wipe
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
+local UnitClass = UnitClass
+local UnitIsPlayer = UnitIsPlayer
 -------------------------------------------------------------------------------
 local localDebug = false
 -------------------------------------------------------------------------------
@@ -38,13 +38,41 @@ function c.GetGroupUnits()
 end
 
 -------------------------------------------------------------------------------
+local playerLastTarget = nil
+local playerTarget = nil
+c.AttachEvent('PLAYER_TARGET_CHANGED', function()
+    local unit = 'target'
+    local target = UnitExists(unit) and c.GetUnitID(unit) or nil
+
+    if playerTarget ~= target then
+        if playerTarget then
+            playerLastTarget = playerTarget
+        end
+        if not target and playerTarget then
+            c.Target(playerTarget)
+        end
+        playerTarget = target
+    end
+end)
+
+local function clearTarget()
+    if playerTarget then
+        playerLastTarget = playerTarget
+    end
+    playerTarget = nil
+end
+
+c.AttachActionHook('clear', clearTarget)
+hooksecurefunc('SpellStopTargeting', clearTarget)
+
 local search = {}
 local ENEMY = 'ENEMY'
 local function initSearch(maxDistance, inViewfield)
     wipe(search)
     search.maxDistance = maxDistance
     search.inViewfield = inViewfield
-    search.skipGUID = c.state.invalidTarget and nil or UnitGUID('target')
+    local skipUnit = playerTarget or playerLastTarget
+    search.skipGUID = skipUnit and UnitGUID(skipUnit) or nil
     local x, y, z = c.UnitPosition('player')
     search.x = x
     search.y = y
@@ -121,7 +149,6 @@ local function getGroupTarget() --assist
     end
     return tar
 end
-
 -------------------------------------------------------------------------------
 local enemy = {}
 local function initEnemy()

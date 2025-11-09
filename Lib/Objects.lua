@@ -5,6 +5,8 @@ local c = Core
 -------------------------------------------------------------------------------
 -- Кешируем функции и значения
 local tinsert = tinsert
+local UnitIsUnit = UnitIsUnit
+local UnitCanAttack = UnitCanAttack
 -------------------------------------------------------------------------------
 local actual = false
 local objects = {}
@@ -78,4 +80,17 @@ c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     return result
 end)
 
+-------------------------------------------------------------------------------
+local function checkSameUnit(uid, unit)
+    if not UnitIsUnit(uid, unit) then return end
+    return uid
+end
+c.GetUnitID = c.GetCachedFunc(function(unit)
+    if not UnitExists(unit) then return end
+    local result = 0
+    updateObject();
+    local count = #units
+    if count < 1 then return result end
+    return c.FindValue(units, checkSameUnit, unit)
+end)
 -------------------------------------------------------------------------------

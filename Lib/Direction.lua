@@ -2,33 +2,42 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local UnitIsUnit = UnitIsUnit
 local GetPlayerFacing = GetPlayerFacing
-local IsMouselooking = IsMouselooking
 local deg = deg
 local atan2 = atan2
 -------------------------------------------------------------------------------
+local inWorld = false
+c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+    inWorld = true
+end)
+c.AttachEvent('PLAYER_LEAVING_WORLD', function()
+    inWorld = false
+end)
+-------------------------------------------------------------------------------
 function c.TurnTo(target)
+    if not inWorld then return end
     if not c.attack and c.Paused() then return end
-    if c.TimerLess("TurnTo", c.attack and 0.1 or 0.5) then return end
-    if not c.attack and not c.state.still then return end
-    if IsMouselooking() then
-        c.TimerStart("TurnTo")
+    if c.TimerLess('TurnTo', c.attack and 0.1 or 0.5) then return end
+    if not c.attack and not st.still then return end
+    if st.look then
+        c.TimerStart('TurnTo')
         return
     end
-    if not target then target = "target" end
+    if not target then target = 'target' end
     if not UnitExists(target) then return end
     if c.PlayerFacingTarget(target, c.attack and 15 or 90) then return end
     --c.Log('Turning to target')
     c.FaceToUnit(target)
-    c.TimerStart("TurnTo")
+    c.TimerStart('TurnTo')
 end
 
 -------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
-    if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == c.state.playerGUID then
+    if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
         local message = select(4, ...)
         if message == 'Цель должна быть перед вами.' then
             c.TurnTo('target')
@@ -49,7 +58,7 @@ c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
 -------------------------------------------------------------------------------
 function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
     if not angle then angle = 90 end
-    if not UnitExists(unit) or UnitIsUnit("player", unit) then return true end
+    if not UnitExists(unit) or UnitIsUnit('player', unit) then return true end
     local yawAngle = c.PlayerFacingAngleToPoint(c.UnitPosition(unit))
     return yawAngle > -angle and yawAngle < angle
 end
@@ -58,13 +67,45 @@ end
 function c.PlayerFacingAngleToPoint(x, y)
     if not x or not y then return 0 end
     local facing = GetPlayerFacing()
-    local x0, y0 = c.UnitPosition("player")
+    local x0, y0 = c.UnitPosition('player')
     local yawAngle = atan2(y0 - y, x0 - x) - deg(facing) - 180
     if yawAngle < 0 then yawAngle = yawAngle + 360 end
     return yawAngle
 end
 
 ------------------------------------------------------------------------------------------------------------------
--- c.AttachTelemetry(function()
---     return c.TelemetryBool('DIR', c.PlayerFacingTarget('target', 30))
--- end)
+function c.PlayerMove(target, maxDist)
+    if not inWorld then return false end
+    if not c.canMove then return false end
+    if c.TimerLess('PlayerMove', 0.5) then return false end
+    if not st.still then return false end
+    if st.look then return false end
+    local px, py, pz = c.UnitPosition('player')
+    local tx, ty, tz = c.UnitPosition(target)
+    local dx = px - tx
+    local dy = py - ty
+    local dz = pz - tz
+    local d = 3
+    local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
+
+    if dist < 5 or dist <= d then
+        return false
+    end
+    if maxDist and dist > maxDist then
+        return false
+    end
+
+    local ratio = d / dist
+    if ratio > 1 then
+        ratio = 1 -- Ограничиваем, чтобы остаться на отрезке (опционально)
+    end
+
+    local x = tx + ratio * dx
+    local y = ty + ratio * dy
+    local z = tz + ratio * dz
+    c.FaceToUnit(target)
+    c.TimerStart('TurnTo')
+    c.MovePlayer(x, y, z)
+    c.TimerStart('PlayerMove')
+    return true
+end

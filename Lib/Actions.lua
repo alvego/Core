@@ -163,7 +163,7 @@ function c.DoAction(reason, name, target, btnNum)
     end
     c.LogWhatHappend(reason, true)
     local targetName = target and UnitName(target) or nil
-    if targetName then reason = reason .. WrapTextInColorCode(' @' .. targetName, c.GetUnitColorHex(target)) end
+    if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end
     c.ClearCursor()
     c.Message(reason, name, GetActionTexture(slot))
     c.Action(slot, target, button)

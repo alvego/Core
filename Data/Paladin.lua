@@ -15,7 +15,6 @@ local st = c.state
 local spell = c.SpellStore
 local addSpell = c.SpellStoreAdd
 local UnitCreatureType = UnitCreatureType
-local IsMouselooking = IsMouselooking
 local UnitThreatSituation = UnitThreatSituation
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local UnitAffectingCombat = UnitAffectingCombat
@@ -419,9 +418,11 @@ local function updateProto()
         end
     end
     -------------------------------------------------------------------------------
-    reason = c.TryTarget(not isTank, 40, c.attack or IsMouselooking())
+    reason = c.TryTarget(not isTank, 40, c.attack or st.look)
     -- есть ли причина для отстановки?
     if reason then return reason end
+
+    if dist > 5 and (dist < 10 or c.attack) then c.PlayerMove('target', 60) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

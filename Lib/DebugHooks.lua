@@ -83,7 +83,7 @@ end)
 -- end
 
 c.AttachActionHook('test', function()
-    -- print(IsSpellTarget)
+    print(c.UnitInfo(c.GetUnitID('target')), c.GetUnitID('target'))
 end)
 
 

@@ -11,6 +11,7 @@ local select = select
 local table_concat = table.concat
 local wipe = wipe
 local format = format
+local type = type
 local time = time
 local WrapTextInColorCode = WrapTextInColorCode
 local UnitClass = UnitClass
@@ -124,15 +125,15 @@ end
 
 -------------------------------------------------------------------------------
 local creatureColors = {
-    ["Гуманоид"] = "ffff00ff", -- жёлтый
-    ["Животное"] = "ff00ff00", -- зелёный
-    ["Демон"] = "ffff0000", -- красный
-    ["Нежить"] = "ffa0a0a0", -- серый
-    ["Элементаль"] = "ff00ffff", -- голубой
+    ["Гуманоид"] = "aaEEFF00", -- жёлтый
+    ["Животное"] = "9900ff00", -- зелёный
+    ["Демон"] = "aaff0000", -- красный
+    ["Нежить"] = "aaa0a0a0", -- серый
+    ["Элементаль"] = "aa00ffff", -- голубой
 }
 function c.GetUnitColorHex(unit)
     unit = unit or 'target'
-    if not UnitExists(unit) then return "ffffffff" end
+    if not UnitExists(unit) then return "aaffffff" end
 
     local _, class = UnitClass(unit)
     if class and RAID_CLASS_COLORS[class] then
@@ -145,7 +146,7 @@ function c.GetUnitColorHex(unit)
 
     -- Fallback: цвет по типу существа
     local ctype = UnitCreatureType(unit)
-    return creatureColors[ctype] or "ffffffff"
+    return creatureColors[ctype] or "aaffffff"
 end
 
 -------------------------------------------------------------------------------
@@ -158,4 +159,17 @@ function c.ClearCursor()
         c.Log("#ClearCursor from " .. infoType)
         ClearCursor() -- Очищаем, если нужно
     end
+end
+
+-------------------------------------------------------------------------------
+function c.UnitInfo(unit)
+    if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
+    local name = UnitName(unit)
+    if not name then return WrapTextInColorCode('!name', 'aaff0000') end
+    name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
+    local ctype = UnitCreatureType(unit)
+    if ctype then
+        name = name .. ' - ' .. WrapTextInColorCode(ctype, creatureColors[ctype] or 'aaffffff')
+    end
+    return name
 end

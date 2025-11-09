@@ -12,7 +12,6 @@ if className ~= 'SHAMAN' then return end
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
 local st = c.state
-local IsMouselooking = IsMouselooking
 -------------------------------------------------------------------------------
 local function HasMagmaTotem()
     local haveTotem, name = GetTotemInfo(1)
@@ -53,7 +52,7 @@ local function updateEnhance()
         return reason
     end
     -------------------------------------------------------------------------------
-    reason = c.TryTarget(true, 30, c.attack or IsMouselooking())
+    reason = c.TryTarget(true, 30, c.attack or st.look)
     -- есть ли причина для отстановки?
     if reason then return reason end
     -------------------------------------------------------------------------------
