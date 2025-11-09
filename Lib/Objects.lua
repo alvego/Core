@@ -11,6 +11,7 @@ local UnitCanAttack = UnitCanAttack
 local actual = false
 local units = {}
 local targets = {}
+local objects = {}
 -------------------------------------------------------------------------------
 c.AttachBeforeUpdate(function()
     if c.TimerMore('resetObjectCache', 1.5) then
@@ -23,6 +24,7 @@ local function updateObject()
     if actual then return end
     wipe(units)
     wipe(targets)
+    wipe(objects)
     local count = c.UnitsCount()
     for i = 0, count - 1 do
         local unit = c.UnitIDByIndex(i)
@@ -32,6 +34,8 @@ local function updateObject()
                 if UnitCanAttack('player', unit) then
                     tinsert(targets, unit)
                 end
+            else
+                tinsert(objects, unit)
             end
         end
     end
@@ -85,15 +89,15 @@ c.GetUnitID = c.GetCachedFunc(function(unit)
 end)
 -------------------------------------------------------------------------------
 local function checkSameGuid(uid, guid)
-    if UnitExists(uid) then return end
+    --if not UnitExists(uid) then return end
     if UnitGUID(uid) ~= guid then return end
     return uid
 end
 
-c.GetUnitIdByGUID = c.GetCachedFunc(function(guid)
+c.GetObjectIdByGUID = c.GetCachedFunc(function(guid)
     if not guid then return end
     updateObject();
-    local count = #units
+    local count = #objects
     if count < 1 then return end
-    return c.FindValue(units, checkSameGuid, guid)
+    return c.FindValue(objects, checkSameGuid, guid)
 end)

@@ -89,9 +89,10 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
              destFlags, ...)
         local spellName = select(2, ...)
         if subEvent:match('SPELL_CREATE') and sourceGUID == c.state.playerGUID and spellName == fishSpell then
-            bobberUID = c.GetUnitIdByGUID(destGUID)
-            c.TimerStop(isBobbingTimer)
+            bobberUID = c.GetObjectIdByGUID(destGUID)
+            c.TimerReset(isBobbingTimer)
             c.Log('Видим поплавок')
+            c.TimerStart(fishSpell)
         end
     end
 )
@@ -114,7 +115,7 @@ c.AttachBeforeUpdate(function()
         return
     end
 
-    if IsEquippedItemType('Удочка') and IsUsableSpell(fishSpell) and c.TimerLess(fishSpell, 15) then
+    if IsEquippedItemType('Удочка') and IsUsableSpell(fishSpell) and c.TimerLess(fishSpell, 5) then
         if not st.still then return end
 
         if not st.playerCasting then
@@ -122,33 +123,40 @@ c.AttachBeforeUpdate(function()
             if c.CanUseGcdSpell(fishSpell, nil, salt) then
                 c.DoAction('Забрасываем', fishSpell)
                 c.TimerStart(fishSpell)
+            elseif c.TimerMore(fishSpell, 0.5) then
+                c.Log('Может еще закинуть?')
             end
+            c.SkipNextUpdate()
             return
         end
 
-        if st.playerCasting == fishSpell and bobberUID and UnitExists(bobberUID) then
-            if not c.TimerStarted(isBobbingTimer) then
-                local ptr = c.UnitPtr(bobberUID)
-                if c.ReadByte(ptr, 188) == 1 then
-                    c.Log('Клюнуло')
-                    c.TimerStart(isBobbingTimer)
+        if st.playerCasting == fishSpell then
+            c.TimerStart(fishSpell)
+            if bobberUID and UnitName(bobberUID) then
+                if not c.TimerStarted(isBobbingTimer) then
+                    local ptr = c.UnitPtr(bobberUID)
+                    if c.ReadByte(ptr, 188) == 1 then
+                        c.Log('Клюнуло')
+                        c.TimerStart(isBobbingTimer)
+                    end
                 end
-            end
 
-            if c.TimerStarted(isBobbingTimer) then
-                local delay = 0.5 + math_random() * 0.5 -- [0 .. 1]
-                if c.TimerMore(isBobbingTimer, delay) then
-                    c.Log('Подсекаем')
-                    c.UnitClick(bobberUID, true)
-                    bobberUID = nil
-                    c.TimerStop(isBobbingTimer)
-                    c.TimerStart(fishSpell)
+                if c.TimerStarted(isBobbingTimer) then
+                    local delay = 0.5 + math_random() * 1.5 -- [0 .. 2]
+                    if c.TimerMore(isBobbingTimer, delay) then
+                        c.Log('Подсекаем')
+                        c.UnitClick(bobberUID, true)
+                        bobberUID = nil
+                        c.TimerReset(isBobbingTimer)
+                    else
+                        c.Log('Наверное надо тянуть?')
+                    end
                 end
+                c.SkipNextUpdate()
+                return
             end
-
-            return
         end
-
+        c.SkipNextUpdate()
         return
     end
 
