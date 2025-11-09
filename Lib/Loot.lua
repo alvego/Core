@@ -80,13 +80,11 @@ end
 c.AttachBeforeUpdate(function()
     if c.Paused() then return end
     if c.TimerLess('Loot', 0.5) then return end
-
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
     if LootFrame:IsVisible() then return end
-    if st.playerCasting or st.gcd or st.mounted then return end
+    if st.playerCasting or st.gcd or st.mounted or st.combatMode then return end
     if st.group and (GetLootMethod() ~= 'freeforall') then return end
     if c.GetBagsFreeSlots() < 1 then return end
-    if st.combatMode then return end
     if GetCVar('autoLootDefault') ~= '1' then return end
 
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
@@ -109,7 +107,7 @@ c.AttachBeforeUpdate(function()
         tinsert(skinList, corpse)
         c.TimerStart(skinTimer)
         c.SkipNextUpdate()
-        c.TimerStart('Loot', 2)
+        c.TimerStart('Loot', 1.5)
         return
     end
 

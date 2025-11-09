@@ -47,9 +47,10 @@ end)
 
 -------------------------------------------------------------------------------
 c.AttachActionHook('log', function()
-    c.showSpellSuccess = not c.showSpellSuccess
-    c.showSpellError = not c.showSpellError
     c.showNoneReason = not c.showNoneReason
+    c.showSpellError = c.showNoneReason
+    c.showSpellSuccess = c.showNoneReason
+    c.EchoBool('Log', c.showNoneReason)
 end)
 
 -------------------------------------------------------------------------------

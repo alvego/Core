@@ -173,3 +173,12 @@ function c.UnitInfo(unit)
     end
     return name
 end
+
+function c.BoolToColorString(val)
+    if val then return WrapTextInColorCode('Enable', 'ff00ff00') end
+    return WrapTextInColorCode('Disbale', 'ffff0000')
+end
+
+function c.EchoBool(name, value)
+    c.Echo(c.ToStr(c.BoolToColorString(value), name))
+end

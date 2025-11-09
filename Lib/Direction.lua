@@ -9,16 +9,7 @@ local GetPlayerFacing = GetPlayerFacing
 local deg = deg
 local atan2 = atan2
 -------------------------------------------------------------------------------
-local inWorld = false
-c.AttachEvent('PLAYER_ENTERING_WORLD', function()
-    inWorld = true
-end)
-c.AttachEvent('PLAYER_LEAVING_WORLD', function()
-    inWorld = false
-end)
--------------------------------------------------------------------------------
 function c.TurnTo(target)
-    if not inWorld then return end
     if not c.attack and c.Paused() then return end
     if c.TimerLess('TurnTo', c.attack and 0.1 or 0.5) then return end
     if not c.attack and not st.still then return end
@@ -75,7 +66,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function c.PlayerMove(target, maxDist)
-    if not inWorld then return false end
+    if c.Paused() then return false end
     if not c.canMove then return false end
     if c.TimerLess('PlayerMove', 0.5) then return false end
     if not st.still then return false end
@@ -109,3 +100,8 @@ function c.PlayerMove(target, maxDist)
     c.TimerStart('PlayerMove')
     return true
 end
+
+c.AttachActionHook('move', function()
+    c.canMove = not c.canMove
+    c.EchoBool('Move', c.canMove)
+end)

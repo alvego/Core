@@ -23,7 +23,8 @@ c.showSpellSuccess = true
 c.showSpellError = true
 c.showNoneReason = true
 -------------------------------------------------------------------------------
-c.canMove = true
+c.inWorld = false
+c.canMove = false
 
 local state = {}
 c.state = state
@@ -41,6 +42,7 @@ function c.Paused(value)
     if type(value) == 'boolean' then
         db.paused = value
     end
+    if not c.inWorld then return true end
     if (UnitIsAFK('player') == 1) then
         c.Echo('AFK')
         return true

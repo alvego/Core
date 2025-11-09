@@ -40,6 +40,7 @@ end
 -------------------------------------------------------------------------------
 local playerLastTarget = nil
 local playerTarget = nil
+local nextTarget = nil
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     local target = UnitExists(unit) and c.GetUnitID(unit) or nil
@@ -49,10 +50,17 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
             playerLastTarget = playerTarget
         end
         if not target and playerTarget then
-            c.Target(playerTarget)
+            nextTarget = playerTarget
         end
         playerTarget = target
     end
+end)
+
+c.AttachBeforeUpdate(function()
+    if not c.inWorld then return end
+    if not nextTarget then return end
+    c.Target(nextTarget)
+    nextTarget = nil
 end)
 
 local function clearTarget()

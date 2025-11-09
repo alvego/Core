@@ -35,3 +35,11 @@ c.AttachActionHook('stop', function()
     if c.attack then return end
     c.Paused(true)
 end)
+
+-------------------------------------------------------------------------------
+c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+    c.inWorld = true
+end)
+c.AttachEvent('PLAYER_LEAVING_WORLD', function()
+    c.inWorld = false
+end)
