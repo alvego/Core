@@ -66,6 +66,7 @@ local function onLoad()
 
     addSpell('Божественная защита')
     addSpell('Святая клятва')
+    addSpell('Священный щит')
 
 
     addSpell('Праведная защита')
@@ -428,6 +429,12 @@ local function updateProto()
     -------------------------------------------------------------------------------
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
     if c.CanUseGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Обновляем поглощение', 'Священный щит', 'player'
+    if c.CanUseGcdSpell(action, unit, 5) and not c.HasAuraByID(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end

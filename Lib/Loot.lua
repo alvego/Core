@@ -80,7 +80,7 @@ end
 c.AttachBeforeUpdate(function()
     if c.Paused() then return end
     if c.TimerLess('Loot', 0.5) then return end
-    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
+    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 5) then wipe(skinList) end
     if LootFrame:IsVisible() then return end
     if st.playerCasting or st.gcd or st.mounted or st.combatMode then return end
     if st.group and (GetLootMethod() ~= 'freeforall') then return end
