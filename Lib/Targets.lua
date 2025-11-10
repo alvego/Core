@@ -12,7 +12,6 @@ local wipe = wipe
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
-local UnitClass = UnitClass
 local UnitIsPlayer = UnitIsPlayer
 -------------------------------------------------------------------------------
 local localDebug = false
@@ -42,7 +41,7 @@ local lastGUID = nil
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then return end
-    lastGUID = = UnitGUID(unit)
+    lastGUID = UnitGUID(unit)
 end)
 
 local search = {}
@@ -52,7 +51,7 @@ local function initSearch(maxDistance, inViewfield)
     search.maxDistance = maxDistance
     search.inViewfield = inViewfield
     search.skipGUID = lastGUID -- skip last target
-    lastGUID = nil  -- but only once
+    lastGUID = nil             -- but only once
     local x, y, z = c.UnitPosition('player')
     search.x = x
     search.y = y

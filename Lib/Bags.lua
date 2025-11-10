@@ -46,18 +46,19 @@ c.db.junk = c.db.junk or {}
 c.AttachActionHook('markJunk', function()
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =  GetItemInfo(link)
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
+        GetItemInfo(link)
     if not itemName then return end
     if itemRarity == 0 then return end
     local mark = WrapTextInColorCode('Хлам*', 'ff888888')
     local title = 'Маркер'
     if c.db.junk[itemName] then
         c.db.junk[itemName] = nil
-        с.Echo(format('отметка %s стерта с %s', mark, itemLink), title, itemTexture)
+        c.Echo(format('отметка %s стерта с %s', mark, itemLink), title, itemTexture)
         return
     end
     c.db.junk[itemName] = true
-    с.Echo(format('%s помечен как %s', itemLink, mark), title, itemTexture)    
+    c.Echo(format('%s помечен как %s', itemLink, mark), title, itemTexture)
 end)
 
 
