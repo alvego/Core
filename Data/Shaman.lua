@@ -12,6 +12,7 @@ if className ~= 'SHAMAN' then return end
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
 local st = c.state
+local GetTotemInfo = GetTotemInfo
 -------------------------------------------------------------------------------
 local function HasMagmaTotem()
     local haveTotem, name = GetTotemInfo(1)
@@ -57,13 +58,13 @@ local function updateEnhance()
     if reason then return reason end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
-    ------------------------------------------------------------------------------- 
+    -------------------------------------------------------------------------------
     reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
-    if not aoe and c.CanUseGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', target, 1) and stacks > 4 then
+    if not aoe and c.CanUseGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) and stacks > 4 then
         c.DoAction(reason, action, unit)
         return reason
     end
-    
+
     reason, action, unit = 'АОЕшим или просто дамажим пока есть мана', 'Цепная молния', 'target'
     if mana100 > 40 and c.CanUseGcdSpell(action, unit) and stacks > 4 then
         c.DoAction(reason, action, unit)
@@ -107,7 +108,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Поджигаем', 'Огненный шок', 'target'
-    if c.CanUseGcdSpell(action, unit) and not c.HasMyDebuff('Огненный шок', target, 1) then
+    if c.CanUseGcdSpell(action, unit) and not c.HasMyDebuff('Огненный шок', unit, 1) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -134,7 +135,7 @@ function c.Update()
         c.LogWhatHappend(stopReason)
         return
     end
-    
+
     c.LogWhatHappend(updateEnhance())
 end
 
