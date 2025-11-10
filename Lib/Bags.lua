@@ -41,19 +41,40 @@ function c.EachBugsSlot(fn)
 end
 
 -------------------------------------------------------------------------------
+c.db.junk = c.db.junk or {}
+
+c.AttachActionHook('markJunk', function()
+    local name, link = GameTooltip:GetItem()
+    if not name or not link then return end
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =  GetItemInfo(link)
+    if not itemName then return end
+    if itemRarity == 0 then return end
+    local mark = WrapTextInColorCode('Хлам*', 'ff888888')
+    local title = 'Маркер'
+    if c.db.junk[itemName] then
+        c.db.junk[itemName] = nil
+        с.Echo(format('отметка %s стерта с %s', mark, itemLink), title, itemTexture)
+        return
+    end
+    c.db.junk[itemName] = true
+    с.Echo(format('%s помечен как %s', itemLink, mark), title, itemTexture)    
+end)
+
+
 local function isJunk(link)
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
-    if not itemName then
-        return nil, 0
-    end
-    return itemRarity == 0, itemSellPrice
+    if not itemName then return nil, 0, false end
+    if itemRarity == 0 then return true, itemSellPrice, false end
+    if c.db.junk[itemName] then return true, itemSellPrice, true end
+    return false, 0, false
 end
 
 local itemTipHook = function(self, ...)
     local itemName, itemLink = self:GetItem()
-    if isJunk(itemLink) ~= true then return end
-    local line1 = WrapTextInColorCode('Хлам', 'ff888888')
+    local junk, price, mark = isJunk(itemLink)
+    if junk ~= true then return end
+    local line1 = WrapTextInColorCode('Хлам' .. (mark and '*' or ''), 'ff888888')
     local line2 = WrapTextInColorCode('Будет продан/выброшен', 'FFAD1F1F')
     self:AddDoubleLine(line1, line2)
     self:Show()
