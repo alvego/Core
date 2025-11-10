@@ -37,9 +37,3 @@ c.AttachActionHook('stop', function()
 end)
 
 -------------------------------------------------------------------------------
-c.AttachEvent('PLAYER_ENTERING_WORLD', function()
-    c.inWorld = true
-end)
-c.AttachEvent('PLAYER_LEAVING_WORLD', function()
-    c.inWorld = false
-end)
