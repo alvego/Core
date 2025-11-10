@@ -38,40 +38,12 @@ function c.GetGroupUnits()
 end
 
 -------------------------------------------------------------------------------
-local playerLastTarget = nil
-local playerTarget = nil
-local nextTarget = nil
+local lastGUID = nil
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
-    local target = UnitExists(unit) and c.GetUnitID(unit) or nil
-
-    if playerTarget ~= target then
-        if playerTarget then
-            playerLastTarget = playerTarget
-        end
-        if not target and playerTarget then
-            nextTarget = playerTarget
-        end
-        playerTarget = target
-    end
+    if not UnitExists(unit) then return end
+    lastGUID = = UnitGUID(unit)
 end)
-
-c.AttachBeforeUpdate(function()
-    if not c.inWorld then return end
-    if not nextTarget then return end
-    c.Target(nextTarget)
-    nextTarget = nil
-end)
-
-local function clearTarget()
-    if playerTarget then
-        playerLastTarget = playerTarget
-    end
-    playerTarget = nil
-end
-
-c.AttachActionHook('clear', clearTarget)
-hooksecurefunc('SpellStopTargeting', clearTarget)
 
 local search = {}
 local ENEMY = 'ENEMY'
@@ -79,13 +51,13 @@ local function initSearch(maxDistance, inViewfield)
     wipe(search)
     search.maxDistance = maxDistance
     search.inViewfield = inViewfield
-    local skipUnit = playerTarget or playerLastTarget
-    search.skipGUID = skipUnit and UnitGUID(skipUnit) or nil
+    search.skipGUID = lastGUID -- skip last target
+    lastGUID = nil  -- but only once
     local x, y, z = c.UnitPosition('player')
     search.x = x
     search.y = y
     search.z = z
-    search.angle = c.attack and 15 or 90
+    search.angle = c.attack and 30 or 90
 end
 
 local enemyInView = c.GetCachedFunc(function(unit)
