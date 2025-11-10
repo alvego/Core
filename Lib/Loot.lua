@@ -22,6 +22,7 @@ local wipe = wipe
 local tContains = tContains
 local IsEquippedItemType = IsEquippedItemType
 local math_random = math.random
+local CombatLogClearEntries = CombatLogClearEntries
 -------------------------------------------------------------------------------
 local canLoot = c.GetCachedFunc(function(unit)
     local ptr = c.UnitPtr(unit)
@@ -90,27 +91,9 @@ local function getNearCorpse(allowSkin)
     return _corpse
 end
 -------------------------------------------------------------------------------
-local fish = {}
-fish.spell = 'Рыбная ловля'
-fish.bobber = nil
-fish.delay = 0
-
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
-    function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
-             destFlags, ...)
-        local spellName = select(2, ...)
-        if subEvent:match('SPELL_CREATE') and sourceGUID == st.playerGUID and spellName == fish.spell then
-            fish.bobber = c.GetObjectIdByGUID(destGUID)
-            c.Log('Видим поплавок')
-            c.TimerStart(fish.spell)
-            fish.delay = 0.5 + math_random() * 2.5 -- [0 .. 3]
-        end
-    end
-)
--------------------------------------------------------------------------------
-
-local function lootUnit(unit)
-    c.Message(c.UnitInfo(unit), 'Лутаем')
+local function lootUnit(unit, name)
+    if tContains(lootList, unit) then return end
+    c.Message(name or c.UnitInfo(unit), 'Лутаем')
     c.UnitClick(unit, true)
     c.TimerStart(lootTimer)
     tinsert(lootList, unit)
@@ -124,6 +107,7 @@ local function waitForLoot()
         local IsLootLag = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 1.5)
         -- если окно лута подвисло
         if IsLootLag then
+            c.Log('#подвисло окно лута')
             for i = 1, GetNumLootItems() do
                 if not select(5, GetLootSlotInfo(i)) then LootSlot(i) end
             end
@@ -133,6 +117,92 @@ local function waitForLoot()
     end
     return false    -- лут нет, можно что-то делать
 end
+-------------------------------------------------------------------------------
+local fish = {}
+fish.run = false
+fish.spell = 'Рыбная ловля'
+fish.icon = select(3, GetSpellInfo(fish.spell))
+fish.guid = nil
+fish.bobber = nil
+fish.delay = 1
+
+c.AttachActionHook(fish.spell, function()
+    fish.run = true
+end)
+
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
+    function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+             destFlags, ...)
+        if c.Paused() then return end
+        local spellName = select(2, ...)
+        if subEvent:match('SPELL_CREATE') and sourceGUID == st.playerGUID and spellName == fish.spell then
+            fish.guid = destGUID
+            c.MessageLog('#забросили удочку', fish.spell, fish.icon)
+        end
+    end
+)
+-------------------------------------------------------------------------------
+local function waitForFishing()
+    if not IsUsableSpell(fish.spell) or
+        not c.TimerLess(fish.spell, 5) or
+        st.playerCasting and st.playerCasting ~= fish.spell or
+        not st.still then
+        fish.run = false
+        c.TimerReset(fish.spell)
+        return false
+    end
+
+    c.SkipNextUpdate()
+
+    if not st.playerCasting then
+        if c.CanUseGcdSpell(fish.spell, nil, fish.delay) then
+            CombatLogClearEntries()
+            c.DoAction('Забрасываем', fish.spell)
+            fish.run = true
+            fish.delay = 0.5 + math_random() * 2.5 -- [0 .. 3]
+        end
+        return true
+    end
+
+    c.TimerStart(fish.spell)
+
+    if not fish.bobber and fish.guid then
+        fish.bobber = c.GetObjectIdByGUID(fish.guid)
+        if fish.bobber then
+            c.MessageLog('#нашли поплавок', fish.spell, fish.icon)
+
+            -- local ptr = c.UnitPtr(fish.bobber)
+            -- for i = 0, 1200 do
+            --     local guid = c.ReadUlong(ptr, i)
+            --     if guid == st.playerGUID then c.Log('#', i) end
+            -- end
+            -- local guid = c.ReadUlong(ptr, 0x18)
+            -- c.Log('Created by me', guid == st.playerGUID, 0 + guid, 0 + st.playerGUID)
+
+            -- c.Log('UnitPlayerControlled', UnitPlayerControlled(fish.bobber))
+            -- c.Log('UnitIsTapped', UnitIsTapped(fish.bobber))
+            -- c.Log('UnitIsTappedByPlayer', UnitIsTappedByPlayer(fish.bobber))
+            fish.guid = nil
+        end
+    end
+
+    if fish.run and not fish.bobber and not fish.guid then
+        c.MessageLog('#завис combat log', fish.spell, fish.icon)
+        --c.CastStop()
+    end
+
+    if fish.bobber and not tContains(lootList, fish.bobber) then
+        c.MessageLog('#ждем клева...', fish.spell, fish.icon)
+        local ptr = c.UnitPtr(fish.bobber)
+        if c.ReadByte(ptr, 188) ~= 1 then return end
+        c.MessageLog('#подсекаем', fish.spell, fish.icon)
+        lootUnit(fish.bobber, UnitName(fish.bobber))
+        fish.bobber = nil
+        fish.run = false
+    end
+    return true
+end
+
 
 -------------------------------------------------------------------------------
 
@@ -147,27 +217,7 @@ c.AttachBeforeUpdate(function()
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 5) then wipe(skinList) end
     if st.gcd or st.mounted or st.combatMode then return end
 
-    if IsEquippedItemType('Удочка') and IsUsableSpell(fish.spell) and c.TimerLess(fish.spell, 5) then
-        if not st.still then return end
-
-        if not st.playerCasting then
-            if c.CanUseGcdSpell(fish.spell, nil, fish.delay) then
-                c.DoAction('Забрасываем', fish.spell)
-                c.SkipNextUpdate()
-                c.TimerStart(fish.spell)
-            end
-            return
-        end
-
-        if st.playerCasting == fish.spell and fish.bobber then
-            c.TimerStart(fish.spell)
-            local ptr = c.UnitPtr(fish.bobber)
-            if c.ReadByte(ptr, 188) ~= 1 then return end
-            lootUnit(fish.bobber)
-            fish.bobber = nil
-        end
-        return
-    end
+    if waitForFishing() then return end
 
     if st.playerCasting then return end
     -- ищем кого можно лутануть
