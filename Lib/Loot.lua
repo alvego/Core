@@ -217,15 +217,14 @@ c.AttachBeforeUpdate(function()
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
-
     if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.5) then wipe(lootList) end
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 5) then wipe(skinList) end
-    if st.gcd or st.mounted or st.combatMode then return end
+    if st.mounted or st.combatMode then return end
 
     if waitForFishing() then return end
 
     if c.TimerLess('Loot', 0.4) then return end
-    if st.playerCasting then return end
+    if st.gcd or st.playerCasting then return end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
     if corpse then
