@@ -2,17 +2,21 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
 local UnitIsUnit = UnitIsUnit
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitGUID = UnitGUID
+local bit = bit
 local wipe = wipe
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
 local UnitIsPlayer = UnitIsPlayer
+local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 -------------------------------------------------------------------------------
 local localDebug = false
 -------------------------------------------------------------------------------
@@ -27,10 +31,10 @@ end
 local playerUnits = { 'player' }
 -------------------------------------------------------------------------------
 function c.GetGroupUnits()
-    if c.state.raid then
+    if st.raid then
         return raidUnits
     end
-    if c.state.party then
+    if st.party then
         return partyUnits
     end
     return playerUnits
@@ -214,4 +218,28 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     end
 end
 
+-------------------------------------------------------------------------------
+local attackerGUID = nil -- автовыбор атакующих
+local function attackTracker(event, timestamp, subEvent,
+                             sourceGUID, sourceName, sourceFlags,
+                             destGUID, destName, destFlags, ...)
+    -- Источник события - неодушевленный объект, ловушка, тотем, пропускаем
+    if bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_OBJECT) ~= 0 then return end
+    -- фильтр для игнорирования событий с участием союзников, чтобы фокусировался на боевых действиях против врагов.
+    if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
+    if not sourceGUID or destGUID ~= st.playerGUID then return end
+    if not (subEvent:match('_DAMAGE') or subEvent:match('_MISSED')) then return end
+    attackerGUID = sourceGUID -- нас атакуют
+end
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)
+
+с.AttachBeforeIdle(function() 
+    if attackerGUID and -- нас атакуют
+        not c.Paused() and -- не на паузе
+        (not st.combatTarget or st.invalidTarget) then -- у нас нет цели или она не в бою, либо я не могу ее бить
+        c.MessageLog('#нас атакуют, выбор цели') -- тогда выбираем цель для боя, чтоб не терять время.
+        c.SearchTarget(false, 40, false)
+    end
+    attackerGUID = nil -- сброс, чтоб не подлипало
+end)
 -------------------------------------------------------------------------------
