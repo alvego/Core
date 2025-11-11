@@ -85,9 +85,7 @@ local function updateUserAction()
     end
     if c.TimerMore(userActionTimer, 2) then
         c.Message('отмена по времени!', userAction.name, userAction.icon)
-        userAction.slot = nil
-        userAction.target = nil
-        userAction.button = nil
+        userActionReset()
         return
     end
     if not c.CanUseSlot(userAction.slot, userAction.target) then
