@@ -286,10 +286,10 @@ local function updateProto()
         return reason
     end
     -------------------------------------------------------------------------------
-    reason, action, unit = 'Мало хп в бою, нужен деф', 'Божественная защита', 'player'
-    if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
-        c.DoAction(reason, action, unit) -- мгновенка
-    end
+    -- reason, action, unit = 'Мало хп в бою, нужен деф', 'Божественная защита', 'player'
+    -- if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
+    --     c.DoAction(reason, action, unit) -- мгновенка
+    -- end
     -------------------------------------------------------------------------------
     unit = 'mouseover'
     if c.start and UnitExists(unit) then

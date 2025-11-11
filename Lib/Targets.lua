@@ -243,4 +243,12 @@ c.AttachBeforeUpdate(function()
     end
     attackerGUID = nil -- сброс, чтоб не подлипало
 end)
+
+c.AttachEvent('COMBAT_PLAYER_ENTER', function()
+    if not c.Paused() and -- не на паузе
+        (not st.combatTarget or st.invalidTarget) then -- у нас нет цели или она не в бою, либо я не могу ее бить
+        c.MessageLog('#вступаем в бой, выбор цели') -- тогда выбираем цель для боя, чтоб не терять время.
+        c.SearchTarget(false, 40, false)
+    end
+end)
 -------------------------------------------------------------------------------
