@@ -217,24 +217,23 @@ c.AttachBeforeUpdate(function()
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
-    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.5) then wipe(lootList) end
-    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 5) then wipe(skinList) end
+    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.4) then wipe(lootList) end
+    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
     if st.mounted or st.combatMode then return end
 
     if waitForFishing() then return end
 
-    if c.TimerLess('Loot', 0.4) then return end
+
     if st.gcd or st.playerCasting then return end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
     if corpse then
         lootUnit(corpse)
-        c.TimerStart('Loot')
         return
     end
 
     if not st.still then return end
-
+    if c.TimerLess('Skin', 1) then return end
     local skinSpell = 'Снятие шкур'
     local allowSkin = IsUsableSpell(skinSpell)
     if allowSkin then
@@ -244,11 +243,12 @@ c.AttachBeforeUpdate(function()
             c.DoAction('Свежуем', skinSpell, corpse)
             tinsert(skinList, corpse)
             c.TimerStart(skinTimer)
-            c.TimerStart('Loot', 1.5)
+            c.TimerStart('Skin')
             return
         end
     end
 
+    if c.TimerLess('Move', 1) then return end
     if not c.canMove() then return end
     if st.look then return end
     -- ищем ближайший полезный труп
@@ -257,7 +257,7 @@ c.AttachBeforeUpdate(function()
     --     c.PlayerMove(corpse, maxDist)
     -- end
     if corpse and c.PlayerMove(corpse, maxDist) then
-        c.TimerStart('Loot', 3)
+        c.TimerStart('Move')
     end
 end)
 -------------------------------------------------------------------------------
