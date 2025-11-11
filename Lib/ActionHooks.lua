@@ -53,10 +53,9 @@ local function hookUseAction(slot, target, button)
         local ownGCD = onGcd and (gcdDuration - gcdLeft) < c.advance
         if ownGCD then return end
     end
-
     local isUsable, notEnoughMana = IsUsableAction(slot)
     if not isUsable or notEnoughMana then
-        c.MessageLog(notEnoughMana and '!mana' or '!usable', name, icon))
+        c.MessageLog(notEnoughMana and '!mana' or '!usable', name, icon)
         return
     end
     if ActionHasRange(slot) and IsActionInRange(slot, target) == 0 then

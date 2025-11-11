@@ -233,7 +233,7 @@ local function attackTracker(event, timestamp, subEvent,
 end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)
 
-с.AttachBeforeIdle(function() 
+c.AttachBeforeIdle(function()
     if attackerGUID and -- нас атакуют
         not c.Paused() and -- не на паузе
         (not st.combatTarget or st.invalidTarget) then -- у нас нет цели или она не в бою, либо я не могу ее бить

@@ -86,6 +86,3 @@ end)
 c.AttachActionHook('test', function()
     print(c.UnitInfo(c.GetUnitID('target')), c.GetUnitID('target'))
 end)
-
-
---c.AttachBeforeUpdate(findOffset)
