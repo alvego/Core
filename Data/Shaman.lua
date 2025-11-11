@@ -96,7 +96,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Подбаф расовый', 'Варварский ритуал', 'target'
-    if c.CanUseGcdSpell(action) and dist < 8 then
+    if not c.pvp and c.CanUseSpell(action) and dist < 8 then
         c.DoAction(reason, action)
         return reason
     end
