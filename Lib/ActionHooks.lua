@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local type = type
 local error = error
@@ -11,9 +12,13 @@ local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
 -------------------------------------------------------------------------------
 local userAction = {}
-userAction.slot = nil
-userAction.target = nil
-userAction.button = nil
+local function userActionReset()
+    userAction.slot = nil
+    userAction.target = nil
+    userAction.button = nil
+    userAction.name = nil
+    userAction.icon = nil
+end
 local userActionTimer = 'userAction'
 local actionHooks = {}
 
@@ -28,13 +33,13 @@ local function hookUseAction(slot, target, button)
     if not name then
         return
     end
-
+    local icon = GetActionTexture(slot)
     local isMine = c.SlotIsPressed(slot)
     if not isMine then return end
 
     local hook = actionHooks[name]
     if hook then
-        c.MessageLog('', name, GetActionTexture(slot)) -- hook
+        c.MessageLog('', name, icon) -- hook
         hook(slot, target, button)
         return
     end
@@ -51,21 +56,23 @@ local function hookUseAction(slot, target, button)
 
     local isUsable, notEnoughMana = IsUsableAction(slot)
     if not isUsable or notEnoughMana then
-        c.MessageLog(notEnoughMana and '!mana' or '!usable', name, GetActionTexture(slot))
+        c.MessageLog(notEnoughMana and '!mana' or '!usable', name, icon))
         return
     end
     if ActionHasRange(slot) and IsActionInRange(slot, target) == 0 then
-        c.MessageLog('!range', name, GetActionTexture(slot))
+        c.MessageLog('!range', name, icon)
         return
     end
     if userAction.slot ~= slot then
         userAction.slot = slot
         userAction.target = target
         userAction.button = button
+        userAction.name = name
+        userAction.icon = icon
         c.TimerStart(userActionTimer, castLeft or 0)
-        c.MessageLog('нажать?', name, GetActionTexture(slot))
+        c.MessageLog('нажать?', name, icon)
     elseif inCast then
-        c.MessageLog('повтор -> стопкаст', name, GetActionTexture(slot))
+        c.MessageLog('повтор -> стопкаст', name, icon)
         c.CastStop()
     end
 end
@@ -77,34 +84,32 @@ local function updateUserAction()
         return
     end
     if c.TimerMore(userActionTimer, 2) then
-        c.Message('отмена по времени!', c.GetSlotName(userAction.slot), GetActionTexture(userAction.slot))
+        c.Message('отмена по времени!', userAction.name, userAction.icon)
         userAction.slot = nil
         userAction.target = nil
         userAction.button = nil
         return
     end
     if not c.CanUseSlot(userAction.slot, userAction.target) then
-        c.MessageLog('пока не доступно!', c.GetSlotName(userAction.slot), GetActionTexture(userAction.slot))
+        c.MessageLog('пока не доступно!', userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
-    if c.UnitCasting('player') then -- add spell busy
-        c.MessageLog('ожидаем конец каста!', c.GetSlotName(userAction.slot), GetActionTexture(userAction.slot))
+    if st.playerCasting then -- add spell busy
+        c.MessageLog('ожидаем конец каста!', userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
 
-    if c.GetSpellCooldownLeft(c.gcdSpellId) > 0 then
-        c.MessageLog('пока готово!', c.GetSlotName(userAction.slot), GetActionTexture(userAction.slot))
+    if st.gcd then
+        c.MessageLog('пока не готово, гкд!', userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
-    c.Message('жмем!', c.GetSlotName(userAction.slot), GetActionTexture(userAction.slot))
+    c.Message('жмем!', userAction.name, userAction.icon)
     c.Action(userAction.slot, userAction.target, userAction.button)
     c.SkipNextUpdate()
-    userAction.slot = nil
-    userAction.target = nil
-    userAction.button = nil
+    userActionReset()
 end
 c.AttachAfterUpdate(updateUserAction)
 -------------------------------------------------------------------------------
