@@ -41,9 +41,8 @@ function c.EachBugsSlot(fn)
 end
 
 -------------------------------------------------------------------------------
-c.db.junk = c.db.junk or {}
 
-c.AttachActionHook('markJunk', function()
+c.AttachActionHook('toggle', function()
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =

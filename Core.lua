@@ -2,8 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 Core = {}
-CoreDB = CoreDB or {}
-Core.db = CoreDB
+
 -------------------------------------------------------------------------------
 local c = Core
 -------------------------------------------------------------------------------
@@ -31,21 +30,17 @@ c.state = state
 local stateCache = {}
 c.stateCache = stateCache
 
-local db = c.db
-if db.paused == nil then
-    db.paused = true
-end
-
 -------------------------------------------------------------------------------
 function c.Paused(value)
-    if type(value) == 'boolean' then
-        db.paused = value
+    if c.db and type(value) == 'boolean' then
+        c.db.paused = value
     end
     if (UnitIsAFK('player') == 1) then
         c.Echo('AFK')
         return true
     end
-    return db.paused
+    if not c.db then return true end
+    return c.db.paused
 end
 
 -------------------------------------------------------------------------------

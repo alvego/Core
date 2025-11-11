@@ -147,7 +147,10 @@ local function waitForFishing()
         not c.TimerLess(fish.spell, 5) or
         st.playerCasting and st.playerCasting ~= fish.spell or
         not st.still then
-        fish.run = false
+        if fish.run then
+            c.MessageLog('#хватит рыбачить', fish.spell, fish.icon)
+            fish.run = false
+        end
         c.TimerReset(fish.spell)
         return false
     end
@@ -197,6 +200,7 @@ local function waitForFishing()
         if c.ReadByte(ptr, 188) ~= 1 then return end
         c.MessageLog('#подсекаем', fish.spell, fish.icon)
         lootUnit(fish.bobber, UnitName(fish.bobber))
+        c.CastStop()
         fish.bobber = nil
         fish.run = false
     end
@@ -212,13 +216,15 @@ c.AttachBeforeUpdate(function()
     if c.GetBagsFreeSlots() < 1 then return end
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
-    if c.TimerLess('Loot', 0.5) then return end
-    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 5) then wipe(lootList) end
+
+
+    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.5) then wipe(lootList) end
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 5) then wipe(skinList) end
     if st.gcd or st.mounted or st.combatMode then return end
 
     if waitForFishing() then return end
 
+    if c.TimerLess('Loot', 0.4) then return end
     if st.playerCasting then return end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
@@ -248,6 +254,9 @@ c.AttachBeforeUpdate(function()
     if st.look then return end
     -- ищем ближайший полезный труп
     corpse = getNearCorpse(allowSkin)
+    -- if corpse then
+    --     c.PlayerMove(corpse, maxDist)
+    -- end
     if corpse and c.PlayerMove(corpse, maxDist) then
         c.TimerStart('Loot', 3)
     end

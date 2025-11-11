@@ -1,5 +1,5 @@
 ## Author: Unknown Coder
-## Title: Core
+## Title: |cff00ff00Core|r
 ## Version: 2.0
 ## DefaultState: Disabled
 ## Interface: 30300
