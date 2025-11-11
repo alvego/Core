@@ -229,7 +229,7 @@ local function attackTracker(event, timestamp, subEvent,
     if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
     if not sourceGUID or destGUID ~= st.playerGUID then return end
     if not (subEvent:match('_DAMAGE') or subEvent:match('_MISSED')) then return end
-    c.Log('нас атакуют', sourceName)
+    --c.Log('#нас атакуют -', sourceName)
     attackerGUID = sourceGUID -- нас атакуют
 end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)

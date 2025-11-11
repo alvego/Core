@@ -41,5 +41,4 @@ c.AttachEvent('ADDON_LOADED', function(event, addonName)
     if addonName ~= c.name then return end
     CoreDB = CoreDB or {}
     c.db = CoreDB
-    c.db.junk = c.db.junk or {}
 end)

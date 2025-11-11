@@ -160,7 +160,7 @@ end
 function c.Message(msg, title, icon, r, g, b)
     msg = tostring(msg)
     title = tostring(title)
-    if not c.showNoneReason and string.sub(msg, 1, 1) == '#' then
+    if not c.showCommentLog() and string.sub(msg, 1, 1) == '#' then
         return -- игнорируем комментарии
     end
     if not c.IsChanged('Message', msg .. title) then

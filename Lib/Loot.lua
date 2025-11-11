@@ -249,7 +249,7 @@ c.AttachBeforeUpdate(function()
         end
     end
 
-    if not c.canMove then return end
+    if not c.canMove() then return end
     if st.look then return end
     -- ищем ближайший полезный труп
     corpse = getNearCorpse(allowSkin)

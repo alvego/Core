@@ -51,6 +51,7 @@ c.AttachActionHook('toggle', function()
     if itemRarity == 0 then return end
     local mark = WrapTextInColorCode('Хлам*', 'ff888888')
     local title = 'Маркер'
+    if not c.db.junk then c.db.junk = {} end
     if c.db.junk[itemName] then
         c.db.junk[itemName] = nil
         c.Echo(format('отметка %s стерта с %s', mark, itemLink), title, itemTexture)
@@ -66,7 +67,7 @@ local function isJunk(link)
         GetItemInfo(link)
     if not itemName then return nil, 0, false end
     if itemRarity == 0 then return true, itemSellPrice, false end
-    if c.db.junk[itemName] then return true, itemSellPrice, true end
+    if c.db.junk and c.db.junk[itemName] then return true, itemSellPrice, true end
     return false, 0, false
 end
 

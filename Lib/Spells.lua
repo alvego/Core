@@ -18,7 +18,7 @@ local type = type
 local tContains = tContains
 -------------------------------------------------------------------------------
 local function pushError(message, spell)
-    if not c.showSpellError then return end
+    if not c.showSpellError() then return end
     message = message or 'Что-то пошло не так'
     if not spell then
         local _spell = errorBuffer[message]
@@ -114,7 +114,7 @@ local function onEvent(event, ...)
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
         if spellName then
             c.TimerStart(spellName)
-            if c.showSpellSuccess then
+            if c.showSpellSuccess() then
                 local spellId = c.GetSpellId(spellName, nil, true)
                 local msg = spellId > 0 and
                     format('%s ID: %s', GetSpellLink(spellId), WrapTextInColorCode(spellId, 'ff71d5ff')) or
@@ -142,7 +142,7 @@ c.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
 
 
 local function onUIErrorMessage(event, ...)
-    if not c.showSpellError then return end
+    if not c.showSpellError() then return end
     local action = nil
     if failedSpell and c.TimerLess('Fail:' .. failedSpell, 0.1) then action = failedSpell end
     local message = ...

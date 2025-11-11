@@ -2,6 +2,8 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
+-------------------------------------------------------------------------------
 local format = format
 local tostring = tostring
 local tinsert = tinsert
@@ -11,6 +13,7 @@ local GetFramerate = GetFramerate
 local WrapTextInColorCode = WrapTextInColorCode
 local GetAddOnMemoryUsage = GetAddOnMemoryUsage
 local UnitIsPVP = UnitIsPVP
+local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
@@ -84,12 +87,13 @@ c.AttachAfterUpdate(updateTelemetry)
 
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
+    if UnitIsAFK('player') == 1 then
+        return WrapTextInColorCode('AFK', 'ffffbb00')
+    end
+    if c.attack then
+        return WrapTextInColorCode('ATK', 'ff00ff00')
+    end
     return c.TelemetryBool('RUN', not c.Paused())
-end)
-
--------------------------------------------------------------------------------
-c.AttachTelemetry(function()
-    return c.TelemetryBool('ATK', c.attack)
 end)
 
 -------------------------------------------------------------------------------
@@ -99,7 +103,7 @@ end)
 
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
-    return format('SPD: %03d%%', c.Round(c.state.speed / 7 * 100))
+    return format('SPD: %03d%%', c.Round(st.speed / 7 * 100))
 end)
 
 -------------------------------------------------------------------------------

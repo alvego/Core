@@ -17,30 +17,43 @@ c.gcdSpellId = 61304
 c.lastUsedSpell = nil
 c.duel = false
 -------------------------------------------------------------------------------
-c.showSpellSuccess = true
-c.showSpellError = true
-c.showNoneReason = true
--------------------------------------------------------------------------------
-c.canMove = false
-
-local state = {}
-c.state = state
+c.db = {}
+c.state = {}
 
 local stateCache = {}
 c.stateCache = stateCache
 
 -------------------------------------------------------------------------------
-function c.Paused(value)
-    if c.db and type(value) == 'boolean' then
-        c.db.paused = value
+
+local function canBool(name, value, def)
+    if type(value) == 'boolean' then
+        c.db[name] = value
     end
-    if (UnitIsAFK('player') == 1) then
-        c.Echo('AFK')
-        return true
-    end
-    if not c.db then return true end
-    return c.db.paused
+    if c.db[name] == nil then return def end
+    return c.db[name]
 end
+
+function c.Paused(value)
+    local paused = canBool('paused', value, true)
+    return UnitIsAFK('player') == 1 and true or paused
+end
+
+function c.canMove(value)
+    return canBool('canMove', value, false)
+end
+
+function c.showSpellSuccess(value)
+    return canBool('showSpellSuccess', value, true)
+end
+
+function c.showSpellError(value)
+    return canBool('showSpellError', value, true)
+end
+
+function c.showCommentLog(value)
+    return canBool('showCommentLog', value, true)
+end
+-------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 local stateCacheIndex = 0

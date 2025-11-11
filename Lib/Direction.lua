@@ -67,7 +67,7 @@ end
 ------------------------------------------------------------------------------------------------------------------
 function c.PlayerMove(target, maxDist)
     if c.Paused() then return false end
-    if not c.canMove then return false end
+    if not c.canMove() then return false end
     if c.TimerLess('PlayerMove', 0.5) then return false end
     if not st.still then return false end
     if st.look then return false end
@@ -102,6 +102,5 @@ function c.PlayerMove(target, maxDist)
 end
 
 c.AttachActionHook('move', function()
-    c.canMove = not c.canMove
-    c.EchoBool('Move', c.canMove)
+    c.EchoBool('Move', c.canMove(not c.canMove()))
 end)
