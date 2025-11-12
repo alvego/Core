@@ -219,7 +219,7 @@ c.AttachBeforeUpdate(function()
 
     if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.3) then wipe(lootList) end
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
-    if st.mounted or st.combatMode then return end
+    if st.mounted then return end
 
     if waitForFishing() then return end
 
@@ -232,7 +232,7 @@ c.AttachBeforeUpdate(function()
         return
     end
 
-    if not st.still then return end
+    if not st.still or st.combatMode then return end
     if c.TimerLess('Skin', 1) then return end
     local skinSpell = 'Снятие шкур'
     local allowSkin = IsUsableSpell(skinSpell)
@@ -240,7 +240,6 @@ c.AttachBeforeUpdate(function()
         -- ищем кого можно освежевать
         corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
         if corpse then
-            c.UnitClick(corpse, true)
             c.DoAction('Свежуем', skinSpell, corpse)
             tinsert(skinList, corpse)
             c.TimerStart(skinTimer)
