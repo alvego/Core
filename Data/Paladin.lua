@@ -258,8 +258,9 @@ local function updateProto()
     local useMana = c.attack or (mana100 > 50)
     -------------------------------------------------------------------------------
     -- автовключание если в группе и есть отметка что танк
+    local roleTank, roleHeal, roleDD = UnitGroupRolesAssigned("player")
     reason, action, unit = 'Влючаем баф для танкования', 'Праведное неистовство', 'player'
-    if not isTank and (UnitGroupRolesAssigned("player") == 'TANK') and c.CanUseGcdSpell(action, unit, 5) then
+    if not isTank and roleTank and c.CanUseGcdSpell(action, unit, 5) then
         c.DoAction(reason, action, unit)
         return reason
     end
