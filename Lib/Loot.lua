@@ -103,8 +103,8 @@ local function waitForLoot()
     local isOpenLoot = LootFrame:IsVisible()
     c.TimerToggle('LootFrame', isOpenLoot) -- таймер идет пока открыт LootFrame
     if isOpenLoot then
-        -- LootFrame висит уже 1.5 секунды
-        local IsLootLag = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 1.5)
+        -- LootFrame висит
+        local IsLootLag = c.TimerStarted('LootFrame') and c.TimerMore('LootFrame', 0.5)
         -- если окно лута подвисло
         if IsLootLag then
             c.Log('#подвисло окно лута')
@@ -217,7 +217,7 @@ c.AttachBeforeUpdate(function()
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
-    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.4) then wipe(lootList) end
+    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.3) then wipe(lootList) end
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
     if st.mounted or st.combatMode then return end
 
@@ -240,6 +240,7 @@ c.AttachBeforeUpdate(function()
         -- ищем кого можно освежевать
         corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
         if corpse then
+            c.UnitClick(corpse, true)
             c.DoAction('Свежуем', skinSpell, corpse)
             tinsert(skinList, corpse)
             c.TimerStart(skinTimer)

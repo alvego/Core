@@ -247,7 +247,7 @@ local function updateProto()
     -------------------------------------------------------------------------------
     -- hp меньше половины уже 2 секунды
     local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 1.5) and st.combatMode
-    local needMoreDamage = c.TimerStarted('needMoreDamage') and c.TimerMore('needMoreDamage', 1)
+    local needMoreDamage = c.TimerStarted('needMoreDamage') and c.TimerMore('needMoreDamage', 3)
     local still = c.TimerStarted('still') and c.TimerMore('still', 1)
     -- нужно бурстить
     local needBurst = st.targetHard and needMoreDamage --and dancingRuneWeaponReady
@@ -419,11 +419,11 @@ local function updateProto()
         end
     end
     -------------------------------------------------------------------------------
-    reason = c.TryTarget(not isTank, 40, c.attack or st.look)
+    reason = c.TryTarget(not isTank, c.attack and st.look and 100 or 40, c.attack or st.look)
     -- есть ли причина для отстановки?
     if reason then return reason end
 
-    if dist > 5 and (dist < 10 or c.attack) then c.PlayerMove('target', 60) end
+    if dist > 5 and not st.look then c.PlayerMove('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

@@ -18,6 +18,8 @@ local CanMerchantRepair = CanMerchantRepair
 local RepairAllItems = RepairAllItems
 local ItemRefTooltip = ItemRefTooltip
 local GameTooltip = GameTooltip
+local GetInventoryItemID = GetInventoryItemID
+local tContains = tContains
 -------------------------------------------------------------------------------
 function c.GetBagsFreeSlots()
     local free = 0
@@ -41,15 +43,65 @@ function c.EachBugsSlot(fn)
 end
 
 -------------------------------------------------------------------------------
+local itemTypes = { "Оружие", "Доспехи" }
+local familyRare = 7
+local getMinEquippedItemLevel = c.GetCachedFunc(function()
+    -- print('--------------------------------------------------')
+    -- print('name, itemLevel, itemType, itemSubType')
+    -- print('--------------------------------------------------')
+    local minItemLevel = nil
+    for i = 1, 18 do
+        local itemID = GetInventoryItemID("player", i)
+        if itemID then
+            local name, _, itemRarity, itemLevel, _, itemType, itemSubType = GetItemInfo(itemID)
+            --print('#', i, name, itemLevel, itemType, itemSubType, itemRarity)
+            if itemRarity ~= familyRare and tContains(itemTypes, itemType) and itemSubType ~= "Разное" and (not minItemLevel or (itemLevel < minItemLevel)) then
+                minItemLevel = itemLevel
+                --print('---', name, itemLevel)
+            end
+        end
+    end
+    -- print('--------------------------------------------------')
+    -- print('-')
+    return minItemLevel
+end)
 
+local function isJunk(link, skipList)
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
+        GetItemInfo(link)
+    if not itemName then return nil, 0 end
+    if itemRarity == 0 then return 'Хлам', itemSellPrice end
+    local minItemLevel = getMinEquippedItemLevel()
+    --print('minItemLevel', minItemLevel)
+    if minItemLevel then minItemLevel = c.Round(minItemLevel * 0.8) end -- 80%
+    if itemRarity == 1 and tContains(itemTypes, itemType) and itemSubType ~= "Разное" and minItemLevel and itemLevel < minItemLevel then
+        return format('Хлам (ilvl:%d < %d)', itemLevel, minItemLevel),
+            itemSellPrice
+    end
+    if not skipList and c.db.junk and c.db.junk[itemName] then return 'Хлам (метка)', itemSellPrice end
+    return false, 0
+end
+
+local itemTipHook = function(self, ...)
+    local itemName, itemLink = self:GetItem()
+    local junk, price = isJunk(itemLink)
+    if not junk then return end
+    local line1 = WrapTextInColorCode(junk, 'ff888888')
+    local line2 = WrapTextInColorCode('Будет продан/выброшен', 'FFAD1F1F')
+    self:AddDoubleLine(line1, line2)
+    self:Show()
+end
+GameTooltip:HookScript('OnTooltipSetItem', itemTipHook)
+ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipHook)
+-------------------------------------------------------------------------------
 c.AttachActionHook('toggle', function()
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
+    if isJunk(link, true) then return end
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
     if not itemName then return end
-    if itemRarity == 0 then return end
-    local mark = WrapTextInColorCode('Хлам*', 'ff888888')
+    local mark = WrapTextInColorCode('Хлам (метка)', 'ff888888')
     local title = 'Маркер'
     if not c.db.junk then c.db.junk = {} end
     if c.db.junk[itemName] then
@@ -60,40 +112,20 @@ c.AttachActionHook('toggle', function()
     c.db.junk[itemName] = true
     c.Echo(format('%s помечен как %s', itemLink, mark), title, itemTexture)
 end)
-
-
-local function isJunk(link)
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
-        GetItemInfo(link)
-    if not itemName then return nil, 0, false end
-    if itemRarity == 0 then return true, itemSellPrice, false end
-    if c.db.junk and c.db.junk[itemName] then return true, itemSellPrice, true end
-    return false, 0, false
-end
-
-local itemTipHook = function(self, ...)
-    local itemName, itemLink = self:GetItem()
-    local junk, price, mark = isJunk(itemLink)
-    if junk ~= true then return end
-    local line1 = WrapTextInColorCode('Хлам' .. (mark and '*' or ''), 'ff888888')
-    local line2 = WrapTextInColorCode('Будет продан/выброшен', 'FFAD1F1F')
-    self:AddDoubleLine(line1, line2)
-    self:Show()
-end
-GameTooltip:HookScript('OnTooltipSetItem', itemTipHook)
-ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipHook)
-
 -------------------------------------------------------------------------------
 c.AttachActionHook('junk', function()
     ClearCursor()
     local cnt = 0
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
-        if icon and not locked ~= 1 and lootable ~= 1 and isJunk(link) then
-            cnt = cnt + 1
-            c.MessageLog(format('Выбрасываем хлам %s из сумок', link), 'Очистка', icon)
-            PickupContainerItem(bag, slot)
-            DeleteCursorItem()
+        if icon and not locked ~= 1 and lootable ~= 1 then
+            local junk = isJunk(link)
+            if junk then
+                cnt = cnt + 1
+                c.MessageLog(format('Выбрасываем %s %s из сумок', junk, link), 'Очистка', icon)
+                PickupContainerItem(bag, slot)
+                DeleteCursorItem()
+            end
         end
     end)
     if cnt > 0 then

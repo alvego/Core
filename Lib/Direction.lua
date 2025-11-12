@@ -11,7 +11,7 @@ local atan2 = atan2
 -------------------------------------------------------------------------------
 function c.TurnTo(target)
     if not c.attack and c.Paused() then return end
-    if c.TimerLess('TurnTo', c.attack and 0.1 or 0.5) then return end
+    if c.TimerLess('TurnTo', 0.3) then return end
     if not c.attack and not st.still then return end
     if st.look then
         c.TimerStart('TurnTo')
@@ -19,7 +19,7 @@ function c.TurnTo(target)
     end
     if not target then target = 'target' end
     if not UnitExists(target) then return end
-    if c.PlayerFacingTarget(target, c.attack and 15 or 90) then return end
+    if c.PlayerFacingTarget(target, 30) then return end
     --c.Log('Turning to target')
     c.FaceToUnit(target)
     c.TimerStart('TurnTo')

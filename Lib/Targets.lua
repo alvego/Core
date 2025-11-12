@@ -234,21 +234,20 @@ local function attackTracker(event, timestamp, subEvent,
 end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)
 
+
+local function selectTarget()
+    if c.Paused() then return end
+    if st.combatTarget and not st.invalidTarget then return end
+    c.MessageLog('#бой, выбор цели')
+    c.SearchTarget(false, 40, false)
+end
+
 c.AttachBeforeUpdate(function()
-    if attackerGUID and -- нас атакуют
-        not c.Paused() and -- не на паузе
-        (not st.combatTarget or st.invalidTarget) then -- у нас нет цели или она не в бою, либо я не могу ее бить
-        c.MessageLog('#нас атакуют, выбор цели') -- тогда выбираем цель для боя, чтоб не терять время.
-        c.SearchTarget(false, 40, false)
-    end
+    if not attackerGUID then return end
+    selectTarget()
     attackerGUID = nil -- сброс, чтоб не подлипало
 end)
 
-c.AttachEvent('COMBAT_PLAYER_ENTER', function()
-    if not c.Paused() and -- не на паузе
-        (not st.combatTarget or st.invalidTarget) then -- у нас нет цели или она не в бою, либо я не могу ее бить
-        c.MessageLog('#вступаем в бой, выбор цели') -- тогда выбираем цель для боя, чтоб не терять время.
-        c.SearchTarget(false, 40, false)
-    end
-end)
+c.AttachEvent('PLAYER_REGEN_DISABLED', selectTarget)
+c.AttachEvent('PLAYER_ENTER_COMBAT', selectTarget)
 -------------------------------------------------------------------------------
