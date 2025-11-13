@@ -1,0 +1,68 @@
+MACRO 23 "attack" Ability_SteelMelee
+/startattack [exists, harm, nodead]
+/petattack [exists, harm, nodead]
+/petassist [exists, harm, nodead]
+END
+MACRO 26 "aura" Ability_Priest_HeavanlyVoice
+END
+MACRO 1 "clear" Ability_Ambush
+/cleartarget
+/clearfocus
+END
+MACRO 15 "dance" Ability_Warlock_Avoidance
+/dance
+END
+MACRO 2 "debug" ability_vehicle_shellshieldgenerator_s_blue
+END
+MACRO 32 "dev" spell_warrior_dragoncharge
+/run UIParentLoadAddOn('Blizzard_DebugTools');
+/fstack true
+/etrace
+END
+MACRO 17 "focus" Ability_Hunter_MarkedForDeath
+/focus [target=mouseover, exists, nodead][]
+END
+MACRO 25 "icon" ability_revendreth_priest
+/run ChatFrame_OpenChat(GetActionTexture(1))
+END
+MACRO 29 "junk" Spell_Mage_ConjuredManaBuns
+END
+MACRO 27 "log" Ability_Monk_Ascension
+END
+MACRO 33 "loot" Ability_Racial_PackHobgoblin
+END
+MACRO 4 "macro" ability_vehicle_shellshieldgenerator_s_red
+/macro
+END
+MACRO 14 "mana" Spell_Frost_ManaRecharge
+/oom
+END
+MACRO 30 "move" Spell_Priest_PathofDevout
+END
+MACRO 22 "name" ability_vehicle_shellshieldgenerator_s_white
+/run local f = GetMouseFocus(); if f then DEFAULT_CHAT_FRAME:AddMessage(f:GetName()) end
+END
+MACRO 5 "reload" Ability_Creature_Cursed_04
+/reload
+END
+MACRO 16 "sleep" Spell_Nature_Sleep
+/sleep
+END
+MACRO 28 "start" Ability_Repair
+END
+MACRO 24 "stop" Ability_DualWield
+/stopattack
+/petstop
+/petfollow
+END
+MACRO 10 "test" Spell_Magic_PolymorphRabbit
+END
+MACRO 31 "toggle" Ability_Nightsaber2MountSunMoon
+/cleartarget [target=target, dead]
+/clearfocus [target=focus, dead]
+/target focus
+/cleartarget [target=focus, noexists]
+/targetlasttarget
+/focus target
+/targetlasttarget
+END
