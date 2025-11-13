@@ -9,8 +9,6 @@ local IsControlKeyDown = IsControlKeyDown
 local IsAltKeyDown = IsAltKeyDown
 local IsShiftKeyDown = IsShiftKeyDown
 local UnitGUID = UnitGUID
-local IsMounted = IsMounted
-local CanExitVehicle = CanExitVehicle
 local IsInInstance = IsInInstance
 local GetNumPartyMembers = GetNumPartyMembers
 local GetNumRaidMembers = GetNumRaidMembers
@@ -46,7 +44,7 @@ local function updateState()
     st.instance = inInstance ~= nil and instanceType ~= 'pvp' and instanceType ~= 'arena'
     st.battleground = inInstance ~= nil and instanceType == 'pvp'
     st.arena = inInstance ~= nil and instanceType == 'arena'
-    st.pvp = st.arena or st.battleground or c.duel or
+    st.pvp = st.arena or st.battleground or st.duel or
         (not st.invalidTarget and UnitIsPlayer('target'))
     st.party = GetNumPartyMembers() > 0
     st.raid = GetNumRaidMembers() > 0
@@ -68,7 +66,7 @@ local function updateState()
     end
 
     st.autoattack = IsCurrentSpell('Автоматическая атака')
-    st.combatMode = c.attack or c.TimerLess('combatTarget', 1)
+    st.combatMode = st.attack or c.TimerLess('combatTarget', 1)
 
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()

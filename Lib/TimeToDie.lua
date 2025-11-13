@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local GetTime = GetTime
 local bit = bit
@@ -18,10 +19,10 @@ local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 local db = {}
 -------------------------------------------------------------------------------
 local function needUpdateUnits()
-    if c.state.combatMode then return true end        -- в бою
-    if c.state.autoattack then return true end        -- автоатака
-    if c.attack then return true end                  -- зажата атака
-    if not c.state.invalidTarget then return true end -- есть валидный таргет
+    if st.combatMode then return true end        -- в бою
+    if st.autoattack then return true end        -- автоатака
+    if st.attack then return true end                  -- зажата атака
+    if not st.invalidTarget then return true end -- есть валидный таргет
     return false
 end
 -------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
@@ -92,10 +93,10 @@ end
 -------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
-    if sourceGUID ~= c.state.playerGUID then return end
+    if sourceGUID ~= st.playerGUID then return end
     if subEvent:match('^SPELL_CAST') then
         local spellName = select(2, ...)
-        c.lastUsedSpell = spellName
+        st.lastUsedSpell = spellName
         if subEvent == 'SPELL_CAST_FAILED' then
             local message = select(4, ...)
             pushError(message, spellName)
@@ -109,7 +110,7 @@ local function onEvent(event, ...)
     local source, spellName = select(1, ...)
     if source ~= 'player' then return end
 
-    c.lastUsedSpell = spellName
+    st.lastUsedSpell = spellName
 
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
         if spellName then

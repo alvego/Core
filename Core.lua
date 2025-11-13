@@ -9,20 +9,13 @@ local type = type
 local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 c.name = ...
-c.attack = false
-c.start = false
+c.db = {}
+c.state = {}
+c.stateCache = {}
+-------------------------------------------------------------------------------
 c.advance = 0.05
 c.latency = c.advance
 c.gcdSpellId = 61304
-c.lastUsedSpell = nil
-c.duel = false
--------------------------------------------------------------------------------
-c.db = {}
-c.state = {}
-
-local stateCache = {}
-c.stateCache = stateCache
-
 -------------------------------------------------------------------------------
 
 local function canBool(name, value, def)
@@ -36,6 +29,10 @@ end
 function c.Paused(value)
     local paused = canBool('paused', value, true)
     return UnitIsAFK('player') == 1 and true or paused
+end
+
+function c.canLoot(value)
+    return canBool('canLoot', value, true)
 end
 
 function c.canMove(value)
@@ -53,6 +50,7 @@ end
 function c.showCommentLog(value)
     return canBool('showCommentLog', value, true)
 end
+
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

@@ -10,9 +10,9 @@ local deg = deg
 local atan2 = atan2
 -------------------------------------------------------------------------------
 function c.TurnTo(target)
-    if not c.attack and c.Paused() then return end
+    if not st.attack and c.Paused() then return end
     if c.TimerLess('TurnTo', 0.3) then return end
-    if not c.attack and not st.still then return end
+    if not st.attack and not st.still then return end
     if st.look then
         c.TimerStart('TurnTo')
         return
@@ -64,6 +64,7 @@ function c.PlayerFacingAngleToPoint(x, y)
     return yawAngle
 end
 
+------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------
 function c.PlayerMove(target, maxDist)
     if c.Paused() then return false end

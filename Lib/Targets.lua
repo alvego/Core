@@ -3,6 +3,7 @@
 -------------------------------------------------------------------------------
 local c = Core
 local st = c.state
+-------------------------------------------------------------------------------
 local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
@@ -60,7 +61,7 @@ local function initSearch(maxDistance, inViewfield)
     search.x = x
     search.y = y
     search.z = z
-    search.angle = c.attack and 30 or 90
+    search.angle = st.attack and 30 or 90
 end
 
 local enemyInView = c.GetCachedFunc(function(unit)
@@ -93,7 +94,7 @@ local function isInvalidEnemy(unit)
         return 'skip: possessed'
     end
     -- в pvp выбираем только игроков
-    if c.state.pvp and not UnitIsPlayer(unit) then
+    if st.pvp and not UnitIsPlayer(unit) then
         return 'skip: pvp !player'
     end
     -- если надо, то только цели перед лицом
@@ -153,7 +154,7 @@ local function checkEnemy(uid)
         return 'skip: !combat'
     end
     -- автоматически выбераем только цели в бою
-    if not c.attack and not combat then
+    if not st.attack and not combat then
         return 'skip: !attack & !combat'
     end
     -- уже нашел ближе
@@ -194,7 +195,7 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
 
     local tar = nil
     -- assist
-    if tryAssist and c.state.group then
+    if tryAssist and st.group then
         tar = getGroupTarget()
         if tar then
             if localDebug then

@@ -255,7 +255,7 @@ local function updateProto()
     -- тут что-то делаем бафы, хилки, и т.д. (Цели тут может и не быть)
     -------------------------------------------------------------------------------
     local mana100 = c.UnitMana100('player')
-    local useMana = c.attack or (mana100 > 50)
+    local useMana = st.attack or (mana100 > 50)
     -------------------------------------------------------------------------------
     -- автовключание если в группе и есть отметка что танк
     local roleTank, roleHeal, roleDD = UnitGroupRolesAssigned("player")
@@ -293,7 +293,7 @@ local function updateProto()
     -- end
     -------------------------------------------------------------------------------
     unit = 'mouseover'
-    if c.start and UnitExists(unit) then
+    if st.start and UnitExists(unit) then
         if c.IsSpellNotUsed(tauntSpells, 0.5) then
             reason, action, unit = 'Танунт по мышке', 'Длань возмездия', 'mouseover'
             if UnitCanAttack('player', unit) and c.CanUseSpell(action, unit) and not UnitIsUnit('player', unit .. '-target') and not c.HasBuff('Длань', unit) then
@@ -309,7 +309,7 @@ local function updateProto()
         end
     end
     -------------------------------------------------------------------------------
-    if not st.gcd and (st.start or (not c.attack and st.combatMode)) then
+    if not st.gcd and (st.start or (not st.attack and st.combatMode)) then
         -------------------------------------------------------------------------------
         reason, action, unit = 'Нужно обновить печать', 'Печать повиновения', 'player'
         if c.CanUseGcdSpell(action, unit, 10) and not c.UnitAuraByID(unit, sealAuras) then
@@ -372,7 +372,7 @@ local function updateProto()
                 c.DoAction(reason, action)
                 return reason
             end
-        elseif c.state.combatLock and c.IsSpellNotUsed(tauntSpells, 0.5) then
+        elseif st.combatLock and c.IsSpellNotUsed(tauntSpells, 0.5) then
             -------------------------------------------------------------------------------
             reason, action, unit = 'Снимаем агро', 'Праведная защита', 'target'
             if c.IsUsableSpell(action) then
@@ -420,7 +420,7 @@ local function updateProto()
         end
     end
     -------------------------------------------------------------------------------
-    reason = c.TryTarget(not isTank, c.attack and st.look and 100 or 40, c.attack or st.look)
+    reason = c.TryTarget(not isTank, st.attack and st.look and 100 or 40, st.attack or st.look)
     -- есть ли причина для отстановки?
     if reason then return reason end
 

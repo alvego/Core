@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local wipe = wipe
 local select = select
@@ -10,10 +11,10 @@ local next = next
 local db = {}
 -------------------------------------------------------------------------------
 local function needUpdateDotes()
-    if c.state.combatMode then return true end        -- в бою
-    if c.state.autoattack then return true end        -- автоатака
-    if c.attack then return true end                  -- зажата атака
-    if not c.state.invalidTarget then return true end -- есть валидный таргет
+    if st.combatMode then return true end        -- в бою
+    if st.autoattack then return true end        -- автоатака
+    if st.attack then return true end                  -- зажата атака
+    if not st.invalidTarget then return true end -- есть валидный таргет
     return false
 end
 
@@ -55,7 +56,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     -- если есть смысл
     if not needUpdateDotes() then return end
     -- Обрабатываем только мои ауры
-    if sourceGUID ~= c.state.playerGUID then return end
+    if sourceGUID ~= st.playerGUID then return end
     local spellName = select(2, ...)
     if subEvent == 'SPELL_AURA_APPLIED' or subEvent == 'SPELL_AURA_REFRESH' then
         addDotedUnit(destGUID, spellName)

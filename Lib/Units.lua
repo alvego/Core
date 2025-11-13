@@ -2,7 +2,6 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
-local st = c.state
 -------------------------------------------------------------------------------
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
@@ -160,4 +159,3 @@ function c.GetCurrentSpecID()
 end
 
 -------------------------------------------------------------------------------
-

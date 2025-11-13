@@ -209,55 +209,67 @@ end
 
 
 -------------------------------------------------------------------------------
+local function waitForCorpseLoot()
+    -- ищем кого можно лутануть
+    local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
+    if not corpse then return false end
+    lootUnit(corpse)
+    return true
+end
+-------------------------------------------------------------------------------
+local function waitForCorpseSkin()
+    if not st.still then return false end
+    local skinSpell = 'Снятие шкур'
+    local allowSkin = IsUsableSpell(skinSpell)
+    if not allowSkin then return false end
+    if c.TimerLess('Skin', 1) then return false end
+    -- ищем кого можно освежевать
+    local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
+    if not corpse then return false end
+    c.DoAction('Свежуем', skinSpell, corpse)
+    tinsert(skinList, corpse)
+    c.TimerStart(skinTimer)
+    c.TimerStart('Skin')
+    return true
+end
+-------------------------------------------------------------------------------
+local function waitForFindCorpse()
+    if not c.canMove() or st.move then return false end
+    if st.look then return false end
+    if c.TimerLess('Move', 0.5) then return false end
+    -- ищем ближайший полезный труп
+    local corpse = getNearCorpse(IsUsableSpell('Снятие шкур'))
+    if corpse and c.PlayerMove(corpse, maxDist) then
+        c.TimerStart('Move')
+    end
+end
+
+-------------------------------------------------------------------------------
 
 c.AttachBeforeUpdate(function()
-    if c.Paused() then return end
-    if st.group and (GetLootMethod() ~= 'freeforall') then return end
+    if c.Paused() or not c.canLoot() then return end
+    --if st.group and (GetLootMethod() ~= 'freeforall') then return end
     if c.GetBagsFreeSlots() < 1 then return end
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
     if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.3) then wipe(lootList) end
     if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
+
     if st.mounted then return end
 
     if waitForFishing() then return end
 
-
     if st.gcd or st.playerCasting then return end
-    -- ищем кого можно лутануть
-    local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
-    if corpse then
-        lootUnit(corpse)
-        return
-    end
 
-    if not st.still or st.combatMode then return end
-    if c.TimerLess('Skin', 1) then return end
-    local skinSpell = 'Снятие шкур'
-    local allowSkin = IsUsableSpell(skinSpell)
-    if allowSkin then
-        -- ищем кого можно освежевать
-        corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
-        if corpse then
-            c.DoAction('Свежуем', skinSpell, corpse)
-            tinsert(skinList, corpse)
-            c.TimerStart(skinTimer)
-            c.TimerStart('Skin')
-            return
-        end
-    end
+    if waitForCorpseLoot() then return end
 
-    if c.TimerLess('Move', 1) then return end
-    if not c.canMove() then return end
-    if st.look then return end
-    -- ищем ближайший полезный труп
-    corpse = getNearCorpse(allowSkin)
-    -- if corpse then
-    --     c.PlayerMove(corpse, maxDist)
-    -- end
-    if corpse and c.PlayerMove(corpse, maxDist) then
-        c.TimerStart('Move')
-    end
+    if st.combatMode then return end
+
+    if waitForCorpseSkin() then return end
+    if waitForFindCorpse() then return end
 end)
 -------------------------------------------------------------------------------
+c.AttachActionHook('loot', function()
+    c.EchoBool('Loot', c.canLoot(not c.canLoot()))
+end)

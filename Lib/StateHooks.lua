@@ -2,15 +2,18 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 -------------------------------------------------------------------------------
+st.attack = false
+st.start = false
 c.AttachBeforeUpdate(function()
-    c.attack = c.IsActionPressed('attack') or c.IsMouse(4)
-    c.start = c.IsActionPressed('start') or c.IsMouse(3)
+    st.attack = c.IsActionPressed('attack') or c.IsMouse(4)
+    st.start = c.IsActionPressed('start') or c.IsMouse(3)
     local stop = c.IsActionPressed('stop') or c.IsMouse(5) or UnitIsDeadOrGhost('player')
-    if c.attack then c.TurnTo('target') end
-    if c.attack or c.start then
+    if st.attack then c.TurnTo('target') end
+    if st.attack or st.start then
         c.Paused(false)
     elseif stop then
         c.Paused(true)
@@ -19,20 +22,20 @@ end)
 
 -------------------------------------------------------------------------------
 c.AttachActionHook('attack', function()
-    c.attack = true
+    st.attack = true
     c.Paused(false)
     c.TurnTo('target')
 end)
 
 -------------------------------------------------------------------------------
 c.AttachActionHook('start', function()
-    c.start = true
+    st.start = true
     c.Paused(false)
 end)
 
 -------------------------------------------------------------------------------
 c.AttachActionHook('stop', function()
-    if c.attack then return end
+    if st.attack then return end
     c.Paused(true)
 end)
 
@@ -42,3 +45,4 @@ c.AttachEvent('ADDON_LOADED', function(event, addonName)
     CoreDB = CoreDB or {}
     c.db = CoreDB
 end)
+-------------------------------------------------------------------------------

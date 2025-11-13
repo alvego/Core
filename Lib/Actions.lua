@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local _G = _G
 local ActionHasRange = ActionHasRange
@@ -14,7 +15,6 @@ local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
 local GetActionTexture = GetActionTexture
-local WrapTextInColorCode = WrapTextInColorCode
 -------------------------------------------------------------------------------
 function c.GetSlotName(slot)
     local name = nil
@@ -167,7 +167,7 @@ function c.DoAction(reason, name, target, btnNum)
     c.ClearCursor()
     c.Message(reason, name, GetActionTexture(slot))
     c.Action(slot, target, button)
-    c.lastAction = name
+    st.lastAction = name
 end
 
 -------------------------------------------------------------------------------

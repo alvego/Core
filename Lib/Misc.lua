@@ -10,8 +10,6 @@ local tostring = tostring;
 local select = select
 local table_concat = table.concat
 local wipe = wipe
-local format = format
-local type = type
 local time = time
 local WrapTextInColorCode = WrapTextInColorCode
 local UnitClass = UnitClass
@@ -150,8 +148,6 @@ function c.GetUnitColorHex(unit)
 end
 
 -------------------------------------------------------------------------------
-
-
 function c.ClearCursor()
     local infoType = GetCursorInfo()
     if infoType then
@@ -174,6 +170,7 @@ function c.UnitInfo(unit)
     return name
 end
 
+-------------------------------------------------------------------------------
 function c.BoolToColorString(val)
     if val then return WrapTextInColorCode('Enable', 'ff00ff00') end
     return WrapTextInColorCode('Disbale', 'ffff0000')
@@ -182,3 +179,5 @@ end
 function c.EchoBool(name, value)
     c.Echo(c.ToStr(c.BoolToColorString(value), name))
 end
+
+-------------------------------------------------------------------------------

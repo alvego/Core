@@ -2,6 +2,7 @@
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
+local st = c.state
 -------------------------------------------------------------------------------
 local SpellIsTargeting = SpellIsTargeting
 local GetSpellInfo = GetSpellInfo
@@ -14,7 +15,6 @@ local IsUsableSpell = IsUsableSpell
 local IsCurrentSpell = IsCurrentSpell
 local type = type
 -------------------------------------------------------------------------------
-local st = c.state
 local mountAuras = {
     311563, -- Магический пузырь
     32556   -- Полет
@@ -34,14 +34,14 @@ function c.GetStopReason()
     end
 
     if IsMounted() then
-        if not c.attack then
+        if not st.attack then
             return c.stopReasonMount
         end
         Dismount()
     end
 
     if CanExitVehicle() then
-        if not c.attack then
+        if not st.attack then
             return c.stopReasonMount
         end
         VehicleExit()
@@ -50,14 +50,14 @@ function c.GetStopReason()
     local mountAura = c.UnitAuraByID('player', mountAuras)
     if mountAura then
         local auraName = GetSpellInfo(mountAura)
-        if not c.attack then
+        if not st.attack then
             return c.stopReasonMount
         end
         c.CancelBuff(auraName)
     end
 
 
-    if not c.attack then
+    if not st.attack then
         local auraName = c.HasBuff(eatAuras, 'player')
         if auraName then
             return c.stopReasonEat
@@ -94,10 +94,10 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#' .. st.invalidTarget
     end
 
-    if not c.attack and not st.combatTarget and not st.autoattack then
+    if not st.attack and not st.combatTarget and not st.autoattack then
         return '#цель не в бою, не нажата атака, не вкл автоатака'
     end
-    local stopDebuff = not c.attack and c.HasDebuff(stopAttackDebuff)
+    local stopDebuff = not st.attack and c.HasDebuff(stopAttackDebuff)
     if st.autoattack then
         if stopDebuff then
             local stopAttackReason = '#не бъем в ' .. stopDebuff
@@ -110,7 +110,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     return nil
 end
 
-c.CustomCanUseSpell = function(spell, unit)
+c.CustomCanUseSpell = function(spell, unit) -- empty func for overwrite in your class
     return true
 end
 
@@ -166,17 +166,3 @@ function c.IsSpellNotUsed(spell, interval)
 end
 
 -------------------------------------------------------------------------------
--- Функция для преобразования статуса в текст
-function c.GetThreatStatusText(status)
-    if status == 0 then
-        return "нет угрозы"
-    elseif status == 1 then
-        return "есть угроза"
-    elseif status == 2 then
-        return "овертаунт"
-    elseif status == 3 then
-        return "танкуем"
-    else
-        return "неизвестно"
-    end
-end
