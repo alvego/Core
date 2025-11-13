@@ -33,6 +33,10 @@ local lootList = {}
 local lootTimer = 'lootTimer'
 local lootDist = 5
 
+local skinList = {}
+local skinTimer = 'skinTimer';
+local skinDist = 8
+
 local function checkCorpseForLoot(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDead(unit) then return end
@@ -41,6 +45,7 @@ local function checkCorpseForLoot(unit)
     if c.UnitDistance('player', unit) > lootDist then return end -- so far
     if not canLoot(unit) then return end                         -- can't loot
     if tContains(lootList, unit) then return end
+    if tContains(skinList, unit) then return end
     return unit
 end
 -------------------------------------------------------------------------------
@@ -54,6 +59,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
             if skinTarget then
                 local name = UnitName(skinTarget)
                 if name then
+                    c.Log('#skin ignore ', name)
                     skinFilterList[name] = true
                 end
             end
@@ -68,10 +74,6 @@ local canSkin = c.GetCachedFunc(function(unit)
     local creatureType = UnitCreatureType(unit)
     return creatureType == 'Животное' and not canLoot(unit)
 end)
-
-local skinList = {}
-local skinTimer = 'skinTimer';
-local skinDist = 8
 
 local function checkCorpseForSkin(unit)
     if not UnitExists(unit) then return end
@@ -250,7 +252,7 @@ local function waitForCorpseSkin()
     local skinSpell = 'Снятие шкур'
     local allowSkin = IsUsableSpell(skinSpell)
     if not allowSkin then return false end
-    if c.TimerLess('Skin', 1) then return false end
+    --if c.TimerLess('Skin', 1.5) then return false end
     -- ищем кого можно освежевать
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
     if not corpse then return false end
@@ -258,7 +260,7 @@ local function waitForCorpseSkin()
     tinsert(skinList, corpse)
     skinTarget = corpse
     c.TimerStart(skinTimer)
-    c.TimerStart('Skin')
+    --c.TimerStart('Skin')
     return true
 end
 -------------------------------------------------------------------------------
@@ -283,8 +285,8 @@ c.AttachBeforeUpdate(function()
     if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
-    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.3) then wipe(lootList) end
-    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2) then wipe(skinList) end
+    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
+    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
 
     if st.mounted then return end
 
