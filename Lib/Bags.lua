@@ -43,7 +43,26 @@ function c.EachBugsSlot(fn)
 end
 
 -------------------------------------------------------------------------------
-local itemTypes = { "Оружие", "Доспехи" }
+local disabledItemEquipLoc = {
+    'INVTYPE_BODY',
+    'INVTYPE_TABARD',
+    'INVTYPE_RELIC',
+    'INVTYPE_BAG',
+    'INVTYPE_QUIVER',
+    'INVTYPE_THROWN'
+}
+local function isAllowedItemType(itemType, itemSubType, itemEquipLoc)
+    if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then return false end
+    if itemType == 'Доспехи' then
+        return true
+    end
+    if itemType == 'Оружие' then
+        if itemSubType == 'Удочки' then return false end
+        if itemSubType == 'Разное' then return false end
+        return true
+    end
+    return false
+end
 local familyRare = 7
 local getMinEquippedItemLevel = c.GetCachedFunc(function()
     -- print('--------------------------------------------------')
@@ -51,11 +70,11 @@ local getMinEquippedItemLevel = c.GetCachedFunc(function()
     -- print('--------------------------------------------------')
     local minItemLevel = nil
     for i = 1, 18 do
-        local itemID = GetInventoryItemID("player", i)
+        local itemID = GetInventoryItemID('player', i)
         if itemID then
-            local name, _, itemRarity, itemLevel, _, itemType, itemSubType = GetItemInfo(itemID)
+            local name, _, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLoc = GetItemInfo(itemID)
             --print('#', i, name, itemLevel, itemType, itemSubType, itemRarity)
-            if itemRarity ~= familyRare and tContains(itemTypes, itemType) and itemSubType ~= "Разное" and (not minItemLevel or (itemLevel < minItemLevel)) then
+            if itemRarity ~= familyRare and isAllowedItemType(itemType, itemSubType, itemEquipLoc) and (not minItemLevel or (itemLevel < minItemLevel)) then
                 minItemLevel = itemLevel
                 --print('---', name, itemLevel)
             end
@@ -70,11 +89,12 @@ local function isJunk(link, skipList)
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
     if not itemName then return nil, 0 end
+    --c.Log(itemLink, itemType, itemSubType, itemEquipLoc)
     if itemRarity == 0 then return 'Хлам', itemSellPrice end
     local minItemLevel = getMinEquippedItemLevel()
     --print('minItemLevel', minItemLevel)
     if minItemLevel then minItemLevel = c.Round(minItemLevel * 0.8) end -- 80%
-    if itemRarity == 1 and tContains(itemTypes, itemType) and itemSubType ~= "Разное" and minItemLevel and itemLevel < minItemLevel then
+    if itemRarity == 1 and isAllowedItemType(itemType, itemSubType, itemEquipLoc) and minItemLevel and itemLevel < minItemLevel then
         return format('Хлам (ilvl:%d < %d)', itemLevel, minItemLevel),
             itemSellPrice
     end
@@ -129,7 +149,7 @@ c.AttachActionHook('junk', function()
         end
     end)
     if cnt > 0 then
-        c.Message(format("Освободили %s слот(ов). Свободно %s слот(а).", cnt, c.GetBagsFreeSlots()), 'Очистка')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, c.GetBagsFreeSlots()), 'Очистка')
     end
 end
 )
@@ -158,10 +178,10 @@ c.AttachEvent('MERCHANT_SHOW', function()
         end
     end)
     if sum > 0 then
-        c.Message(format("Итого продали на %s", GetCoinTextureString(sum)), 'Продажа')
+        c.Message(format('Итого продали на %s', GetCoinTextureString(sum)), 'Продажа')
     end
     if cnt > 0 then
-        c.Message(format("Освободили %s слот(ов). Свободно %s слот(а).", cnt, c.GetBagsFreeSlots()), 'Продажа')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, c.GetBagsFreeSlots()), 'Продажа')
     end
     if CanMerchantRepair() then
         RepairAllItems(1) -- сперва пробуем за счет ги банка

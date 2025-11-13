@@ -27,9 +27,9 @@ end)
 -- end)
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
-    return format('SPD: %03d%%', c.Round(st.speed / 7 * 100))
-end)
+-- c.AttachTelemetry(function()
+--     return format('SPD: %03d%%', c.Round(st.speed / 7 * 100))
+-- end)
 
 -------------------------------------------------------------------------------
 -- c.AttachTelemetry(function()
@@ -37,9 +37,9 @@ end)
 -- end)
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
-    return format('FPS: %03d', GetFramerate())
-end)
+-- c.AttachTelemetry(function()
+--     return format('FPS: %03d', GetFramerate())
+-- end)
 
 -------------------------------------------------------------------------------
 -- c.AttachTelemetry(function()

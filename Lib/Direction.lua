@@ -65,9 +65,9 @@ function c.PlayerFacingAngleToPoint(x, y)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------
 function c.PlayerMove(target, maxDist)
     if c.Paused() then return false end
+    if st.move then return false end
     if not c.canMove() then return false end
     if c.TimerLess('PlayerMove', 0.5) then return false end
     if not st.still then return false end
@@ -104,4 +104,8 @@ end
 
 c.AttachActionHook('move', function()
     c.EchoBool('Move', c.canMove(not c.canMove()))
+end)
+
+c.AttachTelemetry(function()
+    return c.TelemetryBool('MOVE', c.canMove())
 end)

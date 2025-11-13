@@ -44,7 +44,27 @@ local function checkCorpseForLoot(unit)
     return unit
 end
 -------------------------------------------------------------------------------
+local skinFilterList = {}
+local skinTarget = nil
+local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+                                destFlags, ...)
+    if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
+        local message = select(4, ...)
+        if message == 'С этого существа нельзя снять шкуру.' then
+            if skinTarget then
+                local name = UnitName(skinTarget)
+                if name then
+                    skinFilterList[name] = true
+                end
+            end
+        end
+    end
+end
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+
 local canSkin = c.GetCachedFunc(function(unit)
+    local name = UnitName(unit)
+    if skinFilterList[name] then return end
     local creatureType = UnitCreatureType(unit)
     return creatureType == 'Животное' and not canLoot(unit)
 end)
@@ -133,10 +153,10 @@ end)
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
              destFlags, ...)
-        if c.Paused() then return end
         local spellName = select(2, ...)
         if subEvent:match('SPELL_CREATE') and sourceGUID == st.playerGUID and spellName == fish.spell then
             fish.guid = destGUID
+            fish.run = true
             c.MessageLog('#забросили удочку', fish.spell, fish.icon)
         end
     end
@@ -149,6 +169,8 @@ local function waitForFishing()
         not st.still then
         if fish.run then
             c.MessageLog('#хватит рыбачить', fish.spell, fish.icon)
+            fish.guid = nil
+            fish.bobber = nil
             fish.run = false
         end
         c.TimerReset(fish.spell)
@@ -159,10 +181,15 @@ local function waitForFishing()
 
     if not st.playerCasting then
         if c.CanUseGcdSpell(fish.spell, nil, fish.delay) then
-            CombatLogClearEntries()
-            c.DoAction('Забрасываем', fish.spell)
-            fish.run = true
-            fish.delay = 0.5 + math_random() * 2.5 -- [0 .. 3]
+            fish.run = false
+            fish.bobber = nil
+            fish.guid = nil
+            if not c.Paused() then
+                CombatLogClearEntries()
+                c.DoAction('Забрасываем', fish.spell)
+                fish.run = true
+                fish.delay = 0.5 + math_random() * 2.5 -- [0 .. 3]
+            end
         end
         return true
     end
@@ -202,6 +229,7 @@ local function waitForFishing()
         lootUnit(fish.bobber, UnitName(fish.bobber))
         c.CastStop()
         fish.bobber = nil
+        fish.guid = nil
         fish.run = false
     end
     return true
@@ -228,6 +256,7 @@ local function waitForCorpseSkin()
     if not corpse then return false end
     c.DoAction('Свежуем', skinSpell, corpse)
     tinsert(skinList, corpse)
+    skinTarget = corpse
     c.TimerStart(skinTimer)
     c.TimerStart('Skin')
     return true
@@ -240,6 +269,7 @@ local function waitForFindCorpse()
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse(IsUsableSpell('Снятие шкур'))
     if corpse and c.PlayerMove(corpse, maxDist) then
+        print(c.GetCurrentTime())
         c.TimerStart('Move')
     end
 end
@@ -247,7 +277,7 @@ end
 -------------------------------------------------------------------------------
 
 c.AttachBeforeUpdate(function()
-    if c.Paused() or not c.canLoot() then return end
+    if not c.canLoot() then return end
     --if st.group and (GetLootMethod() ~= 'freeforall') then return end
     if c.GetBagsFreeSlots() < 1 then return end
     if GetCVar('autoLootDefault') ~= '1' then return end
@@ -259,7 +289,7 @@ c.AttachBeforeUpdate(function()
     if st.mounted then return end
 
     if waitForFishing() then return end
-
+    if c.Paused() then return end
     if st.gcd or st.playerCasting then return end
 
     if waitForCorpseLoot() then return end
@@ -272,4 +302,8 @@ end)
 -------------------------------------------------------------------------------
 c.AttachActionHook('loot', function()
     c.EchoBool('Loot', c.canLoot(not c.canLoot()))
+end)
+
+c.AttachTelemetry(function()
+    return c.TelemetryBool('LOOT', c.canLoot())
 end)
