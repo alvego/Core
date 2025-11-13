@@ -13,12 +13,12 @@ local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if UnitIsAFK('player') == 1 then
-        return WrapTextInColorCode('AFK', 'ffffbb00')
+        return WrapTextInColorCode('Run', 'ffffbb00')
     end
     if st.attack then
-        return WrapTextInColorCode('ATK', 'ff00ff00')
+        return WrapTextInColorCode('Run', 'ffff0000')
     end
-    return c.TelemetryBool('RUN', not c.Paused())
+    return c.TelemetryBool('Run', not c.Paused())
 end)
 
 -------------------------------------------------------------------------------

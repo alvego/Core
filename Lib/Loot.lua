@@ -269,7 +269,7 @@ local function waitForFindCorpse()
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse(IsUsableSpell('Снятие шкур'))
     if corpse and c.PlayerMove(corpse, maxDist) then
-        print(c.GetCurrentTime())
+        --print(c.GetCurrentTime())
         c.TimerStart('Move')
     end
 end
@@ -305,5 +305,5 @@ c.AttachActionHook('loot', function()
 end)
 
 c.AttachTelemetry(function()
-    return c.TelemetryBool('LOOT', c.canLoot())
+    return c.TelemetryBool('Loot', c.canLoot())
 end)

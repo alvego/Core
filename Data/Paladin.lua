@@ -158,13 +158,13 @@ local isTank = false
 c.AttachTelemetry(function()
     if not isLoaded then return end
     isTank = c.HasAuraByID('player', spell['Праведное неистовство']) and true or false
-    return c.TelemetryRedBool('TANK', isTank)
+    return c.TelemetryRedBool('Tank', isTank)
 end)
 
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if not isLoaded then return end
-    return c.TelemetryRedBool('AURA', c.UnitAuraByID('player', stanceDefenceAuras))
+    return c.TelemetryRedBool('Aura', c.UnitAuraByID('player', stanceDefenceAuras))
 end)
 
 -------------------------------------------------------------------------------
@@ -424,7 +424,7 @@ local function updateProto()
     -- есть ли причина для отстановки?
     if reason then return reason end
 
-    if dist > 5 and not st.look then c.PlayerMove('target', 100) end
+    if dist > 5 then c.PlayerMove('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

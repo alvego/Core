@@ -70,7 +70,7 @@ function c.PlayerMove(target, maxDist)
     if st.move then return false end
     if not c.canMove() then return false end
     if c.TimerLess('PlayerMove', 0.5) then return false end
-    if not st.still then return false end
+    --if not st.still then return false end
     if st.look then return false end
     local px, py, pz = c.UnitPosition('player')
     local tx, ty, tz = c.UnitPosition(target)
@@ -107,5 +107,5 @@ c.AttachActionHook('move', function()
 end)
 
 c.AttachTelemetry(function()
-    return c.TelemetryBool('MOVE', c.canMove())
+    return c.TelemetryBool('Move', c.canMove())
 end)
