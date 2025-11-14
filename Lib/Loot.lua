@@ -24,28 +24,41 @@ local IsEquippedItemType = IsEquippedItemType
 local math_random = math.random
 local CombatLogClearEntries = CombatLogClearEntries
 -------------------------------------------------------------------------------
+local lootList = {}
+local lootTimer = 'lootTimer'
+local lootDist = 5
+local lootFilterList = {}
+-------------------------------------------------------------------------------
+local skinList = {}
+local skinTimer = 'skinTimer';
+local skinDist = 8
+local skinFilterList = {}
+local skinTarget = nil
+-------------------------------------------------------------------------------
+local function resetTimers()
+    if c.TimerStarted(lootTimer) then
+        if c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
+        if c.TimerMore(lootTimer, 300) then wipe(lootFilterList) end
+    end
+    if c.TimerStarted(skinTimer) then
+        if c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
+        if c.TimerMore(skinTimer, 300) then wipe(skinFilterList) end
+    end
+end
+-------------------------------------------------------------------------------
 local allowSkin = false
 local skinSpell = 'Снятие шкур'
 c.AttachEvent('PLAYER_ENTERING_WORLD', function()
     allowSkin = IsUsableSpell(skinSpell)
 end)
 -------------------------------------------------------------------------------
-local lootFilterList = {}
 local canLoot = c.GetCachedFunc(function(unit)
     local ptr = c.UnitPtr(unit)
     if c.ReadByte(ptr, 168) == 0 then return false end
     if (lootFilterList[unit] or 0) >= 10 then return false end
     return true
 end)
-
-local lootList = {}
-local lootTimer = 'lootTimer'
-local lootDist = 5
-
-local skinList = {}
-local skinTimer = 'skinTimer';
-local skinDist = 8
-
+-------------------------------------------------------------------------------
 local function checkCorpseForLoot(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDead(unit) then return end
@@ -57,7 +70,7 @@ local function checkCorpseForLoot(unit)
     if tContains(skinList, unit) then return end
     return unit
 end
-
+-------------------------------------------------------------------------------
 -- c.TestLoot = function()
 --     local unit = c.GetUnitID('target')
 --     if not UnitExists(unit) then return '!exists' end
@@ -76,8 +89,7 @@ end
 -- end
 
 -------------------------------------------------------------------------------
-local skinFilterList = {}
-local skinTarget = nil
+
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
@@ -94,14 +106,17 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     end
 end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
-
+-------------------------------------------------------------------------------
+local skinTypes = { 'Животное', 'Демон' }
 local canSkin = c.GetCachedFunc(function(unit)
     local name = UnitName(unit)
     if skinFilterList[name] then return false end
     local creatureType = UnitCreatureType(unit)
-    return creatureType == 'Животное' and not canLoot(unit)
+    if not tContains(skinTypes, creatureType) then return false end
+    if canLoot(unit) then return false end
+    return true
 end)
-
+-------------------------------------------------------------------------------
 local function checkCorpseForSkin(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDead(unit) then return end
@@ -133,7 +148,7 @@ local function checkCorpse(unit)
         _dist = dist
     end
 end
-
+-------------------------------------------------------------------------------
 local function getNearCorpse()
     _corpse, _dist = nil, 0
     c.FindValue(c.GetUnits(), checkCorpse)
@@ -143,7 +158,7 @@ end
 local function lootUnit(unit, name)
     if tContains(lootList, unit) then return end
 
-    local uid = c.GetUnitID('target')
+    --local uid = c.GetUnitID('target')
 
     c.Message(name or c.UnitInfo(unit), 'Лутаем')
     c.UnitClick(unit, true)
@@ -152,9 +167,9 @@ local function lootUnit(unit, name)
     -- попытки лута
     lootFilterList[unit] = (lootFilterList[unit] or 0) + 1
 
-    c.Target(uid)
+    --c.Target(uid)
 end
-
+-------------------------------------------------------------------------------
 local function waitForLoot()
     -- core лут отключен, стоп
     if not c.canLoot() then return true end
@@ -192,11 +207,11 @@ fish.icon = select(3, GetSpellInfo(fish.spell))
 fish.guid = nil
 fish.bobber = nil
 fish.delay = 1
-
+-------------------------------------------------------------------------------
 c.AttachActionHook(fish.spell, function()
     fish.run = true
 end)
-
+-------------------------------------------------------------------------------
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
              destFlags, ...)
@@ -324,26 +339,13 @@ end
 
 c.AttachBeforeUpdate(function()
     if waitForLoot() then return end
-
-    if c.TimerStarted(lootTimer) then
-        if c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
-        if c.TimerMore(lootTimer, 300) then wipe(lootFilterList) end
-    end
-    if c.TimerStarted(skinTimer) then
-        if c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
-        if c.TimerMore(skinTimer, 300) then wipe(skinFilterList) end
-    end
-
+    resetTimers()
     if st.mounted then return end
-
+    if st.combatMode then return end
     if waitForFishing() then return end
     if c.Paused() then return end
     if st.gcd or st.playerCasting then return end
-
     if waitForCorpseLoot() then return end
-
-    if st.combatMode then return end
-
     if waitForCorpseSkin() then return end
     if waitForFindCorpse() then return end
 end)
@@ -351,7 +353,7 @@ end)
 c.AttachActionHook('loot', function()
     c.EchoBool('Loot', c.canLoot(not c.canLoot()))
 end)
-
+-------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     return c.TelemetryBool('Loot', c.canLoot())
 end)

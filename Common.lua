@@ -120,6 +120,7 @@ function c.CanUseSpell(spell, unit, interval)
     if interval and not c.TimerMore(spell, interval) then return false end
     if c.IsSpellFailedRecently(spell) then return false end
     if not IsUsableSpell(spell) then return false end
+    if unit and not c.UnitInLOS('player', unit) then return false end
     if not c.CustomCanUseSpell(spell, unit) then return false end
     return c.CanUseAction(spell, unit)
 end

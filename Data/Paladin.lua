@@ -72,6 +72,7 @@ local function onLoad()
     addSpell('Праведная защита')
     addSpell('Длань возмездия')
     addSpell('Длань спасения')
+    addSpell('Щит мстителя')
 
 
 
@@ -112,6 +113,7 @@ local function onLoad()
         spell['Праведная защита'],
         spell['Длань возмездия'],
         spell['Длань спасения'],
+        spell['Щит мстителя'],
     }
 
     isLoaded = true;
@@ -203,14 +205,14 @@ local function checkTauntTarget(target, action, checkHand) -- target for taunt
     if not c.FindValue(tankingUnits, checkTankingUnit, target) then return end
     return target
 end
-local function getTauntTarget(action)
+local function getTauntTarget(action, checkHand)
     wipe(tankingUnits)
     local units = c.GetGroupUnits()
     for i = 1, #units do
         local unit = checkThreatUnit(units[i], nil, 3)
         if unit then tinsert(tankingUnits, unit) end
     end
-    return c.FindValue(c.GetTargets(), checkTauntTarget, action, true)
+    return c.FindValue(c.GetTargets(), checkTauntTarget, action, checkHand)
 end
 -------------------------------------------------------------------------------
 local function checkCastTarget(target, action) -- unit for taunt
@@ -386,7 +388,7 @@ local function updateProto()
             -------------------------------------------------------------------------------
             reason, action, unit = 'Таунт', 'Длань возмездия', 'target'
             if c.IsUsableSpell(action) then
-                unit = getTauntTarget(action)
+                unit = getTauntTarget(action, true)
                 if unit then
                     c.DoAction(reason, action, unit) -- мговенка
                     return reason                    -- не частим
@@ -397,6 +399,15 @@ local function updateProto()
             reason, action, unit = 'Понижаем агро', 'Длань спасения', 'target'
             if not st.gcd and c.IsUsableSpell(action) then
                 unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 2, true) -- 2 orange indicator
+                if unit then
+                    c.DoAction(reason, action, unit)
+                    return reason -- не частим
+                end
+            end
+
+            reason, action, unit = 'Повышаем агро используя Сало', 'Щит мстителя', 'target'
+            if useMana and not st.gcd and c.IsUsableSpell(action) then
+                unit = getTauntTarget(action, false)
                 if unit then
                     c.DoAction(reason, action, unit)
                     return reason -- не частим
@@ -442,6 +453,15 @@ local function updateProto()
     -------------------------------------------------------------------------------
     reason, action, unit = 'Нужнен баф на блокирование', 'Щит небес', 'player'
     if not st.gcd and dist < 10 and useMana and c.CanUseGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+    -------------------------------------------------------------------------------
+    reason, action, unit =
+        'Нужно пустить лужу - ' ..
+        (c.targetHard and 'страшно' or 'враги окружили'),
+        'Освящение', 'target'
+    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -494,19 +514,16 @@ local function updateProto()
         return reason
     end
     -------------------------------------------------------------------------------
-    reason, action, unit =
-        'Нужно пустить лужу - ' ..
-        (c.targetHard and 'страшно' or 'враги окружили'),
-        'Освящение', 'target'
-    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-    -------------------------------------------------------------------------------
     reason, action, unit = 'Заполнитель', 'Щит праведности', 'target'
     if useMana and c.CanUseGcdSpell(action) then
         c.DoAction(reason, action, unit)
         return reason
+    end
+    -------------------------------------------------------------------------------
+    reason, action, unit = 'Прям совсем нечего нажать, кидаем Сало', 'Щит мстителя', 'target'
+    if useMana and c.CanUseGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason -- не частим
     end
 
     --if st.gcd then return '#gcd' end

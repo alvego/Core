@@ -69,8 +69,13 @@ local function isAllowedItemType(link)
         return true
     end
 
+    if itemType == 'Разное' then
+        if itemSubType == 'Хлам' then return true end
+        return false
+    end
+
     if itemType == 'Расходуемые' then
-        if itemSubType == 'Зелья' and (c.StrContains(itemName, 'лечебным зельем') or c.StrContains(itemName, 'зельем маны')) then
+        if itemSubType == 'Зелья' and (c.StrContains(itemName, 'лечебн') or c.StrContains(itemName, ' маны')) then
             return true
         end
         if itemSubType == 'Еда и напитки' then
@@ -109,6 +114,8 @@ local function isJunk(link, skipList)
     if not itemName then return nil, 0 end
 
     if itemRarity == 0 then return 'Хлам', itemSellPrice end
+
+    if itemType == 'Разное' then return nil, 0 end
 
     if itemRarity ~= 1 then return nil, 0 end -- только 0 и 1
 

@@ -241,7 +241,7 @@ local function selectTarget(event)
     local reason = st.invalidTarget
     if not reason and not st.combatTarget then reason = 'target не в бою' end
     if not reason then return end
-    c.Log('#бой, выбор цели, reason:', reason, event)
+    c.MessageLog(c.ToStr('#выбор цели, reason:', reason, event))
     c.SearchTarget(false, 40, false)
 end
 

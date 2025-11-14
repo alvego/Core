@@ -72,6 +72,7 @@ function c.PlayerMove(target, maxDist)
     if c.TimerLess('PlayerMove', 0.5) then return false end
     --if not st.still then return false end
     if st.look then return false end
+    if not c.UnitInLOS('player', target) then return false end
     local px, py, pz = c.UnitPosition('player')
     local tx, ty, tz = c.UnitPosition(target)
     local dx = px - tx
@@ -95,8 +96,8 @@ function c.PlayerMove(target, maxDist)
     local x = tx + ratio * dx
     local y = ty + ratio * dy
     local z = tz + ratio * dz
-    c.FaceToUnit(target)
-    c.TimerStart('TurnTo')
+    --c.FaceToUnit(target)
+    --c.TimerStart('TurnTo')
     c.MovePlayer(x, y, z)
     c.TimerStart('PlayerMove')
     return true
