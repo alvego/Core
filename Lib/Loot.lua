@@ -24,9 +24,18 @@ local IsEquippedItemType = IsEquippedItemType
 local math_random = math.random
 local CombatLogClearEntries = CombatLogClearEntries
 -------------------------------------------------------------------------------
+local allowSkin = false
+local skinSpell = 'Снятие шкур'
+c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+    allowSkin = IsUsableSpell(skinSpell)
+end)
+-------------------------------------------------------------------------------
+local lootFilterList = {}
 local canLoot = c.GetCachedFunc(function(unit)
     local ptr = c.UnitPtr(unit)
-    return c.ReadByte(ptr, 168) ~= 0
+    if c.ReadByte(ptr, 168) == 0 then return false end
+    if (lootFilterList[unit] or 0) >= 10 then return false end
+    return true
 end)
 
 local lootList = {}
@@ -48,6 +57,24 @@ local function checkCorpseForLoot(unit)
     if tContains(skinList, unit) then return end
     return unit
 end
+
+-- c.TestLoot = function()
+--     local unit = c.GetUnitID('target')
+--     if not UnitExists(unit) then return '!exists' end
+--     if not UnitIsDead(unit) then return '!dead' end
+--     if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then return '!tapped' end
+--     if UnitIsPlayer(unit) then return 'player' end
+--     if c.UnitDistance('player', unit) > lootDist then return 'dist > 5' end -- so far
+
+--     local ptr = c.UnitPtr(unit)
+--     if c.ReadByte(ptr, 168) == 0 then return '!canLoot' end
+--     if (lootFilterList[unit] or 0) >= 10 then return 'lootFilterList ' .. lootFilterList[unit] end
+--     -- can't loot
+--     if tContains(lootList, unit) then return 'in lootList' end
+--     if tContains(skinList, unit) then return 'in skinList' end
+--     return 'ok'
+-- end
+
 -------------------------------------------------------------------------------
 local skinFilterList = {}
 local skinTarget = nil
@@ -70,7 +97,7 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
 local canSkin = c.GetCachedFunc(function(unit)
     local name = UnitName(unit)
-    if skinFilterList[name] then return end
+    if skinFilterList[name] then return false end
     local creatureType = UnitCreatureType(unit)
     return creatureType == 'Животное' and not canLoot(unit)
 end)
@@ -88,7 +115,7 @@ end
 -------------------------------------------------------------------------------
 local maxDist = 40
 local _corpse, _dist = nil, 0
-local function checkCorpse(unit, allowSkin)
+local function checkCorpse(unit)
     if not UnitExists(unit) then return end
     if not UnitExists(unit) then return end
     if not UnitIsDead(unit) then return end
@@ -107,22 +134,39 @@ local function checkCorpse(unit, allowSkin)
     end
 end
 
-local function getNearCorpse(allowSkin)
+local function getNearCorpse()
     _corpse, _dist = nil, 0
-    c.FindValue(c.GetUnits(), checkCorpse, allowSkin)
+    c.FindValue(c.GetUnits(), checkCorpse)
     return _corpse
 end
 -------------------------------------------------------------------------------
 local function lootUnit(unit, name)
     if tContains(lootList, unit) then return end
+
+    local uid = c.GetUnitID('target')
+
     c.Message(name or c.UnitInfo(unit), 'Лутаем')
     c.UnitClick(unit, true)
     c.TimerStart(lootTimer)
     tinsert(lootList, unit)
+    -- попытки лута
+    lootFilterList[unit] = (lootFilterList[unit] or 0) + 1
+
+    c.Target(uid)
 end
 
 local function waitForLoot()
+    -- core лут отключен, стоп
+    if not c.canLoot() then return true end
+    -- нет свободного места в сумках, стоп
+    if c.GetBagsFreeSlots() < 1 then return true end
+    -- wow автолут отключен, дальше не идем
+    if GetCVar('autoLootDefault') ~= '1' then return true end
+    -- открыт лут
     local isOpenLoot = LootFrame:IsVisible()
+    -- если в группе и не freeforall, может быть окно item roll, так что ждем
+    if isOpenLoot and st.group and (GetLootMethod() ~= 'freeforall') then return true end
+    -- иначе может просто подвиснуть лут, бывает при клике одновременно с interact
     c.TimerToggle('LootFrame', isOpenLoot) -- таймер идет пока открыт LootFrame
     if isOpenLoot then
         -- LootFrame висит
@@ -131,13 +175,14 @@ local function waitForLoot()
         if IsLootLag then
             c.Log('#подвисло окно лута')
             for i = 1, GetNumLootItems() do
+                -- тогда лутаем вручную
                 if not select(5, GetLootSlotInfo(i)) then LootSlot(i) end
             end
-            CloseLoot()
+            CloseLoot() -- закрываем фрем лута
         end
-        return true -- ждем закрытия лута
+        return true     -- ждем одну итерацию, для закрытия лута
     end
-    return false    -- лут нет, можно что-то делать
+    return false        -- лут нет, можно что-то делать
 end
 -------------------------------------------------------------------------------
 local fish = {}
@@ -240,19 +285,19 @@ end
 
 -------------------------------------------------------------------------------
 local function waitForCorpseLoot()
+    if c.TimerLess('waitForCorpseLoot', 0.8) then return true end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
     if not corpse then return false end
     lootUnit(corpse)
+    c.TimerStart('waitForCorpseLoot')
     return true
 end
 -------------------------------------------------------------------------------
 local function waitForCorpseSkin()
+    if c.TimerLess('waitForCorpseSkin', 0.8) then return true end
     if not st.still then return false end
-    local skinSpell = 'Снятие шкур'
-    local allowSkin = IsUsableSpell(skinSpell)
     if not allowSkin then return false end
-    --if c.TimerLess('Skin', 1.5) then return false end
     -- ищем кого можно освежевать
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
     if not corpse then return false end
@@ -260,33 +305,34 @@ local function waitForCorpseSkin()
     tinsert(skinList, corpse)
     skinTarget = corpse
     c.TimerStart(skinTimer)
-    --c.TimerStart('Skin')
+    c.TimerStart('waitForCorpseSkin')
     return true
 end
 -------------------------------------------------------------------------------
 local function waitForFindCorpse()
+    if c.TimerLess('waitForFindCorpse', 0.5) then return true end
     if not c.canMove() or st.move then return false end
     if st.look then return false end
-    if c.TimerLess('Move', 0.5) then return false end
     -- ищем ближайший полезный труп
-    local corpse = getNearCorpse(IsUsableSpell('Снятие шкур'))
+    local corpse = getNearCorpse()
     if corpse and c.PlayerMove(corpse, maxDist) then
-        --print(c.GetCurrentTime())
-        c.TimerStart('Move')
+        c.TimerStart('waitForFindCorpse')
     end
 end
 
 -------------------------------------------------------------------------------
 
 c.AttachBeforeUpdate(function()
-    if not c.canLoot() then return end
-    --if st.group and (GetLootMethod() ~= 'freeforall') then return end
-    if c.GetBagsFreeSlots() < 1 then return end
-    if GetCVar('autoLootDefault') ~= '1' then return end
     if waitForLoot() then return end
 
-    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
-    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
+    if c.TimerStarted(lootTimer) then
+        if c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
+        if c.TimerMore(lootTimer, 300) then wipe(lootFilterList) end
+    end
+    if c.TimerStarted(skinTimer) then
+        if c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
+        if c.TimerMore(skinTimer, 300) then wipe(skinFilterList) end
+    end
 
     if st.mounted then return end
 

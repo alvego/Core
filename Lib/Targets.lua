@@ -236,19 +236,21 @@ end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)
 
 
-local function selectTarget()
+local function selectTarget(event)
     if c.Paused() then return end
-    if st.combatTarget and not st.invalidTarget then return end
-    c.MessageLog('#бой, выбор цели')
+    local reason = st.invalidTarget
+    if not reason and not st.combatTarget then reason = 'target не в бою' end
+    if not reason then return end
+    c.Log('#бой, выбор цели, reason:', reason, event)
     c.SearchTarget(false, 40, false)
 end
 
 c.AttachBeforeUpdate(function()
     if not attackerGUID then return end
-    selectTarget()
+    selectTarget('COMBAT_LOG_EVENT_UNFILTERED')
     attackerGUID = nil -- сброс, чтоб не подлипало
 end)
 
 c.AttachEvent('PLAYER_REGEN_DISABLED', selectTarget)
-c.AttachEvent('PLAYER_ENTER_COMBAT', selectTarget)
+--c.AttachEvent('PLAYER_ENTER_COMBAT', selectTarget)
 -------------------------------------------------------------------------------

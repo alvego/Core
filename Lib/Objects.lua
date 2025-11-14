@@ -7,6 +7,7 @@ local c = Core
 local tinsert = tinsert
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
+local UnitHealthMax = UnitHealthMax
 -------------------------------------------------------------------------------
 local actual = false
 local units = {}
@@ -31,7 +32,7 @@ local function updateObject()
         if unit then
             if UnitExists(unit) then
                 tinsert(units, unit)
-                if UnitCanAttack('player', unit) then
+                if UnitCanAttack('player', unit) and UnitHealthMax(unit) > 20 then
                     tinsert(targets, unit)
                 end
             else

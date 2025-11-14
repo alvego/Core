@@ -56,14 +56,15 @@ end)
 -------------------------------------------------------------------------------
 
 -- local offsets = {}
--- local ignored = { 168, 169 }
--- --local ignored = { 191, 171, 168, 169, 170 }
+-- local ignored = {
+--     191, -- mouseover
+-- }
+--local ignored = { 191, 171, 168, 169, 170 }
 -- local function findOffset()
---     --if UnitExists('target') and UnitIsDead('target') then
---     if UnitExists('target') then
+--     if UnitExists('target') and UnitIsDead('target') then
+--         --if UnitExists('target') then
 --         local ptr = c.UnitPtr('target')
-
---         print('-----------------------------------------------')
+--         local line = false
 --         -- print('test8', c.ReadByte(ptr, 168)) --171
 --         --if true then return end
 --         for i = 1, 300 do
@@ -72,6 +73,10 @@ end)
 
 --                 if offsets[i] ~= data then
 --                     if offsets[i] ~= nil then
+--                         if not line then
+--                             line = true
+--                             print('-----------------------------------------------')
+--                         end
 --                         print('#' .. i, offsets[i], '!=', data)
 --                     end
 
@@ -83,6 +88,8 @@ end)
 --     end
 -- end
 
+-- c.AttachBeforeUpdate(findOffset)
+
 c.AttachActionHook('test', function()
-    print(c.UnitInfo(c.GetUnitID('target')), c.GetUnitID('target'))
+    --print(c.TestLoot())
 end)
