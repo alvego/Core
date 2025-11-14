@@ -424,7 +424,7 @@ local function updateProto()
     -- есть ли причина для отстановки?
     if reason then return reason end
 
-    if dist > 5 and (dist < 10 or st.attack) then c.PlayerMove('target', 100) end
+    if dist > 5 and (dist < 15 or st.attack) then c.PlayerMove('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

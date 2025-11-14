@@ -113,7 +113,7 @@ local function checkCorpseForSkin(unit)
 end
 
 -------------------------------------------------------------------------------
-local maxDist = 40
+local maxDist = 15
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
     if not UnitExists(unit) then return end
