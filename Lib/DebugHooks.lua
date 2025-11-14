@@ -90,27 +90,12 @@ end)
 
 -- c.AttachBeforeUpdate(findOffset)
 
-function canLoot(unitid)
-    if not UnitExists(unitid) or not UnitIsDead(unitid) then
-        return false
-    end
 
-    GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
-    GameTooltip:ClearLines()
-    GameTooltip:SetUnit(unitid)
 
-    for i = 1, GameTooltip:NumLines() do
-        local text1 = _G["GameTooltipTextLeft" .. i]:GetText()
-        local text2 = _G["GameTooltipTextRight" .. i]:GetText()
-        print(text1, text2)
-    end
 
-    GameTooltip:Hide()
-    return false
-end
 
 c.AttachActionHook('test', function()
-    --print(IsSkinnableUnit(c.GetUnitID('target')))
-    print(canLoot('target'))
-    --LootTarget('target')
+    -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
+    -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())
+    --ChatFrame_OpenChat(StaticPopup1Button1:GetText())
 end)

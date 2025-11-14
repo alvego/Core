@@ -181,3 +181,20 @@ function c.EchoBool(name, value)
 end
 
 -------------------------------------------------------------------------------
+local function autoButton(btn, btnText)
+    if btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
+    local text = btn:GetText()
+    if text ~= btnText then return false end
+    c.Log('Жмем', btnText)
+    btn:Click()
+    return true
+end
+-------------------------------------------------------------------------------
+function c.AutoPopup(messagePart, btnText)
+    local popup = StaticPopup1
+    if popup:IsVisible() ~= 1 then return false end
+    local text = popup.text:GetText()
+    if not c.StrContains(text, messagePart) then return false end
+    c.Log('Диалог', text)
+    return autoButton(StaticPopup1Button1, btnText) or autoButton(StaticPopup1Button2, btnText)
+end

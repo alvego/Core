@@ -181,6 +181,8 @@ local function waitForLoot()
     local isOpenLoot = LootFrame:IsVisible()
     -- если в группе и не freeforall, может быть окно item roll, так что ждем
     if isOpenLoot and st.group and (GetLootMethod() ~= 'freeforall') then return true end
+
+    if isOpenLoot and c.AutoPopup('станет персональным, если вы его поднимете.', 'ОК') then return true end
     -- иначе может просто подвиснуть лут, бывает при клике одновременно с interact
     c.TimerToggle('LootFrame', isOpenLoot) -- таймер идет пока открыт LootFrame
     if isOpenLoot then

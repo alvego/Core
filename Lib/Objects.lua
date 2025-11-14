@@ -8,6 +8,7 @@ local tinsert = tinsert
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 local UnitHealthMax = UnitHealthMax
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 -------------------------------------------------------------------------------
 local actual = false
 local units = {}
@@ -32,7 +33,7 @@ local function updateObject()
         if unit then
             if UnitExists(unit) then
                 tinsert(units, unit)
-                if UnitCanAttack('player', unit) and UnitHealthMax(unit) > 20 then
+                if UnitCanAttack('player', unit) then
                     tinsert(targets, unit)
                 end
             else
@@ -65,7 +66,7 @@ c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     local x, y, z = c.UnitPosition(aroundUnit)
     for i = 1, count do
         local unit = targets[i]
-        if UnitCanAttack('player', unit) then
+        if UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) and UnitHealthMax(unit) > 20 then
             local dist = c.Distance(x, y, z, c.UnitPosition(unit))
             if dist <= range then
                 result = result + 1
