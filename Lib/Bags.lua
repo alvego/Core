@@ -51,90 +51,85 @@ local disabledItemEquipLoc = {
     'INVTYPE_QUIVER',
     'INVTYPE_THROWN'
 }
-local function isAllowedItemType(link)
+local familyRare = 7
+local function getEquippedItemLevel(link)
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
-
-    if not itemName then return false end
-
+    if not itemName then return end
     --c.Log(itemLink, itemType, itemSubType, itemEquipLoc, itemMinLevel, itemLevel)
+    if itemRarity == familyRare then return end
+    if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then return end
 
-    if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then return false end
-
-    if itemType == 'Доспехи' then return true end
-
+    if itemType == 'Доспехи' then return itemLevel, itemLink end
     if itemType == 'Оружие' then
-        if itemSubType == 'Удочки' then return false end
-        if itemSubType == 'Разное' then return false end
-        return true
+        if itemSubType == 'Удочки' then return end
+        if itemSubType == 'Разное' then return end
+        return itemLevel, itemLink
     end
-
-    if itemType == 'Разное' then
-        if itemSubType == 'Хлам' then return true end
-        return false
-    end
-
-    if itemType == 'Расходуемые' then
-        if itemSubType == 'Зелья' and (c.StrContains(itemName, 'лечебн') or c.StrContains(itemName, ' маны')) then
-            return true
-        end
-        if itemSubType == 'Еда и напитки' then
-            return true
-        end
-        return false
-    end
-
-    return false
 end
-local familyRare = 7
+-------------------------------------------------------------------------------
 local getMinEquippedItemLevel = c.GetCachedFunc(function()
     local minLvL = nil
     for i = 1, 18 do
         local itemID = GetInventoryItemID('player', i)
-        if itemID and isAllowedItemType(itemID) then
-            local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
-                GetItemInfo(itemID)
-            --c.Log(itemLink, itemLevel)
-            if itemRarity ~= familyRare and (not minLvL or itemLevel < minLvL) then
-                minLvL = itemLevel
-                --c.Log('берем', itemLevel)
+        if itemID then
+            local itemLevel, itemLink = getEquippedItemLevel(itemID)
+            if itemLevel then
+                --c.Log(itemLink, itemLevel)
+                if not minLvL or itemLevel < minLvL then
+                    minLvL = itemLevel
+                    --c.Log('берем', itemLevel)
+                end
             end
         end
     end
     --c.Log('minItemLevel', minLvL)
     return minLvL or 0
 end)
-
-local function isJunk(link, skipList)
-    if not isAllowedItemType(link) then return nil, 0 end
-
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
-        GetItemInfo(link)
-
-    if not itemName then return nil, 0 end
-
-    if itemRarity == 0 then return 'Хлам', itemSellPrice end
-
-    if itemType == 'Разное' then return nil, 0 end
-
-    if itemRarity ~= 1 then return nil, 0 end -- только 0 и 1
-
-    if itemType == 'Расходуемые' then
-        if itemMinLevel > 0 and itemMinLevel < (UnitLevel('player') - 10) then
-            return 'Хлам (по ур.)', itemSellPrice
-        end
-        return nil, 0
-    end
-
+-------------------------------------------------------------------------------
+local function checkItemLevel(itemLevel, itemSellPrice)
     local minItemLevel = getMinEquippedItemLevel()
-    if itemRarity == 1 and itemLevel < c.Round(minItemLevel * 0.8) then -- 80%
+    if itemLevel < c.Round(minItemLevel * 0.8) then -- 80%
         return format('Хлам (ilvl:%d < %d)', itemLevel, minItemLevel),
             itemSellPrice
     end
+end
+
+local function checkItemMinLevel(itemMinLevel, itemSellPrice)
+    if itemMinLevel > 0 and itemMinLevel < (UnitLevel('player') - 10) then
+        return 'Хлам (по ур.)', itemSellPrice
+    end
+end
+
+local function isJunk(link, skipList)
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
+        GetItemInfo(link)
+    if not itemName then return end
+    -- продаем любой хлам
+    if itemRarity == 0 then return 'Хлам', itemSellPrice end
+    -- вещи обычного качества
+    if itemRarity == 1 then
+        -- проверяем, на игнорируемые слоты (эти вещи не трогаем)
+        if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then return end
+
+        if itemType == 'Доспехи' then return checkItemLevel(itemLevel, itemSellPrice) end
+        if itemType == 'Оружие' then
+            if itemSubType == 'Удочки' then return false end
+            if itemSubType == 'Разное' then return false end
+            return checkItemLevel(itemLevel, itemSellPrice)
+        end
+
+        if itemType == 'Расходуемые' then
+            if itemSubType == 'Зелья' and (c.StrContains(itemName, 'лечебн') or c.StrContains(itemName, ' маны')) then
+                return checkItemMinLevel(itemMinLevel, itemSellPrice)
+            end
+            if itemSubType == 'Еда и напитки' then
+                return checkItemMinLevel(itemMinLevel, itemSellPrice)
+            end
+        end
+    end
 
     if not skipList and c.db.junk and c.db.junk[itemName] then return 'Хлам (метка)', itemSellPrice end
-
-    return false, 0
 end
 
 local itemTipHook = function(self, ...)
@@ -169,16 +164,14 @@ c.AttachActionHook('toggle', function()
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
     if not itemName then return end
-    local mark = WrapTextInColorCode('Хлам (метка)', 'ff888888')
-    local title = 'Маркер'
     if not c.db.junk then c.db.junk = {} end
     if c.db.junk[itemName] then
         c.db.junk[itemName] = nil
-        c.Echo(format('отметка %s стерта с %s', mark, itemLink), title, itemTexture)
+        c.Echo(itemLink, WrapTextInColorCode('Норм', 'FF0084FF'), itemTexture)
         return
     end
     c.db.junk[itemName] = true
-    c.Echo(format('%s помечен как %s', itemLink, mark), title, itemTexture)
+    c.Echo(itemLink, WrapTextInColorCode('Хлам', 'ff888888'), itemTexture)
 end)
 -------------------------------------------------------------------------------
 c.AttachActionHook('junk', function()
