@@ -252,7 +252,7 @@ local function waitForFishing()
                 CombatLogClearEntries()
                 c.DoAction('Забрасываем', fish.spell)
                 fish.run = true
-                fish.delay = 0.5 + math_random() * 2.5 -- [0 .. 3]
+                fish.delay = 0.5 + math_random() * 2.5 -- [0.5 .. 3]
             end
         end
         return true

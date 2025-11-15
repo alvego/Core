@@ -177,6 +177,7 @@ end)
 c.AttachActionHook('junk', function()
     ClearCursor()
     local cnt = 0
+    local free = c.GetBagsFreeSlots()
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 and lootable ~= 1 then
@@ -190,7 +191,7 @@ c.AttachActionHook('junk', function()
         end
     end)
     if cnt > 0 then
-        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, c.GetBagsFreeSlots()), 'Очистка')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Очистка')
     end
 end
 )
@@ -199,6 +200,7 @@ c.AttachEvent('MERCHANT_SHOW', function()
     ClearCursor()
     local sum = 0
     local cnt = 0
+    local free = c.GetBagsFreeSlots()
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 and lootable ~= 1 then
@@ -222,7 +224,7 @@ c.AttachEvent('MERCHANT_SHOW', function()
         c.Message(format('Итого продали на %s', GetCoinTextureString(sum)), 'Продажа')
     end
     if cnt > 0 then
-        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, c.GetBagsFreeSlots()), 'Продажа')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Продажа')
     end
     if CanMerchantRepair() then
         RepairAllItems(1) -- сперва пробуем за счет ги банка
