@@ -4,9 +4,11 @@
 local c = Core
 -------------------------------------------------------------------------------
 local tinsert = tinsert
+local tContains = tContains
 local type = type
 local error = error
-local GetTime = GetTime
+local SecondsToTime = SecondsToTime
+local WrapTextInColorCode = WrapTextInColorCode
 -------------------------------------------------------------------------------
 -- Инициализация скрытого фрейма для обработки событий
 local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
@@ -27,10 +29,17 @@ end
 
 -------------------------------------------------------------------------------
 -- Выполняем обработчики соответсвующего события
-local function onEvent(self, event, ...)
-    if eventList[event] ~= nil then
-        local funcList = eventList[event]
 
+local unfiltredEvents = {
+    'ADDON_LOADED',
+    'PLAYER_ENTERING_WORLD',
+    'PLAYER_LEAVING_WORLD'
+}
+
+local function onEvent(self, event, ...)
+    if eventList[event] ~= nil and
+        (c.isReady() or tContains(unfiltredEvents, event)) then
+        local funcList = eventList[event]
         for i = 1, #funcList do
             funcList[i](event, ...)
         end
@@ -67,9 +76,10 @@ local function onUpdate()
         return
     end
 
-    if c.TimerMore('CheckExtended', 5) and c.IsNeedEnableExtended() then
-        c.Echo('Enable Extended Func!', 'Warning')
-        c.TimerStart('CheckExtended')
+    if not c.isReady() then return end
+    if c.IsNeedEnableExtended() and c.TimerMore('CheckExtended', 3) then
+        c.Echo(WrapTextInColorCode('ждем ' .. SecondsToTime(c.TimerElapsed('CheckExtended')), 'FFBBA606'), nil,
+            'Interface\\AddOns\\' .. c.name .. '\\textures\\serp_molot_debug.blp', 0, 0.8, 0)
     end
     ----------------------------------------------------------------
     for i = 1, #listBeforeUpdate do
