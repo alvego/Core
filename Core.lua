@@ -12,6 +12,7 @@ c.name = ...
 c.db = {}
 c.state = {}
 c.stateCache = {}
+c.loaded = false
 -------------------------------------------------------------------------------
 c.advance = 0.05
 c.latency = c.advance
@@ -52,6 +53,9 @@ function c.showCommentLog(value)
 end
 
 -------------------------------------------------------------------------------
+function c.isReady()
+    return c.loaded and c.state.inWorld
+end
 
 -------------------------------------------------------------------------------
 local stateCacheIndex = 0

@@ -10,19 +10,19 @@ local deg = deg
 local atan2 = atan2
 -------------------------------------------------------------------------------
 function c.TurnTo(target)
-    if not st.attack and c.Paused() then return end
-    if c.TimerLess('TurnTo', 0.3) then return end
-    if not st.attack and not st.still then return end
-    if st.look then
-        c.TimerStart('TurnTo')
-        return
-    end
     if not target then target = 'target' end
-    if not UnitExists(target) then return end
-    if c.PlayerFacingTarget(target, 30) then return end
+    -- не поворачиваемся
+    if not UnitExists(target) then return false end
+    if c.PlayerFacingTarget(target, 30) then return false end
+    -- поворачиваемся
+    if not st.attack and c.Paused() then return true end
+    if c.TimerLess('TurnTo', 0.3) then return true end
+    if not st.attack and not st.still then return true end
+    if st.look then return true end
     --c.Log('Turning to target')
     c.FaceToUnit(target)
     c.TimerStart('TurnTo')
+    return true
 end
 
 -------------------------------------------------------------------------------
@@ -66,13 +66,15 @@ end
 
 ------------------------------------------------------------------------------------------------------------------
 function c.PlayerMove(target, maxDist)
+    -- не идем
     if c.Paused() then return false end
     if st.move then return false end
     if not c.canMove() then return false end
     if c.TimerLess('PlayerMove', 0.5) then return false end
-    --if not st.still then return false end
+    if st.move then return false end
     if st.look then return false end
     if not c.UnitInLOS('player', target) then return false end
+
     local px, py, pz = c.UnitPosition('player')
     local tx, ty, tz = c.UnitPosition(target)
     local dx = px - tx
@@ -96,8 +98,10 @@ function c.PlayerMove(target, maxDist)
     local x = tx + ratio * dx
     local y = ty + ratio * dy
     local z = tz + ratio * dz
-    --c.FaceToUnit(target)
-    --c.TimerStart('TurnTo')
+
+    -- поворачиваемся и идем
+    if c.TurnTo(target) then return true end
+    -- идем
     c.MovePlayer(x, y, z)
     c.TimerStart('PlayerMove')
     return true

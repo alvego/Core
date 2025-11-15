@@ -128,7 +128,7 @@ local function checkCorpseForSkin(unit)
 end
 
 -------------------------------------------------------------------------------
-local maxDist = 15
+local maxDist = 25
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
     if not UnitExists(unit) then return end
@@ -179,13 +179,13 @@ local function waitForLoot()
     if GetCVar('autoLootDefault') ~= '1' then return true end
     -- открыт лут
     local isOpenLoot = LootFrame:IsVisible()
-    -- если в группе и не freeforall, может быть окно item roll, так что ждем
-    if isOpenLoot and st.group and (GetLootMethod() ~= 'freeforall') then return true end
-
-    if isOpenLoot and c.AutoPopup('станет персональным, если вы его поднимете.', 'ОК') then return true end
-    -- иначе может просто подвиснуть лут, бывает при клике одновременно с interact
     c.TimerToggle('LootFrame', isOpenLoot) -- таймер идет пока открыт LootFrame
+
+    -- иначе может просто подвиснуть лут, бывает при клике одновременно с interact
     if isOpenLoot then
+        if c.AutoPopup('станет персональным, если вы его поднимете.', 'ОК') then return true end
+        -- если в группе и не freeforall, может быть окно item roll, так что ждем
+        if st.group and (GetLootMethod() ~= 'freeforall') then return true end
         -- LootFrame висит
         local IsLootLag = c.TimerStarted('LootFrame') and c.TimerMore('LootFrame', 0.5)
         -- если окно лута подвисло
@@ -195,11 +195,11 @@ local function waitForLoot()
                 -- тогда лутаем вручную
                 if not select(5, GetLootSlotInfo(i)) then LootSlot(i) end
             end
-            CloseLoot() -- закрываем фрем лута
+            CloseLoot() -- закрываем фрейм лута
         end
         return true     -- ждем одну итерацию, для закрытия лута
     end
-    return false        -- лут нет, можно что-то делать
+    return false        -- лута нет, можно что-то делать
 end
 -------------------------------------------------------------------------------
 local fish = {}

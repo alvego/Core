@@ -435,9 +435,18 @@ local function updateProto()
     -- есть ли причина для отстановки?
     if reason then return reason end
 
-    if dist > 5 and (dist < 15 or st.attack) then c.PlayerMove('target', 100) end
+    if dist > 5 and (dist < 25 or st.attack) then c.PlayerMove('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
+    -------------------------------------------------------------------------------
+    reason, action, unit =
+        'Нужно пустить лужу - ' ..
+        (c.targetHard and 'страшно' or 'враги окружили'),
+        'Освящение', 'target'
+    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
     if c.CanUseGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
@@ -453,15 +462,6 @@ local function updateProto()
     -------------------------------------------------------------------------------
     reason, action, unit = 'Нужнен баф на блокирование', 'Щит небес', 'player'
     if not st.gcd and dist < 10 and useMana and c.CanUseGcdSpell(action, unit) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-    -------------------------------------------------------------------------------
-    reason, action, unit =
-        'Нужно пустить лужу - ' ..
-        (c.targetHard and 'страшно' or 'враги окружили'),
-        'Освящение', 'target'
-    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanUseGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end

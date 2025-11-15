@@ -44,5 +44,12 @@ c.AttachEvent('ADDON_LOADED', function(event, addonName)
     if addonName ~= c.name then return end
     CoreDB = CoreDB or {}
     c.db = CoreDB
+    c.loaded = true
 end)
 -------------------------------------------------------------------------------
+c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+    st.inWorld = true
+end)
+c.AttachEvent('PLAYER_LEAVING_WORLD', function()
+    st.inWorld = false
+end)
