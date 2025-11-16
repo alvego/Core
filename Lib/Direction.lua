@@ -9,22 +9,40 @@ local GetPlayerFacing = GetPlayerFacing
 local deg = deg
 local atan2 = atan2
 -------------------------------------------------------------------------------
-function c.TurnTo(target)
-    if not target then target = 'target' end
+
+
+local turnUnit = nil
+
+local function turnUpdate()
     -- не поворачиваемся
-    if not UnitExists(target) then return false end
-    if c.PlayerFacingTarget(target, 30) then return false end
-    -- поворачиваемся
-    if not st.attack and c.Paused() then return true end
-    if c.TimerLess('TurnTo', 0.3) then return true end
-    if not st.attack and not st.still then return true end
-    if st.look then return true end
-    --c.Log('Turning to target')
-    c.FaceToUnit(target)
+    if c.Paused() or
+        not turnUnit or
+        not UnitExists(turnUnit) or
+        st.move or
+        st.look or
+        c.PlayerFacingTarget(turnUnit, 30) then
+        turnUnit = nil
+        if c.TimerStarted('TurnTo') then
+            c.TimerReset('TurnTo')
+            --c.Log('endturn ', c.PlayerFacingTarget(turnUnit, 30))
+        end
+        return
+    end
+    if c.TimerLess('TurnTo', 0.3) then return end
+    c.FaceToUnit(turnUnit)
+    --c.Log('turn1')
     c.TimerStart('TurnTo')
-    return true
 end
 
+function c.TurnTo(target)
+    if not target then target = 'target' end
+    turnUnit = target
+    turnUpdate()
+    --print('turnUnit', turnUnit)
+    return turnUnit ~= nil -- поворачиваемся
+end
+
+c.AttachBeforeUpdate(turnUpdate)
 -------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
@@ -65,46 +83,71 @@ function c.PlayerFacingAngleToPoint(x, y)
 end
 
 ------------------------------------------------------------------------------------------------------------------
-function c.PlayerMove(target, maxDist)
+local moveUnit = nil
+local maveMaxDist = nil
+local function moveEnd()
+    if not c.TimerStarted('PlayerMove') then return end
+    c.TimerReset('PlayerMove')
+    moveUnit = nil
+    maveMaxDist = nil
+    --c.Log('#пришли')
+    if st.speed > 0 and not st.move then
+        --c.Log('#тормозим')
+        c.MovePlayer(c.UnitPosition('player'))
+    end
+end
+local function moveUpdate()
     -- не идем
-    if c.Paused() then return false end
-    if st.move then return false end
-    if not c.canMove() then return false end
-    if c.TimerLess('PlayerMove', 0.5) then return false end
-    if st.move then return false end
-    if st.look then return false end
-    if not c.UnitInLOS('player', target) then return false end
+    if c.Paused()
+        or not c.canMove()
+        or st.move
+        or st.look
+        or not moveUnit
+        or not UnitExists(moveUnit)
+        or not c.UnitInLOS('player', moveUnit)
+    then
+        --c.Log('end cond')
+        moveEnd()
+        return
+    end
 
     local px, py, pz = c.UnitPosition('player')
-    local tx, ty, tz = c.UnitPosition(target)
-    local dx = px - tx
-    local dy = py - ty
-    local dz = pz - tz
-    local d = 3
+    local tx, ty, tz = c.UnitPosition(moveUnit)
+    local dx, dy, dz = px - tx, py - ty, pz - tz
     local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
-
-    if dist < 5 or dist <= d then
-        return false
-    end
-    if maxDist and dist > maxDist then
-        return false
+    local d = 4 -- нет смысла подходить ближе
+    if dist < 5 or dist <= d or (maveMaxDist and dist > maveMaxDist) then
+        --c.Log('end dist')
+        moveEnd()
+        return
     end
 
     local ratio = d / dist
-    if ratio > 1 then
-        ratio = 1 -- Ограничиваем, чтобы остаться на отрезке (опционально)
+    -- Ограничиваем, чтобы остаться на отрезке (опционально)
+    if ratio > 1 then ratio = 1 end
+    local x, y, z = tx + ratio * dx, ty + ratio * dy, tz + ratio * dz
+
+    -- поворачиваемся
+
+    if c.TurnTo(moveUnit) then
+        --c.Log('turn')
+        return
     end
 
-    local x = tx + ratio * dx
-    local y = ty + ratio * dy
-    local z = tz + ratio * dz
-
-    -- поворачиваемся и идем
-    if c.TurnTo(target) then return true end
     -- идем
+    if c.TimerLess('PlayerMove', 0.5) then return end
+    --c.Log('move')
     c.MovePlayer(x, y, z)
     c.TimerStart('PlayerMove')
-    return true
+end
+c.AttachBeforeUpdate(moveUpdate)
+
+function c.PlayerMove(target, maxDist)
+    moveUnit = target
+    maveMaxDist = maxDist
+    -- идем
+    moveUpdate()
+    return moveUnit ~= nil
 end
 
 c.AttachActionHook('move', function()

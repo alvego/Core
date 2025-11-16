@@ -77,7 +77,7 @@ local function onUpdate()
     end
 
     if not c.isReady() then return end
-    if c.IsNeedEnableExtended() and c.TimerMore('CheckExtended', 3) then
+    if c.IsNeedEnableExtended() and c.TimerStarted('CheckExtended') and c.TimerMore('CheckExtended', 5) then
         c.Echo(WrapTextInColorCode('ждем ' .. SecondsToTime(c.TimerElapsed('CheckExtended')), 'FFBBA606'), nil,
             'Interface\\AddOns\\' .. c.name .. '\\textures\\serp_molot_debug.blp', 0, 0.8, 0)
     end

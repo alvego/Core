@@ -78,6 +78,14 @@ function c.UnitBehind(unit)
 end
 
 -------------------------------------------------------------------------------
+function c.FaceTo(x, y, z)
+    if c.isReady() and type(oFaceTo) == 'function' then
+        print('oFaceTo', oFaceTo, x, y, z)
+        oFaceTo(x, y, z)
+    end
+end
+
+-------------------------------------------------------------------------------
 function c.FaceToUnit(unit)
     if c.isReady() and type(oFaceToUnit) == 'function' then
         oFaceToUnit(unit)

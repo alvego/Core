@@ -12,6 +12,7 @@ local UnitAffectingCombat = UnitAffectingCombat
 local UnitGUID = UnitGUID
 local bit = bit
 local wipe = wipe
+local math_max = math.max
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
@@ -77,9 +78,13 @@ local function isInvalidEnemy(unit)
     if invalidTarget then
         return invalidTarget
     end
+    local name = UnitName(unit)
+    if c.StrContains(name, 'тотем') then
+        return c.ToStr('skip: тотем')
+    end
     local maxHP = UnitHealthMax(unit)
-    if UnitHealthMax(unit) < 20 then
-        return c.ToStr('skip: maxhp(', maxHP, ') < 20')
+    if UnitHealthMax(unit) <= 25 then
+        return c.ToStr('skip: maxhp(', maxHP, ') < 25')
     end
     -- выбираем другую цель
     if search.skipGUID and search.skipGUID == UnitGUID(unit) then
@@ -138,11 +143,12 @@ local enemy = {}
 local function initEnemy()
     wipe(enemy)
     enemy.uid = nil
-    enemy.dist = nil
+    enemy.dist = 99999
     enemy.combat = false
+    enemy.look = false
 end
 
-
+local meleeDist = 5
 local function checkEnemy(uid)
     local invalidEnemy = isInvalidEnemy(uid)
     if invalidEnemy then
@@ -157,15 +163,23 @@ local function checkEnemy(uid)
     if not st.attack and not combat then
         return 'skip: !attack & !combat'
     end
+
+
+    local dist = math_max(meleeDist, enemyDistance(uid)) -- melee
     -- уже нашел ближе
-    local dist = enemyDistance(uid)
-    if enemy.dist and enemy.dist < dist then
+    if dist > enemy.dist then
         return format('skip: dist(%.1f) > enemy.dist(%.1f)', dist, enemy.dist)
+    end
+
+    local look = enemyInView(uid) -- meleeDist
+    if dist == enemy.dist and enemy.look and not look then
+        return 'skip: melee !look'
     end
 
     enemy.uid = uid
     enemy.combat = combat
     enemy.dist = dist
+    enemy.look = look
     return c.ToStr(
         'success,',
         'combat:', enemy.combat,

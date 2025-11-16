@@ -98,4 +98,13 @@ c.AttachActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
     -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())
     --ChatFrame_OpenChat(StaticPopup1Button1:GetText())
+
+    -- local x, y, z = c.UnitPosition('player')
+    -- ChatFrame_OpenChat(c.ToStr(c.Round(x), c.Round(y), c.Round(z)))
+
+    --c.MovePlayer(1239, 834, 9)
+    --c.FaceTo(1239, 834, 9)
+    --print('GetPlayerFacing', GetPlayerFacing())
+    --c.FaceToUnit(c.GetUnitID('focus'), 100)
+    c.PlayerMove('target')
 end)

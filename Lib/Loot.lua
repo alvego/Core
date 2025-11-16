@@ -55,7 +55,7 @@ end)
 local canLoot = c.GetCachedFunc(function(unit)
     local ptr = c.UnitPtr(unit)
     if c.ReadByte(ptr, 168) == 0 then return false end
-    if (lootFilterList[unit] or 0) >= 10 then return false end
+    if (lootFilterList[unit] or 0) >= 3 then return false end
     return true
 end)
 -------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ end
 
 --     local ptr = c.UnitPtr(unit)
 --     if c.ReadByte(ptr, 168) == 0 then return '!canLoot' end
---     if (lootFilterList[unit] or 0) >= 10 then return 'lootFilterList ' .. lootFilterList[unit] end
+--     if (lootFilterList[unit] or 0) >= 3 then return 'lootFilterList ' .. lootFilterList[unit] end
 --     -- can't loot
 --     if tContains(lootList, unit) then return 'in lootList' end
 --     if tContains(skinList, unit) then return 'in skinList' end
@@ -128,7 +128,7 @@ local function checkCorpseForSkin(unit)
 end
 
 -------------------------------------------------------------------------------
-local maxDist = 25
+local maxDist = 40
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
     if not UnitExists(unit) then return end
