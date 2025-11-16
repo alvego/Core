@@ -13,6 +13,11 @@ c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
 local st = c.state
 local GetTotemInfo = GetTotemInfo
+
+-------------------------------------------------------------------------------
+c.AttachTelemetry(function()
+    return format('AOEtar: %d', c.GetEnemyCount(10, 'player'))
+end)
 -------------------------------------------------------------------------------
 local function HasMagmaTotem()
     local haveTotem, name = GetTotemInfo(1)
