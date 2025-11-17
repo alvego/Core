@@ -27,14 +27,19 @@ function c.AttachUpdateDebugState(func)
 end
 
 -------------------------------------------------------------------------------
-local function updateDebugStateHook(key, value)
-    if key ~= 'scriptErrors' then return end
+local function updateDebugState()
     debug = GetCVar('scriptErrors') == '1'
     if c.IsChanged('Debug', debug) then
         for i = 1, #funcList do
             funcList[i](debug)
         end
     end
+end
+c.AttachEvent('PLAYER_ENTERING_WORLD', updateDebugState)
+-------------------------------------------------------------------------------
+local function updateDebugStateHook(key, value)
+    if key ~= 'scriptErrors' then return end
+    updateDebugState()
 end
 hooksecurefunc('SetCVar', updateDebugStateHook)
 -------------------------------------------------------------------------------

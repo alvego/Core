@@ -99,7 +99,7 @@ end
 local function moveUpdate()
     -- не идем
     if c.Paused()
-        or not c.canMove()
+        or not c.flags.move
         or st.move
         or st.look
         or not moveUnit
@@ -149,11 +149,3 @@ function c.PlayerMove(target, maxDist)
     moveUpdate()
     return moveUnit ~= nil
 end
-
-c.AttachActionHook('move', function()
-    c.EchoBool('Move', c.canMove(not c.canMove()))
-end)
-
-c.AttachTelemetry(function()
-    return c.TelemetryBool('Move', c.canMove())
-end)

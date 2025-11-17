@@ -77,4 +77,3 @@ end
 c.AttachBeforeUpdate(updateState)
 updateState() -- for init
 -------------------------------------------------------------------------------
-

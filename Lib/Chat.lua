@@ -45,11 +45,13 @@ local function updateDebugTabVisibility(visible)
                         FCF_SelectDockFrame(firstChatFrame)
                     end
                 end
+
                 chatFrame:Hide()
                 tab:Hide()
             end
         elseif visible then
             tab:Show()
+
             if chatFrame.isDocked then
                 FCF_SelectDockFrame(chatFrame)
             else
@@ -60,12 +62,6 @@ local function updateDebugTabVisibility(visible)
 end
 c.AttachUpdateDebugState(updateDebugTabVisibility)
 
-
--------------------------------------------------------------------------------
-local function renederDebugTab()
-    updateDebugTabVisibility(c.Debug())
-end
-c.AttachEvent('PLAYER_ENTERING_WORLD', renederDebugTab)
 -------------------------------------------------------------------------------
 -- Функция для получения свободного чат-фрейма
 local function getFreeChatIndex()
@@ -160,7 +156,7 @@ end
 function c.Message(msg, title, icon, r, g, b)
     msg = tostring(msg)
     title = tostring(title)
-    if not c.showCommentLog() and string.sub(msg, 1, 1) == '#' then
+    if not c.flags.fullLog and string.sub(msg, 1, 1) == '#' then
         return -- игнорируем комментарии
     end
     if not c.IsChanged('Message', msg .. title) then

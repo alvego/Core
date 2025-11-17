@@ -6,9 +6,13 @@ Core = {}
 local c = Core
 -------------------------------------------------------------------------------
 local type = type
+local tostring = tostring
+local error = error
+local setmetatable = setmetatable
 local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 c.name = ...
+c.icon = 'Interface\\AddOns\\' .. c.name .. '\\textures\\serp_molot_debug.blp'
 c.db = {}
 c.state = {}
 c.stateCache = {}
@@ -18,42 +22,55 @@ c.advance = 0.05
 c.latency = c.advance
 c.gcdSpellId = 61304
 -------------------------------------------------------------------------------
+local flags = { -- defauts
+    paused = true,
+    loot = false,
+    move = false,
+    fullLog = false
+}
 
-local function canBool(name, value, def)
-    if type(value) == 'boolean' then
-        c.db[name] = value
+c.flags = {} -- metatable linked with db
+-- Метатаблица для c.flags
+local flagsMeta = {
+    __index = function(_, key)
+        -- Сначала проверяем в базе данных
+        if c.db[key] ~= nil then
+            return c.db[key]
+        end
+        -- Иначе возвращаем значение по умолчанию из flags defaults
+        local def = flags[key]
+        if def ~= nil then
+            return def
+        end
+        -- Если флага вообще нет, возвращаем nil (или можно добавить error для отладки)
+        error('get: invalid flag - ' .. tostring(key))
+        return nil
+    end,
+
+    __newindex = function(_, key, value)
+        local def = flags[key]
+        if def == nil then
+            error('set: invalid flag ' .. tostring(key))
+            return
+        end
+        -- При присвоении сохраняем в базу данных
+        c.db[key] = value
     end
-    if c.db[name] == nil then return def end
-    return c.db[name]
-end
+}
+setmetatable(c.flags, flagsMeta)
 
 function c.Paused(value)
-    local paused = canBool('paused', value, true)
-    return UnitIsAFK('player') == 1 and true or paused
-end
-
-function c.canLoot(value)
-    return canBool('canLoot', value, true)
-end
-
-function c.canMove(value)
-    return canBool('canMove', value, false)
-end
-
-function c.showSpellSuccess(value)
-    return canBool('showSpellSuccess', value, true)
-end
-
-function c.showSpellError(value)
-    return canBool('showSpellError', value, true)
-end
-
-function c.showCommentLog(value)
-    return canBool('showCommentLog', value, true)
+    if type(value) == 'boolean' then
+        c.flags.paused = value
+    end
+    if UnitIsAFK('player') == 1 then
+        return true
+    end
+    return c.flags.paused
 end
 
 -------------------------------------------------------------------------------
-function c.isReady()
+function c.IsLoaded()
     return c.loaded and c.state.inWorld
 end
 

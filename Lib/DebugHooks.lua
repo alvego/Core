@@ -6,7 +6,7 @@ local c = Core
 local GetCVar = GetCVar
 local SetCVar = SetCVar
 -------------------------------------------------------------------------------
-c.AttachActionHook('aura', function() -- for debug
+function c.PrintTargetAuras() -- for debug
     local target = 'target'
     if not UnitExists(target) then
         target = 'player'
@@ -38,20 +38,7 @@ c.AttachActionHook('aura', function() -- for debug
         end
         idx = idx + 1
     until false
-end)
-
--------------------------------------------------------------------------------
-c.AttachActionHook('debug', function()
-    SetCVar("scriptErrors", GetCVar("scriptErrors") == "1" and 0 or 1)
-end)
-
--------------------------------------------------------------------------------
-c.AttachActionHook('log', function()
-    local val = not c.showCommentLog()
-    c.showCommentLog(val)
-    c.showSpellSuccess(val)
-    c.EchoBool('Log', val)
-end)
+end
 
 -------------------------------------------------------------------------------
 

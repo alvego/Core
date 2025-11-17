@@ -38,7 +38,7 @@ local unfiltredEvents = {
 
 local function onEvent(self, event, ...)
     if eventList[event] ~= nil and
-        (c.isReady() or tContains(unfiltredEvents, event)) then
+        (c.IsLoaded() or tContains(unfiltredEvents, event)) then
         local funcList = eventList[event]
         for i = 1, #funcList do
             funcList[i](event, ...)
@@ -76,10 +76,10 @@ local function onUpdate()
         return
     end
 
-    if not c.isReady() then return end
+    if not c.IsLoaded() then return end
     if c.IsNeedEnableExtended() and c.TimerStarted('CheckExtended') and c.TimerMore('CheckExtended', 5) then
         c.Echo(WrapTextInColorCode('ждем ' .. SecondsToTime(c.TimerElapsed('CheckExtended')), 'FFBBA606'), nil,
-            'Interface\\AddOns\\' .. c.name .. '\\textures\\serp_molot_debug.blp', 0, 0.8, 0)
+            c.icon, 0, 0.8, 0)
     end
     ----------------------------------------------------------------
     for i = 1, #listBeforeUpdate do

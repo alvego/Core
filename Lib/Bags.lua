@@ -19,6 +19,7 @@ local RepairAllItems = RepairAllItems
 local ItemRefTooltip = ItemRefTooltip
 local GameTooltip = GameTooltip
 local GetInventoryItemID = GetInventoryItemID
+local GetContainerItemLink = GetContainerItemLink
 local tContains = tContains
 -------------------------------------------------------------------------------
 function c.GetBagsFreeSlots()
@@ -101,6 +102,10 @@ local function checkItemMinLevel(itemMinLevel, itemSellPrice)
     end
 end
 
+local function checkJunkList(skipList, itemName, itemSellPrice)
+    if not skipList and c.db.junk and c.db.junk[itemName] then return 'Хлам (метка)', itemSellPrice end
+end
+
 local function isJunk(link, skipList)
     local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
         GetItemInfo(link)
@@ -110,12 +115,14 @@ local function isJunk(link, skipList)
     -- вещи обычного качества
     if itemRarity == 1 then
         -- проверяем, на игнорируемые слоты (эти вещи не трогаем)
-        if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then return end
+        if itemEquipLoc and tContains(disabledItemEquipLoc, itemEquipLoc) then
+            return checkJunkList(skipList, itemName, itemSellPrice)
+        end
 
         if itemType == 'Доспехи' then return checkItemLevel(itemLevel, itemSellPrice) end
         if itemType == 'Оружие' then
-            if itemSubType == 'Удочки' then return false end
-            if itemSubType == 'Разное' then return false end
+            if itemSubType == 'Удочки' then return checkJunkList(skipList, itemName, itemSellPrice) end
+            if itemSubType == 'Разное' then return checkJunkList(skipList, itemName, itemSellPrice) end
             return checkItemLevel(itemLevel, itemSellPrice)
         end
 
@@ -129,7 +136,7 @@ local function isJunk(link, skipList)
         end
     end
 
-    if not skipList and c.db.junk and c.db.junk[itemName] then return 'Хлам (метка)', itemSellPrice end
+    return checkJunkList(skipList, itemName, itemSellPrice)
 end
 
 local itemTipHook = function(self, ...)
@@ -157,7 +164,8 @@ end
 GameTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 -------------------------------------------------------------------------------
-c.AttachActionHook('toggle', function()
+c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
+    if button ~= "MiddleButton" then return end
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
     if isJunk(link, true) then return end
@@ -167,14 +175,16 @@ c.AttachActionHook('toggle', function()
     if not c.db.junk then c.db.junk = {} end
     if c.db.junk[itemName] then
         c.db.junk[itemName] = nil
-        c.Echo(itemLink, WrapTextInColorCode('Норм', 'FF0084FF'), itemTexture)
+        c.MessageLog(format('%s %s', WrapTextInColorCode('удалено из списка хлама', 'ff00ff00'), itemLink), 'Хлам',
+            itemTexture)
         return
     end
     c.db.junk[itemName] = true
-    c.Echo(itemLink, WrapTextInColorCode('Хлам', 'ff888888'), itemTexture)
+    c.MessageLog(format('%s %s', WrapTextInColorCode('добавлено в список хлама', 'ffff0000'), itemLink), 'Хлам',
+        itemTexture)
 end)
 -------------------------------------------------------------------------------
-c.AttachActionHook('junk', function()
+function c.RemoveJunk()
     ClearCursor()
     local cnt = 0
     local free = c.GetBagsFreeSlots()
@@ -194,7 +204,7 @@ c.AttachActionHook('junk', function()
         c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Очистка')
     end
 end
-)
+
 -------------------------------------------------------------------------------
 c.AttachEvent('MERCHANT_SHOW', function()
     ClearCursor()

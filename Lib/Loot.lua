@@ -172,7 +172,7 @@ end
 -------------------------------------------------------------------------------
 local function waitForLoot()
     -- core лут отключен, стоп
-    if not c.canLoot() then return true end
+    if not c.flags.loot then return true end
     -- нет свободного места в сумках, стоп
     if c.GetBagsFreeSlots() < 1 then return true end
     -- wow автолут отключен, дальше не идем
@@ -328,7 +328,7 @@ end
 -------------------------------------------------------------------------------
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 0.5) then return true end
-    if not c.canMove() or st.move then return false end
+    if not c.flags.move or st.move then return false end
     if st.look then return false end
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse()
@@ -351,11 +351,5 @@ c.AttachBeforeUpdate(function()
     if waitForCorpseSkin() then return end
     if waitForFindCorpse() then return end
 end)
+
 -------------------------------------------------------------------------------
-c.AttachActionHook('loot', function()
-    c.EchoBool('Loot', c.canLoot(not c.canLoot()))
-end)
--------------------------------------------------------------------------------
-c.AttachTelemetry(function()
-    return c.TelemetryBool('Loot', c.canLoot())
-end)

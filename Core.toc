@@ -17,6 +17,7 @@ Lib\Debug.lua
 Lib\Chat.lua
 Lib\Telemetry.lua
 Lib\TelemetryHooks.lua
+Lib\Minimap.lua
 Lib\CombatLog.lua
 Lib\Units.lua
 Lib\TimeToDie.lua
