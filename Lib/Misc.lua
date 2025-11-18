@@ -4,7 +4,6 @@
 local c = Core
 -------------------------------------------------------------------------------
 -- Кешируем функции и значения
-local div255 = 1 / 255 --предвычисленное значение
 local strlower = strlower
 local tostring = tostring;
 local select = select
@@ -15,7 +14,6 @@ local WrapTextInColorCode = WrapTextInColorCode
 local UnitClass = UnitClass
 local UnitCreatureType = UnitCreatureType
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local strlower = strlower
 local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
 local GetCursorInfo = GetCursorInfo
@@ -163,21 +161,13 @@ function c.UnitInfo(unit)
     local name = UnitName(unit)
     if not name then return WrapTextInColorCode('!name', 'aaff0000') end
     name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
+    local level = UnitLevel(unit)
+    if level then name = name .. ' ' .. level end
     local ctype = UnitCreatureType(unit)
     if ctype then
-        name = name .. ' - ' .. WrapTextInColorCode(ctype, creatureColors[ctype] or 'aaffffff')
+        name = name .. ' ' .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
     end
     return name
-end
-
--------------------------------------------------------------------------------
-function c.BoolToColorString(val)
-    if val then return WrapTextInColorCode('Enable', 'ff00ff00') end
-    return WrapTextInColorCode('Disbale', 'ffff0000')
-end
-
-function c.EchoBool(name, value)
-    c.Echo(c.ToStr(c.BoolToColorString(value), name))
 end
 
 -------------------------------------------------------------------------------

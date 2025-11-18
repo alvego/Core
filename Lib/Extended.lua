@@ -5,6 +5,8 @@ local c = Core
 -------------------------------------------------------------------------------
 local type = type
 local table_concat = table.concat
+local SecondsToTime = SecondsToTime
+local WrapTextInColorCode = WrapTextInColorCode
 -------------------------------------------------------------------------------
 function c.UnitsCount()
     if c.IsLoaded() and type(oUnitsCount) == 'function' then
@@ -210,8 +212,13 @@ function c.Action(slot, target, button)
 end
 
 -------------------------------------------------------------------------------
-function c.IsNeedEnableExtended()
-    return type(oHelp) ~= 'function'
+local checkTimer = 'CheckExtended'
+function c.CheckExtendedFunc()
+    c.TimerToggle(checkTimer, type(oHelp) ~= 'function')
+    if c.TimerStarted(checkTimer) and c.TimerMore(checkTimer, 3) then
+        c.Echo(WrapTextInColorCode('ждем ' .. SecondsToTime(c.TimerElapsed(checkTimer)), 'ffffff00'), nil,
+            c.icon, 0, 1, 0)
+    end
 end
 
 -------------------------------------------------------------------------------

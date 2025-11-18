@@ -7,8 +7,7 @@ local tinsert = tinsert
 local tContains = tContains
 local type = type
 local error = error
-local SecondsToTime = SecondsToTime
-local WrapTextInColorCode = WrapTextInColorCode
+
 -------------------------------------------------------------------------------
 -- Инициализация скрытого фрейма для обработки событий
 local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
@@ -64,23 +63,29 @@ end
 -------------------------------------------------------------------------------
 
 local skipNextUpdate = false -- skip next Update
-function c.SkipNextUpdate()
+function c.SkipNextUpdate()  -- пропустить вызов Update() в следующий тик
     skipNextUpdate = true
 end
 
+local immediatelyNextUpdate = false -- запустить следующий тик немедленно
+function c.ImmediatelyNextUpdate()
+    immediatelyNextUpdate = true
+end
+
 -------------------------------------------------------------------------------
-c.TimerStart('CheckExtended')
 -- Выполняем обработчики события OnUpdate
 local function onUpdate()
-    if c.TimerLess('UPDATE', 0.2) then
+    if immediatelyNextUpdate then
+        c.TimerReset('UPDATE')
+        immediatelyNextUpdate = false
         return
     end
+    -- не чаще 5 раз в секунду
+    if c.TimerLess('UPDATE', 0.2) then return end
 
     if not c.IsLoaded() then return end
-    if c.IsNeedEnableExtended() and c.TimerStarted('CheckExtended') and c.TimerMore('CheckExtended', 5) then
-        c.Echo(WrapTextInColorCode('ждем ' .. SecondsToTime(c.TimerElapsed('CheckExtended')), 'FFBBA606'), nil,
-            c.icon, 0, 0.8, 0)
-    end
+
+    c.CheckExtendedFunc()
     ----------------------------------------------------------------
     for i = 1, #listBeforeUpdate do
         listBeforeUpdate[i]()

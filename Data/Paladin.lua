@@ -234,6 +234,28 @@ local function checkFinishTarget(target, action)
     if not c.UnitInLOS('player', target) then return end
     return target
 end
+
+-------------------------------------------------------------------------------
+c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
+    if button ~= "MiddleButton" then return end
+    if not c.IsSpellNotUsed(tauntSpells, 0.5) then return end
+    local reason, action, unit = 'Танунт по мышке', 'Длань возмездия', 'mouseover'
+    if not UnitExists(unit) then return end
+    if UnitCanAttack('player', unit) and c.CanUseSpell(action, unit) and not UnitIsUnit('player', unit .. '-target') and not c.HasBuff('Длань', unit) then
+        c.DoAction(reason, action, unit)
+        c.LogWhatHappend(reason)
+        c.SkipNextUpdate()
+        return
+    end
+    reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', UnitIsPlayer(unit) and unit or unit .. '-target'
+    if c.UnitInGroup(unit) and c.CanUseSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
+        c.DoAction(reason, action, unit)
+        c.LogWhatHappend(reason)
+        c.SkipNextUpdate()
+        return
+    end
+end)
+
 -------------------------------------------------------------------------------
 local function updateProto()
     local reason, action, unit
@@ -293,23 +315,6 @@ local function updateProto()
     -- if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
     --     c.DoAction(reason, action, unit) -- мгновенка
     -- end
-    -------------------------------------------------------------------------------
-    unit = 'mouseover'
-    if st.start and UnitExists(unit) then
-        if c.IsSpellNotUsed(tauntSpells, 0.5) then
-            reason, action, unit = 'Танунт по мышке', 'Длань возмездия', 'mouseover'
-            if UnitCanAttack('player', unit) and c.CanUseSpell(action, unit) and not UnitIsUnit('player', unit .. '-target') and not c.HasBuff('Длань', unit) then
-                c.DoAction(reason, action, unit)
-                return reason
-            end
-            reason, action, unit = 'Снятие агро по мышке', 'Праведная защита',
-                UnitIsPlayer(unit) and unit or unit .. '-target'
-            if c.UnitInGroup(unit) and c.CanUseSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
-                c.DoAction(reason, action, unit)
-                return reason
-            end
-        end
-    end
     -------------------------------------------------------------------------------
     if not st.gcd and (st.start or (not st.attack and st.combatMode)) then
         -------------------------------------------------------------------------------

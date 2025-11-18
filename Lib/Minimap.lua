@@ -78,7 +78,6 @@ end)
 local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
 local moveIcon = 'Interface\\Icons\\Spell_Priest_PathofDevout'
 local logIcon = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_white'
-local pausedIcon = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_green'
 local debugIcon = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_blue'
 local flagFunc = function(btn)
   local flag = btn.value
@@ -97,7 +96,7 @@ local menu = {
     {
       text = 'Пауза',
       value = 'paused',
-      icon = pausedIcon,
+      icon = c.icon,
       func = flagFunc,
       checked = true,
       notCheckable = false,

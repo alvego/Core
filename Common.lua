@@ -90,6 +90,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode then
             c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) -- enable by default
+            c.ImmediatelyNextUpdate()                                          -- не делаем паузы после выбора цели
         end
         return '#' .. st.invalidTarget
     end

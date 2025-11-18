@@ -7,9 +7,12 @@ local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
 local ChatFrame_RemoveAllChannels = ChatFrame_RemoveAllChannels
+local FCF_UnDockFrame = FCF_UnDockFrame
+local FCF_DockFrame = FCF_DockFrame
 local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
+
 local format = format
 local tostring = tostring
 local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
@@ -32,27 +35,34 @@ local function getDebugChatFrame()
     return debugChatFrame, tab
 end
 -------------------------------------------------------------------------------
--- Функция для управления видимостью вкладки
-local function updateDebugTabVisibility(visible)
+local docked = true
+local function toggleChatVisibility(visible)
     local chatFrame, tab = getDebugChatFrame()
-
     if chatFrame then
         if tab:IsShown() then
             if not visible then
-                if chatFrame.isDocked and chatFrame:IsShown() then
+                -- выбираем первую вкладку
+                docked = chatFrame.isDocked
+                if docked and chatFrame:IsShown() then
                     local firstChatFrame = _G['ChatFrame1']
                     if firstChatFrame then
                         FCF_SelectDockFrame(firstChatFrame)
                     end
                 end
 
+                -- окрепляем
+                if docked then
+                    FCF_UnDockFrame(chatFrame)
+                end
+
+                -- прячем
                 chatFrame:Hide()
                 tab:Hide()
             end
         elseif visible then
             tab:Show()
-
-            if chatFrame.isDocked then
+            if docked then
+                FCF_DockFrame(chatFrame)
                 FCF_SelectDockFrame(chatFrame)
             else
                 chatFrame:Show()
@@ -60,7 +70,7 @@ local function updateDebugTabVisibility(visible)
         end
     end
 end
-c.AttachUpdateDebugState(updateDebugTabVisibility)
+c.AttachUpdateDebugState(toggleChatVisibility)
 
 -------------------------------------------------------------------------------
 -- Функция для получения свободного чат-фрейма
@@ -133,7 +143,6 @@ end
 -------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений
 local function debugChat(msg, title, icon, r, g, b)
-    if not c.Debug() then return end
     if msg == nil then return end
     local chatFrame = getDebugChatFrame()
     if not chatFrame then
@@ -237,7 +246,7 @@ function c.Chat(msg)
     if not c.IsChanged(key, msg) and c.TimerLess(key, 2) then return end
     DEFAULT_CHAT_FRAME:AddMessage(
         formatMessage(
-            iconSuccess,
+            c.icon,
             c.name,
             msg
         ),
