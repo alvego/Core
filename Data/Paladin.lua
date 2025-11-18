@@ -18,6 +18,7 @@ local UnitCreatureType = UnitCreatureType
 local UnitThreatSituation = UnitThreatSituation
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local UnitAffectingCombat = UnitAffectingCombat
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitExists = UnitExists
 local UnitOnTaxi = UnitOnTaxi
 local UnitIsUnit = UnitIsUnit
@@ -236,25 +237,36 @@ local function checkFinishTarget(target, action)
 end
 
 -------------------------------------------------------------------------------
+local mouseoverUid = nil
+local mouseoverTimer = 'mouseoverTimer'
 c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
     if button ~= "MiddleButton" then return end
+    local unit = 'mouseover'
+    if not UnitExists(unit) then return end
+    mouseoverUid = c.GetUnitID(unit)
+    c.TimerStart(mouseoverTimer)
+end)
+
+local function tryMouseTaunt()
+    if not mouseoverUid then return end
+    if c.TimerMore(mouseoverTimer, 2) then return end
     if not c.IsSpellNotUsed(tauntSpells, 0.5) then return end
     local reason, action, unit = 'Танунт по мышке', 'Длань возмездия', 'mouseover'
-    if not UnitExists(unit) then return end
+    if not UnitExists(unit) or UnitIsDeadOrGhost(unit) then return end
+    
     if UnitCanAttack('player', unit) and c.CanUseSpell(action, unit) and not UnitIsUnit('player', unit .. '-target') and not c.HasBuff('Длань', unit) then
         c.DoAction(reason, action, unit)
-        c.LogWhatHappend(reason)
-        c.SkipNextUpdate()
-        return
+        mouseoverUid = nil
+        return reason
     end
+    
     reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', UnitIsPlayer(unit) and unit or unit .. '-target'
     if c.UnitInGroup(unit) and c.CanUseSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
         c.DoAction(reason, action, unit)
-        c.LogWhatHappend(reason)
-        c.SkipNextUpdate()
-        return
+        mouseoverUid = nil
+        return reason
     end
-end)
+end
 
 -------------------------------------------------------------------------------
 local function updateProto()
@@ -315,6 +327,9 @@ local function updateProto()
     -- if st.combatMode and needHeal and c.CanUseSpell(action, unit) then
     --     c.DoAction(reason, action, unit) -- мгновенка
     -- end
+    -------------------------------------------------------------------------------
+    reason = tryMouseTaunt()
+    if reason then return reason end
     -------------------------------------------------------------------------------
     if not st.gcd and (st.start or (not st.attack and st.combatMode)) then
         -------------------------------------------------------------------------------
