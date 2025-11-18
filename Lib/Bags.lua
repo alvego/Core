@@ -190,7 +190,7 @@ function c.RemoveJunk()
     local free = c.GetBagsFreeSlots()
     c.EachBugsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
-        if icon and not locked ~= 1 and lootable ~= 1 then
+        if icon and not locked ~= 1 then -- and lootable ~= 1
             local junk = isJunk(link)
             if junk then
                 cnt = cnt + 1

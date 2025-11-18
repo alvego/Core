@@ -253,13 +253,13 @@ local function tryMouseTaunt()
     if not c.IsSpellNotUsed(tauntSpells, 0.5) then return end
     local reason, action, unit = 'Танунт по мышке', 'Длань возмездия', mouseoverUid
     if not UnitExists(unit) or UnitIsDeadOrGhost(unit) then return end
-    
+
     if UnitCanAttack('player', unit) and c.CanUseSpell(action, unit) and not c.HasBuff('Длань', unit) and (UnitThreatSituation('player', unit) ~= 3) then
         c.DoAction(reason, action, unit)
         mouseoverUid = nil
         return reason
     end
-    
+
     reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', mouseoverUid
     if c.UnitInGroup(unit) and c.CanUseSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
         c.DoAction(reason, action, unit)

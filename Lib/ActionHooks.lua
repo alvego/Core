@@ -83,30 +83,37 @@ local function updateUserAction()
         return
     end
     if c.TimerMore(userActionTimer, 2) then
-        c.Message('отмена по времени!', userAction.name, userAction.icon)
+        c.Message('не успели!', userAction.name, userAction.icon)
         userActionReset()
         return
     end
-    if not c.CanUseSlot(userAction.slot, userAction.target) then
-        c.MessageLog('пока не доступно!', userAction.name, userAction.icon)
+    if not c.IsSpellNotUsed(userAction.name, 0.5) then
+        c.Message('прожали!', userAction.name, userAction.icon)
+        userActionReset()
+        return
+    end
+    local canuse, canuseinfo = c.CanUseSlot(userAction.slot, userAction.target)
+    if not canuse then
+        c.MessageLog(canuseinfo, userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
     if st.playerCasting then -- add spell busy
-        c.MessageLog('ожидаем конец каста!', userAction.name, userAction.icon)
+        c.MessageLog('каст!', userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
 
     if st.gcd then
-        c.MessageLog('пока не готово, гкд!', userAction.name, userAction.icon)
+        c.MessageLog('гкд!', userAction.name, userAction.icon)
         c.SkipNextUpdate()
         return
     end
     c.Message('жмем!', userAction.name, userAction.icon)
+    -- print(userAction.slot, userAction.target, userAction.button)
+    -- print(c.GetSlotName(userAction.slot), UnitExists(userAction.target or 'target'))
     c.Action(userAction.slot, userAction.target, userAction.button)
     c.SkipNextUpdate()
-    userActionReset()
 end
 c.AttachAfterUpdate(updateUserAction)
 -------------------------------------------------------------------------------
