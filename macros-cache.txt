@@ -36,8 +36,6 @@ END
 MACRO 16 "sleep" Spell_Nature_Sleep
 /sleep
 END
-MACRO 28 "start" Ability_Repair
-END
 MACRO 24 "stop" Ability_DualWield
 /stopattack
 /petstop
