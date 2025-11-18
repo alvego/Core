@@ -18,6 +18,9 @@ local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
 local GetCursorInfo = GetCursorInfo
 local ClearCursor = ClearCursor
+local StaticPopup1 = StaticPopup1
+local StaticPopup1Button1 = StaticPopup1Button1
+local StaticPopup1Button2 = StaticPopup1Button2
 -------------------------------------------------------------------------------
 function c.StrContains(str, sub)
     if (not str or not sub) then
