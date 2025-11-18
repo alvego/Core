@@ -18,6 +18,9 @@ c.AttachTelemetry(function()
     if st.attack then
         return WrapTextInColorCode(c.name, 'ffff0000')
     end
+    if st.start then
+        return WrapTextInColorCode(c.name, 'ff0000ff')
+    end
     return c.TelemetryBool(c.name, not c.Paused())
 end)
 

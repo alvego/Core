@@ -21,9 +21,11 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
         if c.Paused() then
             c.Paused(false)
             c.TimerStart('start')
+            c.TimerReset('attack')
         else
             c.TurnTo('target')
             c.TimerStart('attack')
+            c.TimerReset('start')
         end
     elseif button == "Button5" then
         if c.Paused() then
