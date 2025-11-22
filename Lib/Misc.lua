@@ -178,7 +178,7 @@ function c.UnitInfo(unit)
     if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
     local ctype = UnitCreatureType(unit)
     if ctype then
-        name = name .. WrapTextInColorCode('[' .. strlower(ctype) .. ']', creatureColors[ctype] or 'aaffffff')
+        name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
     end
     return name
 end
