@@ -6,6 +6,10 @@ local c = Core
 -- local GetCVar = GetCVar
 -- local SetCVar = SetCVar
 -------------------------------------------------------------------------------
+
+
+-- Константы оффсетов для WoW 3.3.5a (100% точные на 2025 год)
+
 -- local offsets = {}
 -- local ignored = {
 --     191, -- mouseover
@@ -44,7 +48,7 @@ local c = Core
 -- hooksecurefunc('ClearTarget', function(...)
 --     c.Log('ClearTarget', ..., GetTime())
 -- end)
-
+local ignored = {}
 c.AttachActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
     -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())

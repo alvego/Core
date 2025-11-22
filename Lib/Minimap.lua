@@ -187,7 +187,8 @@ local updateFlagMenu = function(flagMenu)
   end
 end
 
-local junkIcon = 'Interface\\Icons\\Ability_Warrior_OffensiveStance'
+--local junkIcon = 'Interface\\Icons\\Ability_Warrior_OffensiveStance'
+local junkIcon = 'Interface\\TargetingFrame\\UI-RaidTargetingIcon_7'
 local junkFunc = function(btn)
   if not c.db.junk then return end
   local itemName = btn.value

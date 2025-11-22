@@ -81,7 +81,7 @@ local function onUpdate()
         return
     end
     -- не чаще 5 раз в секунду
-    if c.TimerLess('UPDATE', 0.2) then return end
+    if c.TimerLess('UPDATE', 0.33) then return end
 
     if not c.IsLoaded() then return end
 

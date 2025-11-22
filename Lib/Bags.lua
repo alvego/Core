@@ -184,6 +184,7 @@ c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
         itemTexture)
 end)
 -------------------------------------------------------------------------------
+local junkIcon = 'Interface\\Icons\\Spell_Mage_ConjuredManaBuns'
 function c.RemoveJunk()
     ClearCursor()
     local cnt = 0
@@ -201,11 +202,12 @@ function c.RemoveJunk()
         end
     end)
     if cnt > 0 then
-        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Очистка')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Очистка', junkIcon)
     end
 end
 
 -------------------------------------------------------------------------------
+local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
 c.AttachEvent('MERCHANT_SHOW', function()
     ClearCursor()
     local sum = 0
@@ -231,10 +233,10 @@ c.AttachEvent('MERCHANT_SHOW', function()
         end
     end)
     if sum > 0 then
-        c.Message(format('Итого продали на %s', GetCoinTextureString(sum)), 'Продажа')
+        c.Message(format('Итого продали на %s', GetCoinTextureString(sum)), 'Продажа', lootIcon)
     end
     if cnt > 0 then
-        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Продажа')
+        c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Продажа', lootIcon)
     end
     if CanMerchantRepair() then
         RepairAllItems(1) -- сперва пробуем за счет ги банка

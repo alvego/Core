@@ -114,38 +114,34 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     return nil
 end
 
-c.CustomCanUseSpell = function(spell, unit) -- empty func for overwrite in your class
-    return true
-end
-
 -------------------------------------------------------------------------------
-function c.CanUseSpell(spell, unit, interval)
+function c.CanSpell(spell, unit, interval)
     if not spell or type(spell) ~= 'string' then return false end
     if interval and not c.TimerMore(spell, interval) then return false end
     if c.IsSpellFailedRecently(spell) then return false end
     if not IsUsableSpell(spell) then return false end
     if unit and not c.UnitInLOS('player', unit) then return false end
-    if not c.CustomCanUseSpell(spell, unit) then return false end
-    return c.CanUseAction(spell, unit)
+    if type(c.CustomCanSpell) == 'function' and not c.CustomCanSpell(spell, unit) then return false end
+    return c.CanUseSpell(spell, unit)
 end
 
 -------------------------------------------------------------------------------
-function c.CanUseGcdSpell(spell, unit, interval)
+function c.CanGcdSpell(spell, unit, interval)
     if st.gcd then return false end
-    return c.CanUseSpell(spell, unit, interval)
+    return c.CanSpell(spell, unit, interval)
 end
 
 -------------------------------------------------------------------------------
-function c.CanUseItem(item, unit)
+function c.CanItem(item, unit)
     if not IsUsableItem(item) then return false end
     return c.CanUseAction(item, unit)
 end
 
 -------------------------------------------------------------------------------
-function c.CanUseCurrentSpell(spell, unit)
+function c.CanCurrentSpell(spell, unit)
     if c.TimerLess('CurrentSpell', 0.1) then return false end
     if IsCurrentSpell(spell) then return false end
-    if not c.CanUseSpell(spell, unit) then return false end
+    if not c.CanSpell(spell, unit) then return false end
     c.TimerStart('CurrentSpell')
     return true
 end

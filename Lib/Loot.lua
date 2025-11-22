@@ -20,7 +20,6 @@ local LootSlot = LootSlot
 local tinsert = tinsert
 local wipe = wipe
 local tContains = tContains
-local IsEquippedItemType = IsEquippedItemType
 local math_random = math.random
 local CombatLogClearEntries = CombatLogClearEntries
 -------------------------------------------------------------------------------
@@ -107,12 +106,22 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
 end
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 -------------------------------------------------------------------------------
-local skinTypes = { 'Животное', 'Демон' }
+
+local ignoreSkinTypes = {
+    'Гуманоид',
+    'Существо',
+    'Элементаль',
+    'Великан',
+    'Механизм',
+    'Газовое облако',
+    'Тотем',
+    'Спутник',
+    'Не указано' }
 local canSkin = c.GetCachedFunc(function(unit)
     local name = UnitName(unit)
     if skinFilterList[name] then return false end
     local creatureType = UnitCreatureType(unit)
-    if not tContains(skinTypes, creatureType) then return false end
+    if tContains(ignoreSkinTypes, creatureType) then return false end
     if canLoot(unit) then return false end
     return true
 end)
@@ -243,13 +252,13 @@ local function waitForFishing()
     c.SkipNextUpdate()
 
     if not st.playerCasting then
-        if c.CanUseGcdSpell(fish.spell, nil, fish.delay) then
+        if c.CanGcdSpell(fish.spell, nil, fish.delay) then
             fish.run = false
             fish.bobber = nil
             fish.guid = nil
             if not c.Paused() then
                 CombatLogClearEntries()
-                c.DoAction('Забрасываем', fish.spell)
+                c.DoSpell('Забрасываем', fish.spell)
                 fish.run = true
                 fish.delay = 0.5 + math_random() * 2.5 -- [0.5 .. 3]
             end
@@ -301,7 +310,7 @@ end
 
 -------------------------------------------------------------------------------
 local function waitForCorpseLoot()
-    if c.TimerLess('waitForCorpseLoot', 0.8) then return true end
+    if c.TimerLess('waitForCorpseLoot', 0.4) then return true end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
     if not corpse then return false end
@@ -317,7 +326,15 @@ local function waitForCorpseSkin()
     -- ищем кого можно освежевать
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
     if not corpse then return false end
-    c.DoAction('Свежуем', skinSpell, corpse)
+    if not c.IsSpellInRange(skinSpell, corpse) then
+        local name = UnitName(corpse)
+        if name then
+            c.Log('#skin ignore ', name)
+            skinFilterList[name] = true
+        end
+        return true
+    end
+    c.DoSpell('Свежуем', skinSpell, corpse)
     tinsert(skinList, corpse)
     skinTarget = corpse
     c.TimerStart(skinTimer)
@@ -325,14 +342,18 @@ local function waitForCorpseSkin()
     return true
 end
 -------------------------------------------------------------------------------
+local lastCorpse = nil
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 0.5) then return true end
     if not c.flags.move or st.move then return false end
     if st.look then return false end
+    if lastCorpse and UnitExists(lastCorpse) and (checkCorpseForLoot(lastCorpse) or checkCorpseForSkin(lastCorpse)) then return false end
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse()
     if corpse and c.MoveToUnit(corpse, maxDist) then
+        c.MessageLog('#идем к ', c.UnitInfo(corpse), lootIcon)
         c.TimerStart('waitForFindCorpse')
+        lastCorpse = corpse
     end
 end
 

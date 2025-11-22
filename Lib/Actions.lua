@@ -72,7 +72,7 @@ function c.CanUseSlot(slot, unit)
     if not isUsable or notEnoughMana then
         return false, notEnoughMana and '!mana' or '!usable'
     end
-    if ActionHasRange(slot) and IsActionInRange(slot, unit) == 0 then
+    if unit ~= nil and ActionHasRange(slot) and IsActionInRange(slot, unit) == 0 then
         return false, '!range'
     end
     if c.GetSlotCooldownLeft(slot) > c.latency then

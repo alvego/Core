@@ -87,6 +87,12 @@ local searchLastGuid = nil
 --     c.Log('SpellStopTargeting', ..., GetTime())
 -- end)
 
+c.DebugHook('RunMacro')
+c.DebugHook('RunMacroText')
+c.DebugHook('CastSpellByName')
+c.DebugHook('CastSpellByID')
+c.DebugHook('ClearTarget')
+
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then return end
@@ -141,6 +147,10 @@ local function isInvalidEnemy(unit)
     -- Призванный юнит
     if UnitIsPossessed(unit) then
         return 'skip: possessed'
+    end
+    -- Призванный юнит
+    if not c.UnitInLOS('player', unit) then
+        return 'skip: !inLoS'
     end
     -- в pvp выбираем только игроков
     if st.pvp and not UnitIsPlayer(unit) then

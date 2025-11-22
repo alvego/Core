@@ -123,12 +123,22 @@ function c.Distance(x1, y1, z1, x2, y2, z2)
 end
 
 -------------------------------------------------------------------------------
-local creatureColors = {
+local creatureColors = { -- Летающее, Магический зверь, Водное под вопросом
+    ["Животное"] = "aa228B22", -- лесной зелёный
+    ["Дракон"] = "aa8A2BE2", -- фиолетовый
+    ["Летающее"] = "aa87CEEB", -- небесно-голубой
     ["Гуманоид"] = "aaEEFF00", -- жёлтый
-    ["Животное"] = "9900ff00", -- зелёный
-    ["Демон"] = "aaff0000", -- красный
-    ["Нежить"] = "aaa0a0a0", -- серый
-    ["Элементаль"] = "aa00ffff", -- голубой
+    ["Существо"] = "aaD2691E", -- коричневый
+    ["Магический зверь"] = "aaFF1493", -- малиновый
+    ["Спутник"] = "aaFF69B4", -- розовый
+    ["Водное"] = "aa1E90FF", -- синий
+    ["Нежить"] = "aaA0A0A0", -- серый
+    ["Демон"] = "aaFF0000", -- красный
+    ["Элементаль"] = "aa00FFFF", -- голубой
+    ["Великан"] = "aaFF8C00", -- оранжевый
+    ["Механизм"] = "aaC0C0C0", -- серебристый
+    ["Тотем"] = "aa556B2F", -- оливково-зелёный
+    ["Не указано"] = "aaFFFFFF", -- белый
 }
 function c.GetUnitColorHex(unit)
     unit = unit or 'target'
@@ -165,10 +175,10 @@ function c.UnitInfo(unit)
     if not name then return WrapTextInColorCode('!name', 'aaff0000') end
     name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
     local level = UnitLevel(unit)
-    if level then name = name .. ' ' .. level end
+    if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
     local ctype = UnitCreatureType(unit)
     if ctype then
-        name = name .. ' ' .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
+        name = name .. WrapTextInColorCode('[' .. strlower(ctype) .. ']', creatureColors[ctype] or 'aaffffff')
     end
     return name
 end

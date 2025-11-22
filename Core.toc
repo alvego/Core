@@ -24,6 +24,7 @@ Lib\TimeToDie.lua
 Lib\Actions.lua
 Lib\ActionHooks.lua
 Lib\Spells.lua
+Lib\SpellError.lua
 Lib\SpellStore.lua
 Lib\SpellRange.lua
 Lib\SpellKick.lua
