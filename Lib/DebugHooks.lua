@@ -3,45 +3,9 @@
 -------------------------------------------------------------------------------
 local c = Core
 -------------------------------------------------------------------------------
-local GetCVar = GetCVar
-local SetCVar = SetCVar
+-- local GetCVar = GetCVar
+-- local SetCVar = SetCVar
 -------------------------------------------------------------------------------
-function c.PrintTargetAuras() -- for debug
-    local target = 'target'
-    if not UnitExists(target) then
-        target = 'player'
-    end
-    local unit = UnitName(target)
-    if unit == nil then return end
-    local guid = UnitGUID(target)
-    c.MessageLog('Auras for GUID:' .. guid, unit, nil, 0, 0, 1)
-    local idx = 0
-    repeat
-        local spellId, count, duration, endTime, isMine, isDebuff = c.UnitAuraByIndex(target, idx)
-        if spellId == nil then break end
-        if spellId and spellId ~= 0 then
-            local name, _, icon = GetSpellInfo(spellId)
-            local link = GetSpellLink(spellId)
-            if name then
-                local method = isDebuff and UnitDebuff or UnitBuff
-                local aura, _, _, _, _, _, _, _, _, _, auraId = method(target, name)
-                local findInUI = aura and (auraId == spellId)
-                c.MessageLog(
-                    format(
-                        '%s |cff%sUI|r',
-                        link or name,
-                        findInUI and '00ff00' or '000000'
-                    ),
-                    format('|cff%s%s|r', isDebuff and 'ff0000' or '00ff00', spellId), icon, 1, 1, 1
-                )
-            end
-        end
-        idx = idx + 1
-    until false
-end
-
--------------------------------------------------------------------------------
-
 -- local offsets = {}
 -- local ignored = {
 --     191, -- mouseover
@@ -77,9 +41,9 @@ end
 
 -- c.AttachBeforeUpdate(findOffset)
 
-
-
-
+-- hooksecurefunc('ClearTarget', function(...)
+--     c.Log('ClearTarget', ..., GetTime())
+-- end)
 
 c.AttachActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
@@ -88,10 +52,4 @@ c.AttachActionHook('test', function()
 
     -- local x, y, z = c.UnitPosition('player')
     -- ChatFrame_OpenChat(c.ToStr(c.Round(x), c.Round(y), c.Round(z)))
-
-    --c.MovePlayer(1239, 834, 9)
-    --c.FaceTo(1239, 834, 9)
-    --print('GetPlayerFacing', GetPlayerFacing())
-    --c.FaceToUnit(c.GetUnitID('focus'), 100)
-    c.PlayerMove('target')
 end)

@@ -23,14 +23,16 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
             c.TimerStart('start')
             c.TimerReset('attack')
         else
-            c.TurnTo('target')
+            c.TurnToUnit('target')
             c.TimerStart('attack')
             c.TimerReset('start')
+            c.Command('/startattack [exists, harm, nodead]')
+            c.Command('/petattack [exists, harm, nodead]')
         end
     elseif button == "Button5" then
         if c.Paused() then
             if st.existsTarget then
-                c.Target()
+                c.Command('/cleartarget')
                 c.Log('#сброс цели')
             elseif c.UnitCasting() or SpellIsTargeting() then
                 c.CastStop()
@@ -40,6 +42,9 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
             c.TimerReset('attack')
             c.TimerReset('start')
             c.Paused(true)
+            c.Command('/stopattack')
+            c.Command('/petstop')
+            c.Command('/petfollow')
         end
     end
 end)

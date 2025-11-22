@@ -53,7 +53,7 @@ function c.GetStopReason()
         if not st.attack then
             return c.stopReasonMount
         end
-        c.CancelBuff(auraName)
+        c.Command('/cancelaura ' .. auraName)
     end
 
 
@@ -102,11 +102,14 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.autoattack then
         if stopDebuff then
             local stopAttackReason = '#не бъем в ' .. stopDebuff
-            c.DoAction(stopAttackReason, 'stop')
+            c.Command('/stopattack')
+            c.Command('/petstop')
+            c.Command('/petfollow')
             return stopAttackReason
         end
     elseif not stopDebuff then
-        c.DoAction('#автоатака', 'attack')
+        c.Command('/startattack [exists, harm, nodead]')
+        c.Command('/petattack [exists, harm, nodead]')
     end
     return nil
 end

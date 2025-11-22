@@ -64,7 +64,7 @@ local function updateEnhance()
     -- есть ли причина для отстановки?.
     if reason then return reason end
 
-    if dist > 5 and (dist < 25 or st.attack) then c.PlayerMove('target', 100) end
+    if dist > 5 and (dist < 25 or st.attack) then c.MoveToUnit('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

@@ -155,19 +155,18 @@ local function getNearCorpse()
     return _corpse
 end
 -------------------------------------------------------------------------------
+local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
 local function lootUnit(unit, name)
     if tContains(lootList, unit) then return end
 
     --local uid = c.GetUnitID('target')
 
-    c.Message(name or c.UnitInfo(unit), 'Лутаем')
+    c.Message(name or c.UnitInfo(unit), 'Лутаем', lootIcon)
     c.UnitClick(unit, true)
     c.TimerStart(lootTimer)
     tinsert(lootList, unit)
     -- попытки лута
     lootFilterList[unit] = (lootFilterList[unit] or 0) + 1
-
-    --c.Target(uid)
 end
 -------------------------------------------------------------------------------
 local function waitForLoot()
@@ -332,7 +331,7 @@ local function waitForFindCorpse()
     if st.look then return false end
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse()
-    if corpse and c.PlayerMove(corpse, maxDist) then
+    if corpse and c.MoveToUnit(corpse, maxDist) then
         c.TimerStart('waitForFindCorpse')
     end
 end

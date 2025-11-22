@@ -44,6 +44,49 @@ end
 
 -------------------------------------------------------------------------------
 local lastGUID = nil
+local searchLastGuid = nil
+
+-- c.DebugHook('TargetUnit')
+-- c.DebugHook('TargetLastTarget')
+-- c.DebugHook('TargetLastFriend')
+-- c.DebugHook('TargetLastEnemy')
+-- c.DebugHook('AssistUnit')
+-- c.DebugHook('TargetNearest')
+-- c.DebugHook('TargetNearestEnemy')
+-- c.DebugHook('TargetNearestEnemyPlayer')
+-- c.DebugHook('TargetNearestFriend')
+-- c.DebugHook('TargetNearestFriendPlayer')
+-- c.DebugHook('TargetNearestPartyMember')
+-- c.DebugHook('TargetNearestRaidMember')
+-- c.DebugHook('SpellTargetUnit')
+-- c.DebugHook('ClearTarget')
+-- c.DebugHook('ClearFocus')
+
+
+-- c.DebugHook('RunMacro')
+-- c.DebugHook('RunMacroText')
+-- c.DebugHook('SecureActionButton_OnClick')
+
+-- hooksecurefunc('ChatEdit_ParseText', function(frame, ...)
+--     c.Log('ChatEdit_ParseText', frame:GetText(), ...)
+-- end)
+
+-- hooksecurefunc('ClearTarget', function(...)
+--     c.Log('ClearTarget', ..., GetTime())
+-- end)
+
+-- hooksecurefunc('UnitIsCharmed', function(...)
+--     c.Log('UnitIsCharmed', ..., GetTime())
+-- end)
+
+-- hooksecurefunc('SpellStopCasting', function(...)
+--     c.Log('SpellStopCasting', ..., GetTime())
+-- end)
+
+-- hooksecurefunc('SpellStopTargeting', function(...)
+--     c.Log('SpellStopTargeting', ..., GetTime())
+-- end)
+
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then return end
@@ -51,7 +94,8 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
 end)
 
 local search = {}
-local ENEMY = 'ENEMY'
+local title  = 'ENEMY'
+local icon   = 'Interface\\Icons\\Ability_Hunter_SniperShot'
 local function initSearch(maxDistance, inViewfield)
     wipe(search)
     search.maxDistance = maxDistance
@@ -195,42 +239,30 @@ local function getEnemyTarget()
         local uid = targets[i]
         local info = checkEnemy(uid)
         if (localDebug and info) then
-            c.Message(format('%s', info, uid), ENEMY)
-            c.MessageLog(format('-- name: %s', UnitName(uid)), ENEMY)
-            c.MessageLog(format('-- uid: %s', uid), ENEMY)
+            local name = c.UnitInfo(uid)
+            c.MessageLog(format('#checkEnemy: %s, name: %s, uid: %s', info, name, uid), title, icon)
         end
     end
     return enemy.uid
 end
 
 -------------------------------------------------------------------------------
+local function searchSelect(tar)
+    if not tar then return false end
+    c.Message(format('нашел новую цель: %s', UnitName(tar)), title, icon)
+    searchLastGuid = UnitGUID(tar)
+    c.Command('/target ' .. tar)
+    return true
+end
+
 function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     initSearch(maxDistance, inViewfield)
-
-    local tar = nil
     -- assist
     if tryAssist and st.group then
-        tar = getGroupTarget()
-        if tar then
-            if localDebug then
-                c.Success('Select form group targets')
-                c.MessageLog(format('-- name: %s', UnitName(tar)), ENEMY)
-                c.MessageLog(format('-- uid: %s', tar), ENEMY)
-            end
-            c.Target(tar)
-            return
-        end
+        if searchSelect(getGroupTarget()) then return end
     end
     -- enemy
-    tar = getEnemyTarget()
-    if tar then
-        if localDebug then
-            c.Success('Select form enemies')
-            c.MessageLog(format('-- name: %s', UnitName(tar)), ENEMY)
-            c.MessageLog(format('-- uid: %s', tar), ENEMY)
-        end
-        c.Target(tar)
-    end
+    searchSelect(getEnemyTarget())
 end
 
 -------------------------------------------------------------------------------

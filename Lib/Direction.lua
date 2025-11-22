@@ -22,19 +22,19 @@ local function turnUpdate()
         st.look or
         c.PlayerFacingTarget(turnUnit, 30) then
         turnUnit = nil
-        if c.TimerStarted('TurnTo') then
-            c.TimerReset('TurnTo')
+        if c.TimerStarted('TurnToUnit') then
+            c.TimerReset('TurnToUnit')
             --c.Log('endturn ', c.PlayerFacingTarget(turnUnit, 30))
         end
         return
     end
-    if c.TimerLess('TurnTo', 0.3) then return end
-    c.FaceToUnit(turnUnit)
+    if c.TimerLess('TurnToUnit', 0.3) then return end
+    c.LookAtUnit(turnUnit)
     --c.Log('turn1')
-    c.TimerStart('TurnTo')
+    c.TimerStart('TurnToUnit')
 end
 
-function c.TurnTo(target)
+function c.TurnToUnit(target)
     if not target then target = 'target' end
     turnUnit = target
     turnUpdate()
@@ -49,7 +49,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
         local message = select(4, ...)
         if message == 'Цель должна быть перед вами.' then
-            c.TurnTo('target')
+            c.TurnToUnit('target')
         end
     end
 end
@@ -59,7 +59,7 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 local function onUIErrorMessage(event, ...)
     local message = ...
     if message == 'Вы смотрите мимо цели!' then
-        c.TurnTo('target')
+        c.TurnToUnit('target')
     end
 end
 c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
@@ -93,7 +93,7 @@ local function moveEnd()
     --c.Log('#пришли')
     if st.speed > 0 and not st.move then
         --c.Log('#тормозим')
-        c.MovePlayer(c.UnitPosition('player'))
+        c.MoveTo(c.UnitPosition('player'))
     end
 end
 local function moveUpdate()
@@ -129,7 +129,7 @@ local function moveUpdate()
 
     -- поворачиваемся
 
-    if c.TurnTo(moveUnit) then
+    if c.TurnToUnit(moveUnit) then
         --c.Log('turn')
         return
     end
@@ -137,12 +137,12 @@ local function moveUpdate()
     -- идем
     if c.TimerLess('PlayerMove', 0.5) then return end
     --c.Log('move')
-    c.MovePlayer(x, y, z)
+    c.MoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
 c.AttachBeforeUpdate(moveUpdate)
 
-function c.PlayerMove(target, maxDist)
+function c.MoveToUnit(target, maxDist)
     moveUnit = target
     maveMaxDist = maxDist
     -- идем
