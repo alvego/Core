@@ -130,3 +130,15 @@ local function updateUserAction()
 end
 c.AttachAfterUpdate(updateUserAction)
 -------------------------------------------------------------------------------
+-- исправленеие зависающих стандартных желтых обводок проков
+c.AttachEvent('PLAYER_REGEN_ENABLED', function()
+    -- по выходу из боя
+    for i = 1, 120 do -- 12 x 10
+        -- для всех кнопок на панелях
+        local btn = _G['BT4Button' .. i]
+        if btn then
+            -- делаем сброс стандартной мигающей подсветки
+            ActionButton_HideOverlayGlow(btn)
+        end
+    end
+end)
