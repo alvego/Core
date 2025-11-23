@@ -340,21 +340,26 @@ local function updateProto()
         end
         -------------------------------------------------------------------------------
         reason, action, unit = 'Нужно обновить стойку', isTank and 'Аура благочестия' or 'Аура воздаяния', 'player'
-        if useMana and c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
+        if c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
+            c.Log('#могу прожать стойку')
             -- Могу прожать стойку
             local stance = c.UnitAuraByID(unit, stanceAuras, true)
             if stance then
+                c.Log('#на мне ecть моя стойка (аура палладина)')
                 -- на мне ecть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
                 if stance == spell['Аура воина Света'] and not c.HasAuraByID(unit, spell[action]) then
+                    c.Log('#но она не атуальна, чужой атуальной нет')
                     c.DoSpell(reason, action, unit) --  переключаемся в атуальную стойку
                     return reason
                 end
             else
+                c.Log('#на мне нет моей стойки (ауры палладина)')
                 -- на мне нет моей стойки (ауры палладина)
                 stance = getAvailableStance(unit) -- что можно включить?
                 if stance then
                     action = spell[stance]
+                    c.Log('#что можно включить?', action)
                     c.DoSpell(reason, action, unit)
                     return reason
                 end
@@ -400,7 +405,7 @@ local function updateProto()
             if c.CanSpell(action) then
                 unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 3) -- 3 red indicator
                 if unit then
-                    c.DoSpell(reason, action, unit)                              -- мговенка
+                    c.DoSpell(reason, action, unit)                               -- мговенка
                     return reason                                                 -- не частим
                 end
             end
@@ -411,7 +416,7 @@ local function updateProto()
                 unit = getTauntTarget(action, true)
                 if unit then
                     c.DoSpell(reason, action, unit) -- мговенка
-                    return reason                    -- не частим
+                    return reason                   -- не частим
                 end
             end
 

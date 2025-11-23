@@ -10,14 +10,31 @@ local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
+local ActionButton_ShowOverlayGlow = ActionButton_ShowOverlayGlow
+local ActionButton_HideOverlayGlow = ActionButton_HideOverlayGlow
 -------------------------------------------------------------------------------
 local userAction = {}
 local function userActionReset()
+    if not userAction.slot then return end
+    local button = _G["BT4Button" .. userAction.slot]
+    ActionButton_HideOverlayGlow(button)
     userAction.slot = nil
     userAction.target = nil
     userAction.button = nil
     userAction.name = nil
     userAction.icon = nil
+end
+
+local function userActionSet(slot, target, button, name, icon)
+    userActionReset()
+    if not slot then return end
+    userAction.slot = slot
+    userAction.target = target
+    userAction.button = button
+    userAction.name = name
+    userAction.icon = icon
+    local button = _G["BT4Button" .. userAction.slot]
+    ActionButton_ShowOverlayGlow(button)
 end
 local userActionTimer = 'userAction'
 local actionHooks = {}
@@ -63,16 +80,12 @@ local function hookUseAction(slot, target, button)
         return
     end
     if userAction.slot ~= slot then
-        userAction.slot = slot
-        userAction.target = target
-        userAction.button = button
-        userAction.name = name
-        userAction.icon = icon
+        userActionSet(slot, target, button, name, icon)
         c.TimerStart(userActionTimer, castLeft or 0)
         c.MessageLog('нажать?', name, icon)
     elseif inCast then
         c.MessageLog('повтор -> стопкаст', name, icon)
-        c.CastStop()
+        c.Command('/stopcasting')
     end
 end
 hooksecurefunc('UseAction', hookUseAction)

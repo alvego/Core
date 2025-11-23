@@ -1,8 +1,10 @@
-## Author: Unknown Coder
-## Title: |cff00ff00Core|r
-## Version: 2.0
-## DefaultState: Disabled
 ## Interface: 30300
+## Title: |cff00ff00Core|r
+## Notes: Use iLich Lenin Power
+## Author: Unknown Coder
+## Version: 2.0
+## Dependencies: Bartender4
+## DefaultState: Disabled
 ## SavedVariables: CoreDB
 
 Core.lua
@@ -23,6 +25,7 @@ Lib\Units.lua
 Lib\TimeToDie.lua
 Lib\Actions.lua
 Lib\ActionHooks.lua
+Lib\ActionGlow.lua
 Lib\Spells.lua
 Lib\SpellError.lua
 Lib\SpellStore.lua

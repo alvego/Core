@@ -188,9 +188,12 @@ function c.Command(chatCommandLine)
 end
 
 -------------------------------------------------------------------------------
-function c.Spell(nameOrId, target)
+function c.Spell(spell, target)
     if isReadyFunc(oSpell) then
-        oSpell(nameOrId, target)
+        if c.HighlightActionSlot then
+            c.HighlightActionSlot(spell)
+        end
+        oSpell(spell, target)
     end
 end
 
@@ -205,6 +208,9 @@ end
 --  RightButton - Right mouse button
 function c.Action(slot, target, button)
     if isReadyFunc(oAction) then
+        if c.HighlightActionSlot then
+            c.HighlightActionSlot(slot)
+        end
         oAction(slot, target, button)
     end
 end
