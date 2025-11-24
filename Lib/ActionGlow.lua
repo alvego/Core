@@ -56,15 +56,16 @@ local function hideGlow(button)
     button.glow:Hide()
 end
 
-function c.HighlightActionSlot(slot, interval, r, g, b)
-    --print('|cffaaFFaa' .. slot .. '|r')
+local function getButton(slot)
     if type(slot) == "string" then slot = c.GetSlot(slot) end
     if not slot then return end
-    local button = _G["BT4Button" .. slot]
+    return _G["BT4Button" .. slot]
+end
+
+function c.ShowActionGlow(slot, interval, r, g, b)
+    local button = getButton(slot)
     if not button then return end
-
     showGlow(button)
-
     -- проверка на постоянную подсветку
     if type(interval) ~= 'number' or interval <= 0 then return end
     -- если нужно скрыть по времени
@@ -77,6 +78,17 @@ function c.HighlightActionSlot(slot, interval, r, g, b)
             self:SetScript("OnUpdate", nil)
         end
     end)
+end
+
+function c.HideActionGlow(slot)
+    local button = getButton(slot)
+    if not button then return end
+    hideGlow(button)
+end
+
+function c.HighlightActionSlot(slot)
+    --print('|cffaaFFaa' .. slot .. '|r')
+    c.ShowActionGlow(slot, 2) -- 2 sec
 end
 
 -------------------------------------------------------------------------------
