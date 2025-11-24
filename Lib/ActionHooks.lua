@@ -10,14 +10,11 @@ local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
-local ActionButton_ShowOverlayGlow = ActionButton_ShowOverlayGlow
-local ActionButton_HideOverlayGlow = ActionButton_HideOverlayGlow
 -------------------------------------------------------------------------------
 local userAction = {}
 local function userActionReset()
     if not userAction.slot then return end
-    local button = _G["BT4Button" .. userAction.slot]
-    ActionButton_HideOverlayGlow(button)
+    c.HideActionGlow(userAction.slot)
     userAction.slot = nil
     userAction.target = nil
     userAction.button = nil
@@ -28,13 +25,13 @@ end
 local function userActionSet(slot, target, button, name, icon)
     userActionReset()
     if not slot then return end
+    c.ShowActionGlow(userAction.slot,  0, 0, 0, 1) -- permanent blue
     userAction.slot = slot
     userAction.target = target
     userAction.button = button
     userAction.name = name
     userAction.icon = icon
-    local button = _G["BT4Button" .. userAction.slot]
-    ActionButton_ShowOverlayGlow(button)
+    
 end
 local userActionTimer = 'userAction'
 local actionHooks = {}
@@ -130,16 +127,3 @@ local function updateUserAction()
 end
 c.AttachBeforeUpdate(updateUserAction)
 -------------------------------------------------------------------------------
--- исправленеие зависающих стандартных желтых обводок проков
-c.AttachBeforeUpdate(function()
-    -- по выходу из боя
-    for i = 1, 120 do -- 12 x 10
-        -- для всех кнопок на панелях
-        local btn = _G['BT4Button' .. i]
-        if btn then
-            -- делаем сброс стандартной мигающей подсветки
-            ActionButton_HideOverlayGlow(btn)
-            ActionButton_HideOverlayGlow(btn)
-        end
-    end
-end)
