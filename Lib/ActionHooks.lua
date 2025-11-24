@@ -44,43 +44,52 @@ end
 
 local function hookUseAction(slot, target, button)
     local name = c.GetSlotName(slot)
-    if not name then
-        return
-    end
+    -- похоже пустой слот
+    if not name then return end
     local icon = GetActionTexture(slot)
     local isMine = c.SlotIsPressed(slot)
+    -- нажат не руками
     if not isMine then return end
 
     local hook = actionHooks[name]
     if hook then
         c.MessageLog('', name, icon) -- hook
         hook(slot, target, button)
+        -- если уже есть обработчик, игнорируем
         return
     end
-
+    -- тут бы неплохо проверить, а есть ли у слота вообще кд? Может это макрос без spell и или item которые не usable
     local left = c.GetSlotCooldownLeft(slot)
     local gcdLeft, gcdDuration = c.GetSpellCooldownLeft(c.gcdSpellId)
     local onGcd = left > 0 and (left == gcdLeft)
     local inCast, castLeft = c.UnitCasting('player')
     if not inCast then
+        -- спел не на гкд
         if not onGcd then return end
+        -- было нажатие и сразу пошло гкд, вероятно нажатие его и запустило
         local ownGCD = onGcd and (gcdDuration - gcdLeft) < c.advance
+        -- вероятно спелл и запустил гкд
         if ownGCD then return end
     end
+    -- а можно ли нажать?
     local isUsable, notEnoughMana = IsUsableAction(slot)
     if not isUsable or notEnoughMana then
         c.MessageLog(notEnoughMana and '!mana' or '!usable', name, icon)
         return
     end
+    -- а что на счет дистанции?
     if ActionHasRange(slot) and IsActionInRange(slot, target) == 0 then
         c.MessageLog('!range', name, icon)
         return
     end
+    
     if userAction.slot ~= slot then
+        -- будем пытаться нажать следующим 
         userActionSet(slot, target, button, name, icon)
         c.TimerStart(userActionTimer, castLeft or 0)
         c.MessageLog('нажать?', name, icon)
     elseif inCast then
+        -- при повторном нажатии отменим текущий каст
         c.MessageLog('повтор -> стопкаст', name, icon)
         c.Command('/stopcasting')
     end
