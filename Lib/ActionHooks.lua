@@ -25,13 +25,12 @@ end
 local function userActionSet(slot, target, button, name, icon)
     userActionReset()
     if not slot then return end
-    c.ShowActionGlow(userAction.slot,  0, 0, 0, 1) -- permanent blue
     userAction.slot = slot
     userAction.target = target
     userAction.button = button
     userAction.name = name
     userAction.icon = icon
-    
+    c.ShowActionGlow(userAction.slot, 0, 1, 0.8431, 0) -- permanent blue
 end
 local userActionTimer = 'userAction'
 local actionHooks = {}
@@ -82,9 +81,9 @@ local function hookUseAction(slot, target, button)
         c.MessageLog('!range', name, icon)
         return
     end
-    
+
     if userAction.slot ~= slot then
-        -- будем пытаться нажать следующим 
+        -- будем пытаться нажать следующим
         userActionSet(slot, target, button, name, icon)
         c.TimerStart(userActionTimer, castLeft or 0)
         c.MessageLog('нажать?', name, icon)
