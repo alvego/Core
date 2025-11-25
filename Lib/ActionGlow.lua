@@ -6,54 +6,70 @@ local c = Core
 local type = type
 local GetTime = GetTime
 -------------------------------------------------------------------------------
-local function setGlowColor(button, r, g, b)
-    for i = 1, 6 do
-        local region = select(i, button.glow:GetRegions())
-        if region and region:GetObjectType() == "Texture" then
-            -- В шаблоне 3.3.5a обычно 2 текстуры отвечают за свечение:
-            -- первая — внешний ободок, вторая — внутренний блик
-            region:SetVertexColor(r, g, b) -- чисто зеленый
-            -- или: 1, 0.3, 0.3 — мягкий красный
-            -- или: 1, 0, 0.7 — красно-фиолетовый
-        end
-    end
-end
+local spellAlertIcon = [[Interface\SpellActivationOverlay\IconAlert]]
+local function createCustomGlow(parent)
+    local f = CreateFrame("Frame", nil, parent)
+    f:SetAllPoints(parent) -- будет растягиваться под кнопку
+    f:Hide()
 
-local glowOverlap = 0.3 --  на 30%  выступает наружу
-local function createGlow(button)
-    button.glow = button.glow or CreateFrame("Frame", nil, UIParent, "ActionBarButtonSpellActivationAlert")
-    local frameWidth, frameHeight = button:GetSize()
-    button.glow:SetParent(button)
-    button.glow:ClearAllPoints()
-    --Make the height/width available before the next frame:
-    local scale = 1 + glowOverlap * 2 -- 100% и 2 стороны по glowOverlap %
-    button.glow:SetSize(frameWidth * scale, frameHeight * scale)
-    button.glow:SetPoint("TOPLEFT", button, "TOPLEFT", -frameWidth * glowOverlap, frameHeight * glowOverlap)
-    button.glow:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", frameWidth * glowOverlap, -frameHeight * glowOverlap)
+    -- Размеры кнопки (нужны для правильного масштабирования текстур)
+    local w, h = parent:GetSize()
+
+    -- 1. outerGlow (большое золотое кольцо снаружи)
+    local outer = f:CreateTexture(nil, "ARTWORK")
+    outer:SetTexture(spellAlertIcon)
+    outer:SetTexCoord(0.00781250, 0.50781250, 0.27734375, 0.52734375)
+    outer:SetSize(w * 1.6, h * 1.6) -- чуть больше кнопки
+    outer:SetPoint("CENTER")
+    f.outerGlow = outer
+
+    -- 2. outerGlowOver (верхняя половина того же кольца, даёт яркость)
+    local outerOver = f:CreateTexture(nil, "ARTWORK", nil, 1)
+    outerOver:SetTexture(spellAlertIcon)
+    outerOver:SetTexCoord(0.00781250, 0.50781250, 0.53515625, 0.78515625)
+    outerOver:SetAllPoints(outer)
+    f.outerGlowOver = outerOver
+
+    -- Функции управления
+    f.ShowGlow = function(self)
+        self:Show()
+    end
+
+    f.HideGlow = function(self)
+        self:Hide()
+    end
+
+    -- Если вдруг понадобится поменять цвет (например на синий/красный для разных проков)
+    f.SetColor = function(self, r, g, b, a)
+        a = a or 1
+        self.outerGlow:SetVertexColor(r, g, b, a)
+        self.outerGlowOver:SetVertexColor(r, g, b, a)
+    end
+
+    return f
 end
 
 local function showGlow(button, r, g, b)
-    if not button.glow then
-        -- создаем первый раз
-        createGlow(button)
+    if not button then return end
+
+    -- Создаём один раз
+    if not button.customGlow then
+        button.customGlow = createCustomGlow(button)
     end
 
-    -- Зеленый цвет по умолчанию (можно любой)
-    setGlowColor(button, r or 0, g or 1, b or 0)
-
-    if not button.glow:IsShown() then
-        -- показываем, если скрыт
-        button.glow:Show()
+    if r or g or b then
+        button.customGlow:SetColor(r, g, b)
+    else
+        button.customGlow:SetColor(0, 1, 0) -- синий
     end
+
+    button.customGlow:ShowGlow()
 end
 
 local function hideGlow(button)
-    -- если нет, прятать нечего
-    if not button.glow then return end
-    -- если спрятан, то уже нечего делать
-    if not button.glow:IsShown() then return end
-    -- прячем
-    button.glow:Hide()
+    if button and button.customGlow then
+        button.customGlow:HideGlow()
+    end
 end
 
 local function getButton(slot)
