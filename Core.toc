@@ -1,5 +1,5 @@
 ## Interface: 30300
-## Title: |cff00ff00Core|r
+## Title: Core
 ## Notes: Use iLich Lenin Power
 ## Author: Unknown Coder
 ## Version: 2.0
@@ -31,6 +31,7 @@ Lib\SpellError.lua
 Lib\SpellStore.lua
 Lib\SpellRange.lua
 Lib\SpellKick.lua
+Lib\SpellBusy.lua
 Lib\Auras.lua
 Lib\Dotes.lua
 Lib\Objects.lua

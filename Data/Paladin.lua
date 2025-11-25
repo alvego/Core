@@ -341,25 +341,20 @@ local function updateProto()
         -------------------------------------------------------------------------------
         reason, action, unit = 'Нужно обновить стойку', isTank and 'Аура благочестия' or 'Аура воздаяния', 'player'
         if c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
-            c.Log('#могу прожать стойку')
             -- Могу прожать стойку
             local stance = c.UnitAuraByID(unit, stanceAuras, true)
             if stance then
-                c.Log('#на мне ecть моя стойка (аура палладина)')
                 -- на мне ecть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
                 if stance == spell['Аура воина Света'] and not c.HasAuraByID(unit, spell[action]) then
-                    c.Log('#но она не атуальна, чужой атуальной нет')
                     c.DoSpell(reason, action, unit) --  переключаемся в атуальную стойку
                     return reason
                 end
             else
-                c.Log('#на мне нет моей стойки (ауры палладина)')
                 -- на мне нет моей стойки (ауры палладина)
                 stance = getAvailableStance(unit) -- что можно включить?
                 if stance then
                     action = spell[stance]
-                    c.Log('#что можно включить?', action)
                     c.DoSpell(reason, action, unit)
                     return reason
                 end

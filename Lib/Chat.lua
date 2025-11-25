@@ -144,6 +144,9 @@ end
 -- Функция для вывода отладочных сообщений
 local function debugChat(msg, title, icon, r, g, b)
     if msg == nil then return end
+    if not c.flags.fullLog and string.sub(msg, 1, 1) == '#' then
+        return -- игнорируем комментарии
+    end
     local chatFrame = getDebugChatFrame()
     if not chatFrame then
         chatFrame = DEFAULT_CHAT_FRAME --failback
@@ -165,9 +168,6 @@ end
 function c.Message(msg, title, icon, r, g, b)
     msg = tostring(msg)
     title = tostring(title)
-    if not c.flags.fullLog and string.sub(msg, 1, 1) == '#' then
-        return -- игнорируем комментарии
-    end
     if not c.IsChanged('Message', msg .. title) then
         return
     end

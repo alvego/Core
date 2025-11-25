@@ -35,7 +35,7 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
                 c.Command('/cleartarget')
                 c.Log('#сброс цели')
             elseif c.UnitCasting() or SpellIsTargeting() then
-                c.CastStop()
+                c.Command('/stopcasting')
                 c.Log('#отмена каста')
             end
         else

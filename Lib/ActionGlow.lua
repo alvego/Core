@@ -57,10 +57,9 @@ local function hideGlow(button)
 end
 
 local function getButton(slot)
-    if type(slot) == "string" then slot = c.GetSlot(slot) end
-    if not slot then return end
-    local button = _G["BT4Button" .. slot]
-    return button
+    if type(slot) == "string" then slot = c.GetSlot(slot, true) end
+    if type(slot) ~= 'number' or slot <= 0 then return end
+    return _G["BT4Button" .. slot]
 end
 
 function c.ShowActionGlow(slot, interval, r, g, b)
@@ -87,9 +86,15 @@ function c.HideActionGlow(slot)
     hideGlow(button)
 end
 
-function c.HighlightActionSlot(slot)
-    --print('|cffaaFFaa' .. slot .. '|r')
-    c.ShowActionGlow(slot, 2) -- 2 sec
-end
+-------------------------------------------------------------------------------
+hooksecurefunc(c, 'Spell', function(spell, ...)
+    local slot = c.GetSlot(spell, true)
+    if type(slot) ~= 'number' or slot <= 0 then return end
+    c.ShowActionGlow(slot, 2)
+end)
 
+hooksecurefunc(c, 'Action', function(slot, ...)
+    if type(slot) ~= 'number' or slot <= 0 then return end
+    c.ShowActionGlow(slot, 2)
+end)
 -------------------------------------------------------------------------------

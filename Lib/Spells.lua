@@ -16,6 +16,7 @@ local div1000 = 0.001 -- 1 / 1000
 local type = type
 local tostring = tostring
 local SpellHasRange = SpellHasRange
+local GetSpellIDByName = GetSpellIDByName
 -------------------------------------------------------------------------------
 function c.UnitCasting(unit)
     unit = unit or 'player'
@@ -37,20 +38,28 @@ end
 -------------------------------------------------------------------------------
 local spellToIdList = {}
 function c.GetSpellId(name, rank, skipError)
-    local spellGUID = name
+    local fullName = name
     if rank then
-        spellGUID = name .. rank
+        fullName = name .. " (" .. rank .. ")" -- ruRU формат
     end
-    local result = spellToIdList[spellGUID]
+    local result = spellToIdList[fullName]
     if nil == result then
-        result = 0
-        local link = GetSpellLink(name, rank)
-        if link then
-            result = result + link:match("spell:%d+"):match("%d+")
-            spellToIdList[spellGUID] = result
-        elseif not skipError then
-            c.Chat(WrapTextInColorCode('[' .. name .. '] не найден ID', 'ffff0000'))
+        if GetSpellIDByName then
+            result = GetSpellIDByName(fullName)
+        else
+            local link = GetSpellLink(name, rank)
+            if link then
+                result = tonumber(link:match("spell:%d+"):match("%d+") or 0)
+            end
         end
+
+        if type(result) ~= 'number' or result <= 0 then
+            result = 0
+            if not skipError then
+                c.Chat(WrapTextInColorCode('[' .. name .. '] не найден ID', 'ffff0000'))
+            end
+        end
+        spellToIdList[fullName] = result
     end
     return result
 end
@@ -83,6 +92,9 @@ function c.CanUseSpell(spell, unit)
     end
     if not c.IsReadySpell(spell) then
         return false, '!ready'
+    end
+    if c.IsBusySpell(spell) then
+        return false, '!busy'
     end
     return true
 end

@@ -15,6 +15,10 @@ local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
 local GetActionTexture = GetActionTexture
+local HasAction = HasAction
+local GetMacroSpell = GetMacroSpell
+local GetItemSpell = GetItemSpell
+local GetPetActionInfo = GetPetActionInfo
 -------------------------------------------------------------------------------
 function c.GetSlotName(slot)
     local name = nil
@@ -64,6 +68,29 @@ function c.GetSlotCooldownLeft(slot)
 end
 
 -------------------------------------------------------------------------------
+function c.GetActionSpell(slot)
+    if not HasAction(slot) then return nil end -- Слот 1-120 пустой
+
+    local actionType, id, subType, spellID = GetActionInfo(slot)
+    if not actionType then return nil end
+
+    if spellID then return select(1, GetSpellInfo(spellID)) end
+
+    local spellName = nil
+    if actionType == 'macro' then
+        spellName = GetMacroSpell(id)
+    elseif actionType == 'item' then
+        local itemName = GetItemInfo(id)
+        if itemName then
+            spellName = GetItemSpell(itemName)
+        end
+    elseif actionType == 'pet' then
+        spellName = GetPetActionInfo(id) -- id как pet slot index
+    end
+    return spellName
+end
+
+-------------------------------------------------------------------------------
 function c.CanUseSlot(slot, unit)
     if type(slot) ~= 'number' or slot == nil or slot == 0 or slot > 120 then
         return false, '!slot ' .. tostring(slot)
@@ -78,20 +105,23 @@ function c.CanUseSlot(slot, unit)
     if c.GetSlotCooldownLeft(slot) > c.latency then
         return false, '!ready'
     end
+    if c.IsBusySpell(c.GetActionSpell(slot)) then
+        return false, '!busy'
+    end
     return true, ''
 end
 
 -------------------------------------------------------------------------------
-function c.GetSlot(action)
+function c.GetSlot(action, skipError)
     if action == 'none' then
         return 0
     end
-    if not action then
+    if not action and not skipError then
         c.Error('Неверное действие. Используй none для бездействия.');
         return 0
     end
     local slot = actions[action]
-    if not slot then
+    if not slot and not skipError then
         c.Error('Не могу найти на панели [' .. action .. ']');
         return 0
     end

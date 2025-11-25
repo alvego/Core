@@ -97,7 +97,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
             if skinTarget then
                 local name = UnitName(skinTarget)
                 if name then
-                    c.Log('#skin ignore ', name)
+                    c.Log('#skin ignore error ', name)
                     skinFilterList[name] = true
                 end
             end
@@ -290,7 +290,7 @@ local function waitForFishing()
 
     if fish.run and not fish.bobber and not fish.guid then
         c.MessageLog('#завис combat log', fish.spell, fish.icon)
-        --c.CastStop()
+        --c.Command('/stopcasting')
     end
 
     if fish.bobber and not tContains(lootList, fish.bobber) then
@@ -299,7 +299,7 @@ local function waitForFishing()
         if c.ReadByte(ptr, 188) ~= 1 then return end
         c.MessageLog('#подсекаем', fish.spell, fish.icon)
         lootUnit(fish.bobber, UnitName(fish.bobber))
-        c.CastStop()
+        c.Command('/stopcasting')
         fish.bobber = nil
         fish.guid = nil
         fish.run = false
@@ -329,7 +329,7 @@ local function waitForCorpseSkin()
     if not c.IsSpellInRange(skinSpell, corpse) then
         local name = UnitName(corpse)
         if name then
-            c.Log('#skin ignore ', name)
+            c.Log('#skin ignore by !can ', name)
             skinFilterList[name] = true
         end
         return true

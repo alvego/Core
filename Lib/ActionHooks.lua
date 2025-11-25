@@ -10,6 +10,7 @@ local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
+local GetMacroSpell = GetMacroSpell
 -------------------------------------------------------------------------------
 local userAction = {}
 local function userActionReset()
@@ -20,9 +21,10 @@ local function userActionReset()
     userAction.button = nil
     userAction.name = nil
     userAction.icon = nil
+    userAction.spellName = nil
 end
 
-local function userActionSet(slot, target, button, name, icon)
+local function userActionSet(slot, target, button, name, icon, spellName)
     userActionReset()
     if not slot then return end
     userAction.slot = slot
@@ -30,7 +32,8 @@ local function userActionSet(slot, target, button, name, icon)
     userAction.button = button
     userAction.name = name
     userAction.icon = icon
-    c.ShowActionGlow(userAction.slot, 0, 1, 0.8431, 0) -- permanent blue
+    userAction.spellName = spellName
+    c.ShowActionGlow(userAction.slot, 0, 1, 0.8431, 0) -- permanent gold
 end
 local userActionTimer = 'userAction'
 local actionHooks = {}
@@ -57,6 +60,11 @@ local function hookUseAction(slot, target, button)
         -- если уже есть обработчик, игнорируем
         return
     end
+
+    -- макрос без спела
+    local spellName = c.GetActionSpell(slot)
+    if not spellName then return end
+
     -- тут бы неплохо проверить, а есть ли у слота вообще кд? Может это макрос без spell и или item которые не usable
     local left = c.GetSlotCooldownLeft(slot)
     local gcdLeft, gcdDuration = c.GetSpellCooldownLeft(c.gcdSpellId)
@@ -84,7 +92,7 @@ local function hookUseAction(slot, target, button)
 
     if userAction.slot ~= slot then
         -- будем пытаться нажать следующим
-        userActionSet(slot, target, button, name, icon)
+        userActionSet(slot, target, button, name, icon, spellName)
         c.TimerStart(userActionTimer, castLeft or 0)
         c.MessageLog('нажать?', name, icon)
     elseif inCast then
@@ -100,13 +108,13 @@ local function updateUserAction()
     if userAction.slot == nil then
         return
     end
-    if c.TimerMore(userActionTimer, 2) then
-        c.Message('не успели!', userAction.name, userAction.icon)
+    if c.TimerLess(userAction.spellName, 0.5) then
+        c.Message('прожали!', userAction.name, userAction.icon)
         userActionReset()
         return
     end
-    if not c.IsSpellNotUsed(userAction.name, 0.5) then
-        c.Message('прожали!', userAction.name, userAction.icon)
+    if c.TimerMore(userActionTimer, 2) then
+        c.Message('не успели!', userAction.name, userAction.icon)
         userActionReset()
         return
     end

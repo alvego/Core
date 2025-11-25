@@ -56,5 +56,4 @@ c.AttachActionHook('test', function()
 
     -- local x, y, z = c.UnitPosition('player')
     -- ChatFrame_OpenChat(c.ToStr(c.Round(x), c.Round(y), c.Round(z)))
-    -- c.HighlightActionSlot('Автоматическая атака')
 end)
