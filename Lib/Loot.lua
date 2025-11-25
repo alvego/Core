@@ -37,11 +37,11 @@ local skinTarget = nil
 local function resetTimers()
     if c.TimerStarted(lootTimer) then
         if c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
-        if c.TimerMore(lootTimer, 300) then wipe(lootFilterList) end
+        if c.TimerMore(lootTimer, 30) then wipe(lootFilterList) end
     end
     if c.TimerStarted(skinTimer) then
         if c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
-        if c.TimerMore(skinTimer, 300) then wipe(skinFilterList) end
+        if c.TimerMore(skinTimer, 30) then wipe(skinFilterList) end
     end
 end
 -------------------------------------------------------------------------------
