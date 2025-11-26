@@ -180,6 +180,9 @@ function c.UnitInfo(unit)
     if ctype then
         name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
     end
+    if UnitIsDead(unit) then
+        name = name .. WrapTextInColorCode(' труп', 'ff333333')
+    end
     return name
 end
 

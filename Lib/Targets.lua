@@ -83,7 +83,7 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     if not UnitExists(unit) then return end
     lastGUID = UnitGUID(unit)
     if lastGUID == searchLastGuid then return end
-    c.MessageLog(format('#manal: %s', c.UnitInfo(unit)), title, icon)
+    c.MessageLog(format('#само %s', c.UnitInfo(unit)), title, icon)
 end)
 
 local function initSearch(maxDistance, inViewfield)
@@ -244,7 +244,23 @@ end
 -------------------------------------------------------------------------------
 local function searchSelect(tar)
     if not tar then return false end
-    c.Message(format('#auto: %s', UnitName(tar)), title, icon)
+    c.Message(format('#авто: %s', c.UnitInfo(tar)), title, icon)
+    c.MessageLog(
+        format('#бой: игрок - %s, цель - %s',
+            st.combatLock and 'да' or 'нет',
+            UnitAffectingCombat(tar) and 'да' or 'нет'
+        ),
+        title, icon)
+    c.MessageLog(
+        format('#comabtMode: %s',
+            st.combatMode and 'да' or 'нет'
+        ),
+        title, icon)
+    c.MessageLog(
+        format('#attack: %s',
+            st.attack and 'да' or 'нет'
+        ),
+        title, icon)
     searchLastGuid = UnitGUID(tar)
     c.Command('/target ' .. tar)
     return true
@@ -274,7 +290,7 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent
     if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
     -- нас пытаются ударить
     if not (subEvent:match('_DAMAGE') or subEvent:match('_MISSED')) then return end
-    c.MessageLog(format('#info: %s - нас атакует', sourceName), title, icon)
+    c.MessageLog(format('#нас атакует: %s', sourceName), title, icon)
     c.TimerStart('combatTarget') -- повлияет на st.combatMode и выбор цели
 end)
 -------------------------------------------------------------------------------
