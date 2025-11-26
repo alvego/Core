@@ -238,3 +238,9 @@ function c.PrintTargetAuras() -- for debug
 end
 
 -------------------------------------------------------------------------------
+-- fix overlay error
+local ActionButton_AllOverlayAlphaUpdate = ActionButton_AllOverlayAlphaUpdate
+_G.ActionButton_AllOverlayAlphaUpdate = function(alpha)
+    if type(alpha) ~= 'number' then alpha = 0 end
+    ActionButton_AllOverlayAlphaUpdate(alpha)
+end
