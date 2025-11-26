@@ -75,14 +75,14 @@ local function updateEnhance()
         return reason
     end
 
-    reason, action, unit = 'АОЕшим или просто дамажим пока есть мана', 'Цепная молния', 'target'
+    reason, action, unit = 'АОЕшим или дамажим в одну цель при достаточном количестве маны', 'Цепная молния', 'target'
     if mana100 > 40 and c.CanGcdSpell(action, unit) and stacks > 4 then
         c.DoSpell(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Уплотняем ротацию', 'Молния', 'target'
-    if c.CanGcdSpell(action, unit) and stacks == 5 then
+    if mana100 <= 40 and c.CanGcdSpell(action, unit) and stacks == 5 then
         c.DoSpell(reason, action, unit)
         return reason
     end
