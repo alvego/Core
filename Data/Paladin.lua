@@ -172,9 +172,9 @@ end)
 
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
-    if not isLoaded then return end --
-    --return c.TelemetryRedBool('5M', not UnitExists('target') or c.IsSpellInRange('Молот праведника', 'target'))
-    return format('Dist: %.2f', UnitExists('target') and c.UnitDistance('player', 'target') or 0)
+    if not isLoaded then return end
+    return c.TelemetryRedBool('5M', not UnitExists('target') or c.IsSpellInRange('Молот праведника', 'target'))
+    --return format('Dist: %.2f', UnitExists('target') and c.UnitDistance('player', 'target') or 0)
 end)
 
 -------------------------------------------------------------------------------

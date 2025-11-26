@@ -184,7 +184,7 @@ c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
         itemTexture)
 end)
 -------------------------------------------------------------------------------
-local junkIcon = 'Interface\\Icons\\Spell_Mage_ConjuredManaBuns'
+local junkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
 function c.RemoveJunk()
     ClearCursor()
     local cnt = 0
@@ -207,7 +207,7 @@ function c.RemoveJunk()
 end
 
 -------------------------------------------------------------------------------
-local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
+local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 c.AttachEvent('MERCHANT_SHOW', function()
     ClearCursor()
     local sum = 0

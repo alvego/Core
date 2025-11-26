@@ -126,11 +126,11 @@ end
 c.AttachEvent('PLAYER_LOGIN', createDebugChatTab)
 
 -------------------------------------------------------------------------------
-local iconSuccess = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_green'
-local iconLog = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_black'
-local iconError = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_red'
-local iconEcho = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_orange'
-local iconMessage = 'Interface\\Icons\\Ability_Vehicle_ShellShieldGenerator'
+local iconSuccess = [[Interface\Icons\ability_vehicle_shellshieldgenerator_green]]
+local iconLog = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_black]]
+local iconError = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_red]]
+local iconEcho = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_orange]]
+local iconMessage = [[Interface\Icons\Ability_Vehicle_ShellShieldGenerator]]
 
 local function formatIcon(icon)
     return icon and '|T' .. icon .. ':24:24:0:0|t' or '       '

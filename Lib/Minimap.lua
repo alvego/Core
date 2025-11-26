@@ -37,7 +37,7 @@ button:SetFrameLevel(8)
 button:SetPoint('TOPRIGHT', Minimap, 'TOPRIGHT', 0, 0) -- Позиция (можно изменить, например, на 'BOTTOMRIGHT' для другого места)
 -- Фон кнопки (круглый, как у стандартных мини-карт кнопок)
 local bg = button:CreateTexture(nil, 'BACKGROUND')
-bg:SetTexture('Interface\\Minimap\\UI-Minimap-Background')
+bg:SetTexture([[Interface\Minimap\UI-Minimap-Background]])
 bg:SetAllPoints()
 bg:SetVertexColor(1, 1, 1, 0.6) -- Полупрозрачный фон
 -- Иконка кнопки (замените на вашу текстуру, если нужно)
@@ -48,13 +48,13 @@ icon:SetPoint('CENTER', button, 'CENTER', 0, 0) -- Легкий сдвиг дл�
 
 -- Добавьте это после создания highlight (или в конец создания текстур кнопки)
 local border = button:CreateTexture(nil, 'BORDER')
-border:SetTexture('Interface\\Minimap\\MiniMap-TrackingBorder')
+border:SetTexture([[Interface\Minimap\MiniMap-TrackingBorder]])
 border:SetSize(54, 54)                               -- Размер бордера (стандартный для WoW: больше кнопки для 'рамки')
 border:SetPoint('TOPLEFT', button, 'TOPLEFT', 1, -1) -- Сдвиг для центрирования бордера вокруг кнопки
 
 -- Хайлайт при наведении
 local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
-highlight:SetTexture('Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight')
+highlight:SetTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
 highlight:SetBlendMode('ADD')
 highlight:SetAllPoints()
 
@@ -75,10 +75,10 @@ end)
 button:SetScript('OnLeave', function()
   GameTooltip:Hide()
 end)
-local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
-local moveIcon = 'Interface\\Icons\\Spell_Priest_PathofDevout'
-local logIcon = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_white'
-local debugIcon = 'Interface\\Icons\\ability_vehicle_shellshieldgenerator_s_blue'
+local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
+local moveIcon = [[Interface\Icons\Spell_Priest_PathofDevout]]
+local logIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_white]]
+local debugIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_blue]]
 local flagFunc = function(btn)
   local flag = btn.value
   if not flag then return end
@@ -147,28 +147,22 @@ local menu = {
     { text = '', notCheckable = true, isSeparator = true },
     {
       text = 'Выкинуть хлам (junk) из сумок',
-      icon = 'Interface\\Icons\\Spell_Mage_ConjuredManaBuns',
+      icon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]],
       notCheckable = true,
       func = function() c.RemoveJunk() end
     },
     {
       text = 'Вывод аур цели',
-      icon = 'Interface\\Icons\\Ability_Priest_HeavanlyVoice',
+      icon = [[Interface\Icons\Ability_Priest_HeavanlyVoice]],
       notCheckable = true,
       func = function() c.PrintTargetAuras() end
     },
     {
       text = 'Перезагрузить UI',
-      icon = 'Interface\\Icons\\Ability_Creature_Cursed_04',
+      icon = [[Interface\Icons\Ability_Creature_Cursed_04]],
       notCheckable = true,
       func = function() ReloadUI() end
     },
-    -- {
-    --   text = 'Выйти из игры',
-    --   icon = 'Interface\\Icons\\Ability_Rogue_FeignDeath',
-    --   notCheckable = true,
-    --   func = function() ForceQuit() end
-    -- },
     { text = '', notCheckable = true, isSeparator = true },
     { text = 'Закрыть', notCheckable = true, func = function() end },
   }
@@ -187,8 +181,7 @@ local updateFlagMenu = function(flagMenu)
   end
 end
 
---local junkIcon = 'Interface\\Icons\\Ability_Warrior_OffensiveStance'
-local junkIcon = 'Interface\\TargetingFrame\\UI-RaidTargetingIcon_7'
+local junkIcon = [[Interface\TargetingFrame\UI-RaidTargetingIcon_7]]
 local junkFunc = function(btn)
   if not c.db.junk then return end
   local itemName = btn.value
@@ -271,6 +264,4 @@ button:EnableMouse(true)
 button:RegisterForDrag('LeftButton')
 button:SetScript('OnDragStart', function(self) self:StartMoving() end)
 button:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
-
--- Чтобы скрыть/показать кнопку, если нужно: button:Hide() или button:Show()
 -------------------------------------------------------------------------------

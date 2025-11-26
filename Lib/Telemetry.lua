@@ -15,7 +15,7 @@ frame:ClearAllPoints()
 frame:SetHeight(10)
 frame:SetWidth(10)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
-frame.text:SetFont("Fonts\\ARIALN.TTF", 10) -- Альтернативный шрифт
+frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
 frame.text:SetAllPoints()
 frame:SetPoint('TOPLEFT', 0, 0)
 frame:SetScale(1);

@@ -164,7 +164,7 @@ local function getNearCorpse()
     return _corpse
 end
 -------------------------------------------------------------------------------
-local lootIcon = 'Interface\\Icons\\Ability_Racial_PackHobgoblin'
+local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 local function lootUnit(unit, name)
     if tContains(lootList, unit) then return end
 

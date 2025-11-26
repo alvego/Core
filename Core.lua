@@ -9,10 +9,11 @@ local type = type
 local tostring = tostring
 local error = error
 local setmetatable = setmetatable
+local format = format
 local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 c.name = ...
-c.icon = 'Interface\\AddOns\\' .. c.name .. '\\textures\\serp_molot_debug.blp'
+c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
 c.db = {}
 c.state = {}
 c.stateCache = {}

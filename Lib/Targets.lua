@@ -59,49 +59,33 @@ local searchLastGuid = nil
 -- c.DebugHook('TargetNearestPartyMember')
 -- c.DebugHook('TargetNearestRaidMember')
 -- c.DebugHook('SpellTargetUnit')
--- c.DebugHook('ClearTarget')
--- c.DebugHook('ClearFocus')
 
-
--- c.DebugHook('RunMacro')
--- c.DebugHook('RunMacroText')
--- c.DebugHook('SecureActionButton_OnClick')
-
--- hooksecurefunc('ChatEdit_ParseText', function(frame, ...)
---     c.Log('ChatEdit_ParseText', frame:GetText(), ...)
+-- hooksecurefunc('SpellStopCasting', function(...)
+--     c.Log('SpellStopCasting', ..., GetTime())
 -- end)
 
--- hooksecurefunc('ClearTarget', function(...)
---     c.Log('ClearTarget', ..., GetTime())
+-- hooksecurefunc('SpellStoTargeting', function(...)
+--     c.Log('SpellStopTargeting', ..., GetTime())
 -- end)
 
 -- hooksecurefunc('UnitIsCharmed', function(...)
 --     c.Log('UnitIsCharmed', ..., GetTime())
 -- end)
 
--- hooksecurefunc('SpellStopCasting', function(...)
---     c.Log('SpellStopCasting', ..., GetTime())
--- end)
 
--- hooksecurefunc('SpellStopTargeting', function(...)
---     c.Log('SpellStopTargeting', ..., GetTime())
--- end)
 
-c.DebugHook('RunMacro')
-c.DebugHook('RunMacroText')
-c.DebugHook('CastSpellByName')
-c.DebugHook('CastSpellByID')
-c.DebugHook('ClearTarget')
+local search = {}
+local title  = 'Цель'
+local icon   = [[Interface\Icons\Ability_Hunter_SniperShot]]
 
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then return end
     lastGUID = UnitGUID(unit)
+    if lastGUID == searchLastGuid then return end
+    c.MessageLog(format('#manal: %s', c.UnitInfo(unit)), title, icon)
 end)
 
-local search = {}
-local title  = 'ENEMY'
-local icon   = 'Interface\\Icons\\Ability_Hunter_SniperShot'
 local function initSearch(maxDistance, inViewfield)
     wipe(search)
     search.maxDistance = maxDistance
@@ -197,8 +181,9 @@ local enemy = {}
 local function initEnemy()
     wipe(enemy)
     enemy.uid = nil
-    enemy.dist = 99999
-    enemy.combat = false
+    enemy.dist = 9999
+    -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
+    enemy.combat = st.combatMode and not st.attack
     enemy.look = false
 end
 
@@ -259,7 +244,7 @@ end
 -------------------------------------------------------------------------------
 local function searchSelect(tar)
     if not tar then return false end
-    c.Message(format('нашел новую цель: %s', UnitName(tar)), title, icon)
+    c.Message(format('#auto: %s', UnitName(tar)), title, icon)
     searchLastGuid = UnitGUID(tar)
     c.Command('/target ' .. tar)
     return true
@@ -276,31 +261,20 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
 end
 
 -------------------------------------------------------------------------------
-local attackerGUID = nil -- автовыбор атакующих
-local function attackTracker(event, timestamp, subEvent,
-                             sourceGUID, sourceName, sourceFlags,
-                             destGUID, destName, destFlags, ...)
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
+                                                      sourceGUID, sourceName, sourceFlags,
+                                                      destGUID, destName, destFlags, ...)
+    if not st.combatLock then return end -- только в бою
+    if st.combatMode then return end     -- если нет цели
+    -- только направленные на меня
+    if not sourceGUID or destGUID ~= st.playerGUID then return end
     -- Источник события - неодушевленный объект, ловушка, тотем, пропускаем
     if bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_OBJECT) ~= 0 then return end
     -- фильтр для игнорирования событий с участием союзников, чтобы фокусировался на боевых действиях против врагов.
     if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then return end
-    if not sourceGUID or destGUID ~= st.playerGUID then return end
+    -- нас пытаются ударить
     if not (subEvent:match('_DAMAGE') or subEvent:match('_MISSED')) then return end
-    --c.Log('#нас атакуют -', sourceName)
-    attackerGUID = sourceGUID -- нас атакуют
-end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', attackTracker)
-
-
-c.AttachBeforeUpdate(function()
-    if not attackerGUID then return end
-    attackerGUID = nil -- сброс, чтоб не подлипало
-    if c.Paused() then return end
-    local reason = st.invalidTarget
-    if not reason and not st.combatTarget then reason = 'target не в бою' end
-    if not reason then return end
-    c.MessageLog(c.ToStr('#выбор цели, reason:', reason))
-    c.SearchTarget(false, 40, false)
+    c.MessageLog(format('#info: %s - нас атакует', sourceName), title, icon)
+    c.TimerStart('combatTarget') -- повлияет на st.combatMode и выбор цели
 end)
-
 -------------------------------------------------------------------------------
