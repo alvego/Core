@@ -90,7 +90,10 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode then
             c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) -- enable by default
-            c.ImmediatelyNextUpdate()                                          -- не делаем паузы после выбора цели
+            -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
+            c.ImmediatelyNextUpdate()
+            -- выходим так как нужно обновить state
+            return '#выбираем новую цель, причина: ' .. st.invalidTarget
         end
         return '#' .. st.invalidTarget
     end

@@ -276,7 +276,7 @@ function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в U
     );
 end
 
-UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+--UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
 -------------------------------------------------------------------------------
 function c.LogWhatHappend(msg, skipLogging)
     if not msg then
