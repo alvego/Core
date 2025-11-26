@@ -86,6 +86,16 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     c.MessageLog(format('#само %s', c.UnitInfo(unit)), title, icon)
 end)
 
+
+
+c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
+    function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+             destFlags, ...)
+        if subEvent == 'UNIT_DIED' and lastGUID == destGUID then
+            c.TimerReset('attack')
+        end
+    end)
+
 local function initSearch(maxDistance, inViewfield)
     wipe(search)
     search.maxDistance = maxDistance
