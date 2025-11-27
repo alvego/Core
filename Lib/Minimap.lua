@@ -80,6 +80,7 @@ local moveIcon = [[Interface\Icons\Spell_Priest_PathofDevout]]
 local logIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_white]]
 local debugIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_blue]]
 local delJunkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
+local autoLookIcon = [[Interface\Icons\Ability_Hunter_SniperShot]]
 local flagFunc = function(btn)
   local flag = btn.value
   if not flag then return end
@@ -143,6 +144,15 @@ local menu = {
       text = 'Aвтоудаление хлама',
       value = 'autoDelJunk',
       icon = delJunkIcon,
+      func = flagFunc,
+      checked = true,
+      notCheckable = false,
+      isNotRadio = true
+    },
+    {
+      text = 'Aвтоповорот к цели',
+      value = 'autoLook',
+      icon = autoLookIcon,
       func = flagFunc,
       checked = true,
       notCheckable = false,

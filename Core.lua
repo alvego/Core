@@ -29,6 +29,7 @@ local flags = { -- defauts
     move = false,
     fullLog = false,
     autoDelJunk = false,
+    autoLook = false
 }
 
 c.flags = {} -- metatable linked with db

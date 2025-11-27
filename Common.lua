@@ -96,6 +96,8 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
             return '#выбираем новую цель, причина: ' .. st.invalidTarget
         end
         return '#' .. st.invalidTarget
+    elseif c.flags.autoLook and st.combatMode then
+        c.TurnToUnit('target')
     end
 
     if not st.attack and not st.combatTarget and not st.autoattack then
