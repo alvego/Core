@@ -1,60 +1,180 @@
 -------------------------------------------------------------------------------
 -- By by Unknown Coder
 -------------------------------------------------------------------------------
-local c = Core
-local st = c.state
+local c                     = Core
+local st                    = c.state
 -------------------------------------------------------------------------------
-local GetLootMethod = GetLootMethod
-local GetCVar = GetCVar
-local UnitExists = UnitExists
-local UnitIsDead = UnitIsDead
-local UnitIsPlayer = UnitIsPlayer
-local UnitIsTapped = UnitIsTapped
-local UnitIsTappedByPlayer = UnitIsTappedByPlayer
-local UnitCreatureType = UnitCreatureType
-local LootFrame = LootFrame
-local CloseLoot = CloseLoot
-local GetLootSlotInfo = GetLootSlotInfo
-local GetNumLootItems = GetNumLootItems
-local LootSlot = LootSlot
-local tinsert = tinsert
-local wipe = wipe
-local tContains = tContains
-local math_random = math.random
+local GetLootMethod         = GetLootMethod
+local GetCVar               = GetCVar
+local UnitExists            = UnitExists
+local UnitIsDead            = UnitIsDead
+local UnitIsDeadOrGhost     = UnitIsDeadOrGhost
+local UnitIsPlayer          = UnitIsPlayer
+local UnitIsTapped          = UnitIsTapped
+local UnitIsTappedByPlayer  = UnitIsTappedByPlayer
+local GetSpellTexture       = GetSpellTexture
+local LootFrame             = LootFrame
+local CloseLoot             = CloseLoot
+local GetLootSlotInfo       = GetLootSlotInfo
+local GetNumLootItems       = GetNumLootItems
+local LootSlot              = LootSlot
+local GetLootSlotLink       = GetLootSlotLink
+local wipe                  = wipe
+local type                  = type
+local math_random           = math.random
 local CombatLogClearEntries = CombatLogClearEntries
+local GameTooltip           = GameTooltip
+local WorldFrame            = WorldFrame
+local WrapTextInColorCode   = WrapTextInColorCode
 -------------------------------------------------------------------------------
-local lootList = {}
-local lootTimer = 'lootTimer'
-local lootDist = 5
-local lootFilterList = {}
+local lootList              = {}
+local lootTimer             = 'lootTimer'
+local lootDist              = 5
+local lootFilterList        = {}
+local lootTitle             = 'Лутаем'
+local lootIcon              = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
+local lootTarget            = nil
 -------------------------------------------------------------------------------
-local skinList = {}
-local skinTimer = 'skinTimer';
-local skinDist = 8
-local skinFilterList = {}
-local skinTarget = nil
+local skinList              = {}
+local skinTimer             = 'skinTimer';
+local skinDist              = 8
+local skinFilterList        = {}
+local allowSkin             = false
+local skinTarget            = nil
+local skinSpell             = 'Снятие шкур'
+local skinIcon              = nil
+-------------------------------------------------------------------------------
+local maxTryCount           = 2
+-------------------------------------------------------------------------------
+c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+    allowSkin = IsUsableSpell(skinSpell)
+    if allowSkin then
+        skinIcon = GetSpellTexture(skinSpell)
+    end
+end)
+
+
+local function isLooting()
+    -- нет цели лута, не лутаем
+    if not lootTarget then return false end
+    -- есть цель и время ожидания не истекло, лутаем
+    if c.TimerLess(lootTimer, 0.5) then return true end
+    -- время ожидания окна лута истекло, сбрасываем цель, не луитаем
+    -- lootList[lootTarget] = true -- добавлем в список уже лутаных целей, чтоб не лутать повторно
+    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(lootTarget)), lootTitle,
+        lootIcon)
+    lootTarget = nil
+    return false
+end
+
+
+c.AttachEvent('LOOT_OPENED', function()
+    if lootTarget then
+        -- успешло полутали цель, у нее есть лут
+        lootList[lootTarget] = true -- добавлем в список уже лутаных целей, чтоб не лутать повторно
+        c.MessageLog(format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'), c.UnitInfo(lootTarget)), lootTitle,
+            lootIcon)
+        -- сбрасываем цель
+
+
+        for i = 1, GetNumLootItems() do
+            local texture, item, quantity, quality, locked = GetLootSlotInfo(i)
+            local link = GetLootSlotLink(i) or item
+            quantity = (type(quantity) == "number" and quantity > 1) and (" (" .. quantity .. ")") or ""
+            c.MessageLog('#добыча ' .. link .. quantity, lootTitle, texture)
+        end
+
+        lootTarget = nil
+    end
+end)
+
+local function isSkinning()
+    -- нет цели, свободны
+    if not skinTarget then return false end
+    -- есть цель и время ожидания не истекло, в процессе
+    if c.TimerLess(skinTimer, 2) then return true end
+    -- время ожидания спела истекло, сбрасываем цель, свободны
+    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача по времени', 'FF773A3A'), c.UnitInfo(skinTarget)),
+        skinSpell,
+        skinIcon)
+    skinTarget = nil
+    return false
+end
+
+local function onEvent(event, ...)
+    local source, spellName = select(1, ...)
+    if not skinTarget then return end
+    if source ~= 'player' then return end
+    if spellName ~= skinSpell then return end
+    if event == 'UNIT_SPELLCAST_SUCCEEDED' then
+        c.MessageLog(format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'), c.UnitInfo(skinTarget)), skinSpell,
+            skinIcon)
+        lootTarget = skinTarget
+        c.TimerStart(lootTimer)
+        skinList[skinTarget] = true -- добавлем в список уже освежеваных целей, чтоб не снимать повторно
+    else
+        c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(skinTarget)),
+            skinSpell,
+            skinIcon)
+        skinFilterList[skinTarget] = (skinFilterList[skinTarget] or 0) + 1
+        if skinFilterList[skinTarget] == maxTryCount then
+            c.MessageLog('#в игнор (ошибка): ' .. c.UnitInfo(skinTarget), skinSpell, skinIcon)
+            skinList[skinTarget] = true
+        end
+    end
+
+    skinTarget = nil
+end
+c.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
+c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', onEvent)
 -------------------------------------------------------------------------------
 local function resetTimers()
-    if c.TimerStarted(lootTimer) then
-        if c.TimerMore(lootTimer, 0.75) then wipe(lootList) end
-        if c.TimerMore(lootTimer, 30) then wipe(lootFilterList) end
+    if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 300) then
+        wipe(lootList)
+        wipe(lootFilterList)
     end
-    if c.TimerStarted(skinTimer) then
-        if c.TimerMore(skinTimer, 2.5) then wipe(skinList) end
-        if c.TimerMore(skinTimer, 30) then wipe(skinFilterList) end
+    if c.TimerStarted(skinTimer) and c.TimerMore(skinTimer, 300) then
+        wipe(skinList)
+        wipe(skinFilterList)
     end
 end
 -------------------------------------------------------------------------------
-local allowSkin = false
-local skinSpell = 'Снятие шкур'
-c.AttachEvent('PLAYER_ENTERING_WORLD', function()
-    allowSkin = IsUsableSpell(skinSpell)
+
+-------------------------------------------------------------------------------
+local hasSkinTooltip = c.GetCachedFunc(function(unit)
+    -- Проверка подсказки: наличие текста "Можно снять шкуру" и что он не красный (уровень профессии достаточен)
+    if GameTooltip:IsShown() then return false end -- занят тултип
+    GameTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+    GameTooltip:SetUnit(unit)
+    local numLines = GameTooltip:NumLines()
+    for i = 1, numLines do
+        local tipText = _G["GameTooltipTextLeft" .. i]:GetText()
+        if tipText and string.find(tipText, "Можно снять шкуру") then
+            local r, g, b = _G["GameTooltipTextLeft" .. i]:GetTextColor()
+            GameTooltip:Hide()
+            -- Красный текст: g ~0.1-0.2; белый/желтый/зеленый: g > 0.5
+            -- Возвращаем true, если НЕ красный (уровень профессии ок)
+            return g > 0.5
+        end
+    end
+    GameTooltip:Hide()
+    return false
 end)
 -------------------------------------------------------------------------------
 local canLoot = c.GetCachedFunc(function(unit)
-    local ptr = c.UnitPtr(unit)
-    if c.ReadByte(ptr, 168) == 0 then return false end
-    if (lootFilterList[unit] or 0) >= 3 then return false end
+    if lootList[unit] then return false end
+    if skinList[unit] then return false end
+    if (lootFilterList[unit] or 0) >= maxTryCount then return false end
+    -- если далеко
+    if c.UnitDistance('player', unit) > lootDist then
+        -- проверим, стоит ли идти?
+        -- иногда проверка дает ложное срабатывание
+        -- если говорит что можнно лутануть, то 100%, что это верно
+        -- если говорит что нельзя лутануть, то 3%, что это верно
+        -- поэтому используем только, чтоб проверить, стоит ли идти
+        if c.ReadByte(c.UnitPtr(unit), 168) == 0 then return false end
+    end
+    if hasSkinTooltip(unit) then return false end
     return true
 end)
 -------------------------------------------------------------------------------
@@ -65,74 +185,34 @@ local function checkCorpseForLoot(unit)
     if UnitIsPlayer(unit) then return end
     if c.UnitDistance('player', unit) > lootDist then return end -- so far
     if not canLoot(unit) then return end                         -- can't loot
-    if tContains(lootList, unit) then return end
-    if tContains(skinList, unit) then return end
     return unit
 end
 -------------------------------------------------------------------------------
--- c.TestLoot = function()
---     local unit = c.GetUnitID('target')
---     if not UnitExists(unit) then return '!exists' end
---     if not UnitIsDead(unit) then return '!dead' end
---     if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then return '!tapped' end
---     if UnitIsPlayer(unit) then return 'player' end
---     if c.UnitDistance('player', unit) > lootDist then return 'dist > 5' end -- so far
-
---     local ptr = c.UnitPtr(unit)
---     if c.ReadByte(ptr, 168) == 0 then return '!canLoot' end
---     if (lootFilterList[unit] or 0) >= 3 then return 'lootFilterList ' .. lootFilterList[unit] end
---     -- can't loot
---     if tContains(lootList, unit) then return 'in lootList' end
---     if tContains(skinList, unit) then return 'in skinList' end
---     return 'ok'
--- end
-
--------------------------------------------------------------------------------
-
-local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
-                                destFlags, ...)
-    if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
-        local message = select(4, ...)
-        if message == 'С этого существа нельзя снять шкуру.' then
-            if skinTarget then
-                local name = UnitName(skinTarget)
-                if name then
-                    c.Log('#skin ignore error ', name)
-                    skinFilterList[name] = true
-                end
-            end
-        end
-    end
-end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
--------------------------------------------------------------------------------
-
-local ignoreSkinTypes = {
-    'Гуманоид',
-    'Существо',
-    'Элементаль',
-    'Великан',
-    'Механизм',
-    'Газовое облако',
-    'Тотем',
-    'Спутник',
-    'Не указано' }
 local canSkin = c.GetCachedFunc(function(unit)
-    local name = UnitName(unit)
-    if skinFilterList[name] then return false end
-    local creatureType = UnitCreatureType(unit)
-    if tContains(ignoreSkinTypes, creatureType) then return false end
-    if canLoot(unit) then return false end
+    if skinList[unit] then return false end
+    if (skinFilterList[unit] or 0) >= maxTryCount then return false end
+    if not hasSkinTooltip(unit) then return false end
     return true
 end)
+
+
 -------------------------------------------------------------------------------
 local function checkCorpseForSkin(unit)
     if not UnitExists(unit) then return end
-    if not UnitIsDead(unit) then return end
+    if not UnitIsDeadOrGhost(unit) then return end
     if UnitIsPlayer(unit) then return end
     if c.UnitDistance('player', unit) > skinDist then return end -- so far
     if not canSkin(unit) then return end                         -- can't skin
-    if tContains(skinList, unit) then return end
+    if skinList[unit] then return end
+    -- на нужном расстоянии, но сам спелл говорит обратное
+    if not c.IsSpellInRange(skinSpell, unit) then
+        skinFilterList[unit] = (skinFilterList[unit] or 0) + 1
+        if skinFilterList[unit] == maxTryCount then
+            c.MessageLog('#в игнор (спелл): ' .. c.UnitInfo(unit), skinSpell, skinIcon)
+            skinList[unit] = true
+        end
+        return
+    end
     return unit
 end
 
@@ -141,13 +221,10 @@ local maxDist = 40
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
     if not UnitExists(unit) then return end
-    if not UnitExists(unit) then return end
     if not UnitIsDead(unit) then return end
     if UnitIsPlayer(unit) then return end
-    local loot = not (
-        tContains(lootList, unit) or (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit))
-    ) and canLoot(unit)
-    local skin = allowSkin and not (loot or tContains(skinList, unit)) and canSkin(unit)
+    local loot = not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) and canLoot(unit)
+    local skin = allowSkin and not loot and canSkin(unit)
     if not (loot or skin) then return end
     if not c.UnitInLOS(unit) then return end
     local dist = c.UnitDistance('player', unit)
@@ -164,18 +241,21 @@ local function getNearCorpse()
     return _corpse
 end
 -------------------------------------------------------------------------------
-local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 local function lootUnit(unit, name)
-    if tContains(lootList, unit) then return end
-
-    --local uid = c.GetUnitID('target')
-
-    c.Message(name or c.UnitInfo(unit), 'Лутаем', lootIcon)
+    -- и так уже лутаем кого-то
+    -- if isLooting() then return end
+    -- -- уже полутан
+    -- if lootList[unit] then return end
+    c.Message(name or c.UnitInfo(unit), lootTitle, lootIcon)
     c.UnitClick(unit, true)
+    lootTarget = unit
     c.TimerStart(lootTimer)
-    tinsert(lootList, unit)
     -- попытки лута
     lootFilterList[unit] = (lootFilterList[unit] or 0) + 1
+    if lootFilterList[unit] == maxTryCount then
+        c.MessageLog('#в игнор (попытки):' .. (name or c.UnitInfo(unit)), lootTitle, lootIcon)
+        lootList[unit] = true
+    end
 end
 -------------------------------------------------------------------------------
 local function waitForLoot()
@@ -185,11 +265,15 @@ local function waitForLoot()
     if c.GetBagsFreeSlots() < 1 then return true end
     -- wow автолут отключен, дальше не идем
     if GetCVar('autoLootDefault') ~= '1' then return true end
-    -- открыт лут
+    -- полутали, ждем открытия лута
+    if isLooting() then return true end
+    -- свежуем, скоро будем дждать лута
+    if isSkinning() then return true end
+    -- открыт ли лут?
     local isOpenLoot = LootFrame:IsVisible()
-    c.TimerToggle('LootFrame', isOpenLoot) -- таймер идет пока открыт LootFrame
-
-    -- иначе может просто подвиснуть лут, бывает при клике одновременно с interact
+    -- таймер идет пока открыт LootFrame
+    c.TimerToggle('LootFrame', isOpenLoot)
+    -- может просто подвиснуть лут, бывает при клике одновременно с interact
     if isOpenLoot then
         if c.AutoPopup('станет персональным, если вы его поднимете.', 'ОК') then return true end
         -- если в группе и не freeforall, может быть окно item roll, так что ждем
@@ -198,7 +282,7 @@ local function waitForLoot()
         local IsLootLag = c.TimerStarted('LootFrame') and c.TimerMore('LootFrame', 0.5)
         -- если окно лута подвисло
         if IsLootLag then
-            c.Log('#подвисло окно лута')
+            c.MessageLog('#подвисло окно лута', lootTitle, lootIcon)
             for i = 1, GetNumLootItems() do
                 -- тогда лутаем вручную
                 if not select(5, GetLootSlotInfo(i)) then LootSlot(i) end
@@ -293,7 +377,7 @@ local function waitForFishing()
         --c.Command('/stopcasting')
     end
 
-    if fish.bobber and not tContains(lootList, fish.bobber) then
+    if fish.bobber and not lootList[fish.bobber] then
         c.MessageLog('#ждем клева...', fish.spell, fish.icon)
         local ptr = c.UnitPtr(fish.bobber)
         if c.ReadByte(ptr, 188) ~= 1 then return end
@@ -310,41 +394,28 @@ end
 
 -------------------------------------------------------------------------------
 local function waitForCorpseLoot()
-    if c.TimerLess('waitForCorpseLoot', 0.4) then return true end
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
     if not corpse then return false end
     lootUnit(corpse)
-    c.TimerStart('waitForCorpseLoot')
     return true
 end
 -------------------------------------------------------------------------------
 local function waitForCorpseSkin()
-    if c.TimerLess('waitForCorpseSkin', 0.8) then return true end
     if not st.still then return false end
     if not allowSkin then return false end
     -- ищем кого можно освежевать
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
     if not corpse then return false end
-    if not c.IsSpellInRange(skinSpell, corpse) then
-        local name = UnitName(corpse)
-        if name then
-            c.Log('#skin ignore by !can ', name)
-            skinFilterList[name] = true
-        end
-        return true
-    end
     c.DoSpell('Свежуем', skinSpell, corpse)
-    tinsert(skinList, corpse)
     skinTarget = corpse
     c.TimerStart(skinTimer)
-    c.TimerStart('waitForCorpseSkin')
     return true
 end
 -------------------------------------------------------------------------------
 local lastCorpse = nil
 local function waitForFindCorpse()
-    if c.TimerLess('waitForFindCorpse', 0.5) then return true end
+    if c.TimerLess('waitForFindCorpse', 1) then return true end
     if not c.flags.move or st.move then return false end
     if st.look then return false end
     if lastCorpse and UnitExists(lastCorpse) and (checkCorpseForLoot(lastCorpse) or checkCorpseForSkin(lastCorpse)) then return false end

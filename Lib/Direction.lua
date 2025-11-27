@@ -24,21 +24,21 @@ local function turnUpdate()
         turnUnit = nil
         if c.TimerStarted('TurnToUnit') then
             c.TimerReset('TurnToUnit')
-            --c.Log('endturn ', c.PlayerFacingTarget(turnUnit, 30))
         end
         return
     end
     if c.TimerLess('TurnToUnit', 0.3) then return end
-    c.LookAtUnit(turnUnit)
-    --c.Log('turn1')
+    c.LookAtUnit(UnitIsUnit(turnUnit, 'target') and 'target' or turnUnit)
+    --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
 
 function c.TurnToUnit(target)
-    if not target then target = 'target' end
+    if not target then
+        target = 'target'
+    end
     turnUnit = target
     turnUpdate()
-    --print('turnUnit', turnUnit)
     return turnUnit ~= nil -- поворачиваемся
 end
 
@@ -85,19 +85,30 @@ end
 ------------------------------------------------------------------------------------------------------------------
 local moveUnit = nil
 local maveMaxDist = nil
-local function moveEnd()
-    if not c.TimerStarted('PlayerMove') then return end
-    c.TimerReset('PlayerMove')
+
+local function getPointAhead(d)
+    local x, y, z = c.UnitPosition('player')
+    local facing = GetPlayerFacing()
+    local nx = x + d * math.cos(facing)
+    local ny = y + d * math.sin(facing)
+    local nz = z -- или скорректируй через TraceLine, если нужно
+    return nx, ny, nz
+end
+
+local function moveEnd(cond)
     moveUnit = nil
     maveMaxDist = nil
-    --c.Log('#пришли')
+    c.TimerReset('PlayerMove')
+    c.Log('#пришли', cond)
     if st.speed > 0 and not st.move then
-        --c.Log('#тормозим')
-        c.MoveTo(c.UnitPosition('player'))
+        c.Log('#тормозим')
+        c.MoveTo(getPointAhead(0.1))
     end
 end
 local function moveUpdate()
     -- не идем
+    if not moveUnit then return end
+
     if c.Paused()
         or not c.flags.move
         or st.move
@@ -106,8 +117,7 @@ local function moveUpdate()
         or not UnitExists(moveUnit)
         or not c.UnitInLOS('player', moveUnit)
     then
-        --c.Log('end cond')
-        moveEnd()
+        moveEnd('условия')
         return
     end
 
@@ -115,28 +125,39 @@ local function moveUpdate()
     local tx, ty, tz = c.UnitPosition(moveUnit)
     local dx, dy, dz = px - tx, py - ty, pz - tz
     local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
-    local d = 4 -- нет смысла подходить ближе
-    if dist < 5 or dist <= d or (maveMaxDist and dist > maveMaxDist) then
-        --c.Log('end dist')
-        moveEnd()
+    local d = st.combatMode and 4 or 2 -- нет смысла подходить ближе
+    if dist <= d then
+        moveEnd(format('ближе %dм.', d))
+        return
+    end
+    if maveMaxDist and dist > maveMaxDist then
+        moveEnd(format('дальше %dм.', d))
         return
     end
 
     local ratio = d / dist
     -- Ограничиваем, чтобы остаться на отрезке (опционально)
-    if ratio > 1 then ratio = 1 end
+    if ratio > 1 then
+        moveEnd(format('пришли ratio > 1 (%.3f) при d: %d', ratio, d))
+        return
+    end
     local x, y, z = tx + ratio * dx, ty + ratio * dy, tz + ratio * dz
 
-    -- поворачиваемся
 
-    if c.TurnToUnit(moveUnit) then
-        --c.Log('turn')
+    local delta = c.Distance(px, py, pz, x, y, z)
+    if delta < 1 then
+        moveEnd(format('пришли delta < 1 (%.3f) при d: %d', delta, d))
         return
     end
 
-    -- идем
     if c.TimerLess('PlayerMove', 0.5) then return end
-    --c.Log('move')
+    -- поворачиваемся
+    if c.TurnToUnit(moveUnit) then
+        c.Log('#поворачиваем к ', c.UnitInfo(moveUnit))
+        return
+    end
+    -- идем
+    c.Log('#идем к ', c.UnitInfo(moveUnit))
     c.MoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
@@ -145,6 +166,7 @@ c.AttachBeforeUpdate(moveUpdate)
 function c.MoveToUnit(target, maxDist)
     moveUnit = target
     maveMaxDist = maxDist
+    c.Log('#MoveToUnit: ', c.UnitInfo(moveUnit))
     -- идем
     moveUpdate()
     return moveUnit ~= nil

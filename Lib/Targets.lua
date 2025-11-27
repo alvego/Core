@@ -17,6 +17,7 @@ local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
 local UnitIsPlayer = UnitIsPlayer
+local WrapTextInColorCode = WrapTextInColorCode
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 -------------------------------------------------------------------------------
@@ -83,7 +84,7 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     if not UnitExists(unit) then return end
     lastGUID = UnitGUID(unit)
     if lastGUID == searchLastGuid then return end
-    c.MessageLog(format('#само %s', c.UnitInfo(unit)), title, icon)
+    c.MessageLog(format('#%s', c.UnitInfo(unit)), title, icon)
 end)
 
 
@@ -254,7 +255,7 @@ end
 -------------------------------------------------------------------------------
 local function searchSelect(tar)
     if not tar then return false end
-    c.Message(format('#авто: %s', c.UnitInfo(tar)), title, icon)
+    c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
     c.MessageLog(
         format('#бой: игрок - %s, цель - %s',
             st.combatLock and 'да' or 'нет',

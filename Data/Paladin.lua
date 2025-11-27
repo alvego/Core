@@ -173,8 +173,11 @@ end)
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if not isLoaded then return end
-    return c.TelemetryRedBool('5M', not UnitExists('target') or c.IsSpellInRange('Молот праведника', 'target'))
-    --return format('Dist: %.2f', UnitExists('target') and c.UnitDistance('player', 'target') or 0)
+
+    return c.TelemetryRedBool(
+        format('Dist: %dм.', UnitExists('target') and c.Round(c.UnitDistance('player', 'target')) or 0),
+        not UnitExists('target') or c.IsSpellInRange('Молот праведника', 'target')
+    )
 end)
 
 -------------------------------------------------------------------------------
@@ -221,8 +224,7 @@ local function checkCastTarget(target, action) -- unit for taunt
     if not UnitAffectingCombat(target) then return end
     if UnitIsTapped(target) and not UnitIsTappedByPlayer(target) then return end
     if not c.UnitCasting(target) then return end
-    if not c.IsSpellInRange(action, target) then return end
-    if not c.UnitInLOS('player', target) then return end
+    if not c.CanGcdSpell(action, target) then return end
     return target
 end
 -------------------------------------------------------------------------------
@@ -231,8 +233,7 @@ local function checkFinishTarget(target, action)
     if not UnitAffectingCombat(target) then return end
     if UnitIsTapped(target) and not UnitIsTappedByPlayer(target) then return end
     if not (c.UnitHealth100(target) < 19.9) then return end
-    if not c.IsSpellInRange(action, target) then return end
-    if not c.UnitInLOS('player', target) then return end
+    if not c.CanGcdSpell(action, target) then return end
     return target
 end
 
@@ -507,7 +508,7 @@ local function updateProto()
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Сало на троих', 'Щит мстителя', 'target'
-    if useMana and not st.gcd and c.CanSpell(action) then
+    if useMana and c.CanGcdSpell(action) then
         unit = c.FindValue(c.GetTargets(), checkCastTarget, action)
         if unit then
             c.DoSpell(reason, action, unit)
@@ -535,13 +536,13 @@ local function updateProto()
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Заполнитель', 'Щит праведности', 'target'
-    if useMana and c.CanGcdSpell(action) then
+    if useMana and c.CanGcdSpell(action, unit) then
         c.DoSpell(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Прям совсем нечего нажать, кидаем Сало', 'Щит мстителя', 'target'
-    if useMana and c.CanGcdSpell(action, unit) then
+    if useMana and c.CanGcdSpell(action, unit, 3) then
         c.DoSpell(reason, action, unit)
         return reason -- не частим
     end

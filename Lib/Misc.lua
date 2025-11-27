@@ -16,6 +16,7 @@ local UnitCreatureType = UnitCreatureType
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
+local UnitIsUnit = UnitIsUnit
 local GetCursorInfo = GetCursorInfo
 local ClearCursor = ClearCursor
 local StaticPopup1 = StaticPopup1
@@ -176,12 +177,17 @@ function c.UnitInfo(unit)
     name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
     local level = UnitLevel(unit)
     if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
+    if UnitIsUnit(unit, 'player') then return name end
     local ctype = UnitCreatureType(unit)
     if ctype then
         name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
     end
+    local d = c.UnitDistance('player', unit)
+    if d then
+        name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
+    end
     if UnitIsDead(unit) then
-        name = name .. WrapTextInColorCode(' труп', 'ff333333')
+        name = name .. WrapTextInColorCode('труп', 'ff333333')
     end
     return name
 end

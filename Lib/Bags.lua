@@ -13,13 +13,11 @@ local GetContainerItemInfo = GetContainerItemInfo
 local GetCoinTextureString = GetCoinTextureString
 local UseContainerItem = UseContainerItem
 local WrapTextInColorCode = WrapTextInColorCode
-local SecondsToTime = SecondsToTime
 local CanMerchantRepair = CanMerchantRepair
 local RepairAllItems = RepairAllItems
 local ItemRefTooltip = ItemRefTooltip
 local GameTooltip = GameTooltip
 local GetInventoryItemID = GetInventoryItemID
-local GetContainerItemLink = GetContainerItemLink
 local tContains = tContains
 -------------------------------------------------------------------------------
 function c.GetBagsFreeSlots()
@@ -130,7 +128,7 @@ local function isJunk(link, skipList)
             if itemSubType == 'Зелья' and (c.StrContains(itemName, 'лечебн') or c.StrContains(itemName, ' маны')) then
                 return checkItemMinLevel(itemMinLevel, itemSellPrice)
             end
-            if itemSubType == 'Еда и напитки' then
+            if itemSubType == 'Еда и напитки' or itemSubType == 'Свитки' then
                 return checkItemMinLevel(itemMinLevel, itemSellPrice)
             end
         end

@@ -214,6 +214,7 @@ end
 -- Функция для вывода сообщений об ошибках без спама
 function c.Error(msg, icon)
     if not c.IsChanged('Error', msg) then return end
+    c.EchoError(msg)
     debugChat(
         msg,
         'Ошибка',
@@ -276,7 +277,21 @@ function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в U
     );
 end
 
---UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+function c.EchoError(msg) -- Показ ошибки в UIErrorsFrame
+    if msg == nil then return end
+    msg = tostring(msg)
+    if not c.IsChanged('EchoError', msg) then return end
+    UIErrorsFrame:AddMessage(
+        msg,
+        RED_FONT_COLOR.r,
+        RED_FONT_COLOR.g,
+        RED_FONT_COLOR.b,
+        53,
+        2
+    );
+end
+
+UIErrorsFrame:UnregisterEvent('UI_ERROR_MESSAGE')
 -------------------------------------------------------------------------------
 function c.LogWhatHappend(msg, skipLogging)
     if not msg then

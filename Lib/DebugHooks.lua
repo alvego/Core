@@ -56,4 +56,7 @@ c.AttachActionHook('test', function()
 
     -- local x, y, z = c.UnitPosition('player')
     -- ChatFrame_OpenChat(c.ToStr(c.Round(x), c.Round(y), c.Round(z)))
+    --c.LookAtUnit('target')
+    --c.LookAtUnit(c.GetUnitID('target'))
+    --c.MoveTo(c.UnitPosition('player'))
 end)
