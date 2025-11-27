@@ -23,8 +23,7 @@ local wipe                  = wipe
 local type                  = type
 local math_random           = math.random
 local CombatLogClearEntries = CombatLogClearEntries
-local GameTooltip           = GameTooltip
-local WorldFrame            = WorldFrame
+local UIParent              = UIParent
 local WrapTextInColorCode   = WrapTextInColorCode
 -------------------------------------------------------------------------------
 local lootList              = {}
@@ -80,7 +79,7 @@ c.AttachEvent('LOOT_OPENED', function()
         for i = 1, GetNumLootItems() do
             local texture, item, quantity, quality, locked = GetLootSlotInfo(i)
             local link = GetLootSlotLink(i) or item
-            quantity = (type(quantity) == "number" and quantity > 1) and (" (" .. quantity .. ")") or ""
+            quantity = (type(quantity) == 'number' and quantity > 1) and (' (' .. quantity .. ')') or ''
             c.MessageLog('#добыча ' .. link .. quantity, lootTitle, texture)
         end
 
@@ -139,25 +138,23 @@ local function resetTimers()
     end
 end
 -------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 local hasSkinTooltip = c.GetCachedFunc(function(unit)
-    -- Проверка подсказки: наличие текста "Можно снять шкуру" и что он не красный (уровень профессии достаточен)
-    if GameTooltip:IsShown() then return false end -- занят тултип
-    GameTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-    GameTooltip:SetUnit(unit)
-    local numLines = GameTooltip:NumLines()
+    local tooltip = SkinCheckTooltip or
+        CreateFrame('GameTooltip', 'SkinCheckTooltip', UIParent, 'GameTooltipTemplate')
+    -- Проверка подсказки: наличие текста 'Можно снять шкуру' и что он не красный (уровень профессии достаточен)
+    tooltip:ClearLines()
+    tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+    tooltip:SetUnit(unit)
+    local numLines = tooltip:NumLines()
     for i = 1, numLines do
-        local tipText = _G["GameTooltipTextLeft" .. i]:GetText()
-        if tipText and string.find(tipText, "Можно снять шкуру") then
-            local r, g, b = _G["GameTooltipTextLeft" .. i]:GetTextColor()
-            GameTooltip:Hide()
+        local tipText = _G['GameTooltipTextLeft' .. i]:GetText()
+        if tipText and string.find(tipText, 'Можно снять шкуру') then
+            local r, g, b = _G['GameTooltipTextLeft' .. i]:GetTextColor()
             -- Красный текст: g ~0.1-0.2; белый/желтый/зеленый: g > 0.5
             -- Возвращаем true, если НЕ красный (уровень профессии ок)
             return g > 0.5
         end
     end
-    GameTooltip:Hide()
     return false
 end)
 -------------------------------------------------------------------------------
