@@ -294,7 +294,7 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent
     if not st.combatLock then return end -- только в бою
     if st.combatMode then return end     -- если нет цели
     -- только направленные на меня
-    if not sourceGUID or destGUID ~= st.playerGUID then return end
+    if not sourceName or not sourceGUID or destGUID ~= st.playerGUID then return end
     -- Источник события - неодушевленный объект, ловушка, тотем, пропускаем
     if bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_OBJECT) ~= 0 then return end
     -- фильтр для игнорирования событий с участием союзников, чтобы фокусировался на боевых действиях против врагов.

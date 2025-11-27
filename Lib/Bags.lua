@@ -163,7 +163,7 @@ GameTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 -------------------------------------------------------------------------------
 c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
-    if button ~= "MiddleButton" then return end
+    if button ~= 'MiddleButton' then return end
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
     if isJunk(link, true) then return end
@@ -182,6 +182,7 @@ c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
         itemTexture)
 end)
 -------------------------------------------------------------------------------
+local junkTimer = 'JunkTimer'
 local junkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
 function c.RemoveJunk()
     ClearCursor()
@@ -202,6 +203,17 @@ function c.RemoveJunk()
     if cnt > 0 then
         c.Message(format('Освободили %s слот(ов). Свободно %s слот(а).', cnt, free + cnt), 'Очистка', junkIcon)
     end
+    c.TimerStart(junkTimer)
+end
+
+local function autoDelJunk()
+    if not c.flags.autoDelJunk then return end
+    if c.TimerLess(junkTimer, 300) then return end
+    local free = c.GetBagsFreeSlots()
+    if free > 5 then return end
+    c.Message(format('В сумках осталось всего %s свободных слот(ов). Запускаем автоматическое удаление хлама.', free),
+        'Очистка', junkIcon)
+    c.RemoveJunk();
 end
 
 -------------------------------------------------------------------------------
@@ -240,5 +252,6 @@ c.AttachEvent('MERCHANT_SHOW', function()
         RepairAllItems(1) -- сперва пробуем за счет ги банка
         RepairAllItems()
     end
+    c.TimerStart(junkTimer)
 end)
 -------------------------------------------------------------------------------

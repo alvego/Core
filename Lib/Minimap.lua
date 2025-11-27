@@ -79,6 +79,7 @@ local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 local moveIcon = [[Interface\Icons\Spell_Priest_PathofDevout]]
 local logIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_white]]
 local debugIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_blue]]
+local delJunkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
 local flagFunc = function(btn)
   local flag = btn.value
   if not flag then return end
@@ -138,6 +139,15 @@ local menu = {
       notCheckable = false,
       isNotRadio = true
     },
+    {
+      text = 'Aвтоудаление хлама',
+      value = 'autoDelJunk',
+      icon = delJunkIcon,
+      func = flagFunc,
+      checked = true,
+      notCheckable = false,
+      isNotRadio = true
+    },
     { text = '', notCheckable = true, isSeparator = true },
     { text = 'Закрыть', notCheckable = true, func = function() end },
   },
@@ -147,7 +157,7 @@ local menu = {
     { text = '', notCheckable = true, isSeparator = true },
     {
       text = 'Выкинуть хлам (junk) из сумок',
-      icon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]],
+      icon = delJunkIcon,
       notCheckable = true,
       func = function() c.RemoveJunk() end
     },

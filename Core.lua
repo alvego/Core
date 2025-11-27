@@ -27,7 +27,8 @@ local flags = { -- defauts
     paused = true,
     loot = false,
     move = false,
-    fullLog = false
+    fullLog = false,
+    autoDelJunk = false,
 }
 
 c.flags = {} -- metatable linked with db
