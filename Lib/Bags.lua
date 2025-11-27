@@ -206,7 +206,7 @@ function c.RemoveJunk()
     c.TimerStart(junkTimer)
 end
 
-local function autoDelJunk()
+c.AttachEvent('LOOT_CLOSED', function()
     if not c.flags.autoDelJunk then return end
     if c.TimerLess(junkTimer, 300) then return end
     local free = c.GetBagsFreeSlots()
@@ -215,6 +215,7 @@ local function autoDelJunk()
         'Очистка', junkIcon)
     c.RemoveJunk();
 end
+)
 
 -------------------------------------------------------------------------------
 local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
