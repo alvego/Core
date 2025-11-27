@@ -139,17 +139,19 @@ local function resetTimers()
 end
 -------------------------------------------------------------------------------
 local hasSkinTooltip = c.GetCachedFunc(function(unit)
-    local tooltip = SkinCheckTooltip or
-        CreateFrame('GameTooltip', 'SkinCheckTooltip', UIParent, 'GameTooltipTemplate')
+    local tooltipName = 'SkinCheckTooltip'
+    local tooltip = _G[tooltipName] or
+        CreateFrame('GameTooltip', tooltipName, UIParent, 'GameTooltipTemplate')
     -- Проверка подсказки: наличие текста 'Можно снять шкуру' и что он не красный (уровень профессии достаточен)
     tooltip:ClearLines()
     tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     tooltip:SetUnit(unit)
     local numLines = tooltip:NumLines()
     for i = 1, numLines do
-        local tipText = _G['GameTooltipTextLeft' .. i]:GetText()
+        local textName = tooltipName .. 'TextLeft' .. i
+        local tipText = _G[textName]:GetText()
         if tipText and string.find(tipText, 'Можно снять шкуру') then
-            local r, g, b = _G['GameTooltipTextLeft' .. i]:GetTextColor()
+            local r, g, b = _G[textName]:GetTextColor()
             -- Красный текст: g ~0.1-0.2; белый/желтый/зеленый: g > 0.5
             -- Возвращаем true, если НЕ красный (уровень профессии ок)
             return g > 0.5
@@ -414,6 +416,7 @@ local lastCorpse = nil
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 1) then return true end
     if not c.flags.move or st.move then return false end
+    if st.playerCasting then return false end
     if st.look then return false end
     if lastCorpse and UnitExists(lastCorpse) and (checkCorpseForLoot(lastCorpse) or checkCorpseForSkin(lastCorpse)) then return false end
     -- ищем ближайший полезный труп

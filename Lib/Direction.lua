@@ -20,6 +20,7 @@ local function turnUpdate()
         not UnitExists(turnUnit) or
         st.move or
         st.look or
+        st.playerCasting or
         c.PlayerFacingTarget(turnUnit, 30) then
         turnUnit = nil
         if c.TimerStarted('TurnToUnit') then
@@ -113,6 +114,7 @@ local function moveUpdate()
         or not c.flags.move
         or st.move
         or st.look
+        or st.playerCasting
         or not moveUnit
         or not UnitExists(moveUnit)
         or not c.UnitInLOS('player', moveUnit)
