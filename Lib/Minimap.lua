@@ -88,7 +88,7 @@ local flagFunc = function(btn)
   c.flags[flag] = not c.flags[flag] -- toggle flag
 end
 local debugFunc = function(btn)
-  SetCVar("scriptErrors", GetCVar("scriptErrors") == "1" and 0 or 1)
+  SetCVar('scriptErrors', GetCVar('scriptErrors') == '1' and 0 or 1)
 end
 
 
@@ -202,7 +202,7 @@ local updateFlagMenu = function(flagMenu)
     for _, item in pairs(flagMenu) do
       if item.notCheckable == false and item.value then
         if item.value == 'debug' then
-          item.checked = GetCVar("scriptErrors") == "1"
+          item.checked = GetCVar('scriptErrors') == '1'
         else
           item.checked = c.flags[item.value]
         end
@@ -216,7 +216,7 @@ local junkFunc = function(btn)
   if not c.db.junk then return end
   local itemName = btn.value
   if not itemName then return end
-  c.MessageLog(format('%s "%s"', WrapTextInColorCode('удалено из списка хлама', 'ff00ff00'), itemName), 'Хлам',
+  c.MessageLog(format('%s '%s'', WrapTextInColorCode('удалено из списка хлама', 'ff00ff00'), itemName), 'Хлам',
     junkIcon)
   c.db.junk[itemName] = nil -- remove from junk list
 end
@@ -273,7 +273,7 @@ local updateJunkMenu = function(junkMenu)
   tinsert(junkMenu, item)
 end
 
-button:RegisterForClicks("LeftButtonDown", "MiddleButtonDown", "RightButtonDown", "Button4Down", "Button5Down");
+button:RegisterForClicks('LeftButtonDown', 'MiddleButtonDown', 'RightButtonDown', 'Button4Down', 'Button5Down');
 
 -- Обработка клика: открытие меню
 button:SetScript('OnClick', function(self, btn, ...)
@@ -285,7 +285,7 @@ button:SetScript('OnClick', function(self, btn, ...)
 
   -- Показываем меню у курсора
   EasyMenu(menu[btn], minimapDropDown, self, 0, 0, 'MENU')
-  PlaySound("igMainMenuOptionCheckBoxOn") -- звук, как у стандартных кнопок
+  PlaySound('igMainMenuOptionCheckBoxOn') -- звук, как у стандартных кнопок
 end)
 
 -- Опционально: сделать кнопку перетаскиваемой (для удобства пользователя)
