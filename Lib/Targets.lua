@@ -256,6 +256,7 @@ end
 -------------------------------------------------------------------------------
 local function searchSelect(tar)
     if not tar then return false end
+    if not st.invalidTarget and not st.attack and c.flags.autoMelee and c.UnitDistance('player', tar) > 5 then return false end
     c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
     c.MessageLog(
         format('#бой: игрок - %s, цель - %s',

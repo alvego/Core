@@ -151,7 +151,7 @@ local menu = {
       isNotRadio = true
     },
     {
-      text = 'Всегда лицом к цели',
+      text = 'Всегда лицом в ближнем бою',
       value = 'autoLook',
       icon = autoLookIcon,
       func = flagFunc,
@@ -216,7 +216,7 @@ local junkFunc = function(btn)
   if not c.db.junk then return end
   local itemName = btn.value
   if not itemName then return end
-  c.MessageLog(format('%s '%s'', WrapTextInColorCode('удалено из списка хлама', 'ff00ff00'), itemName), 'Хлам',
+  c.MessageLog(format('%s ' % s '', WrapTextInColorCode('удалено из списка хлама', 'ff00ff00'), itemName), 'Хлам',
     junkIcon)
   c.db.junk[itemName] = nil -- remove from junk list
 end

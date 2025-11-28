@@ -105,10 +105,8 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#выбираем новую цель в 5 м, причина: dist = ' .. c.Round(dist)
     end
 
-    if st.combatMode then
-        if c.flags.autoLook then
-            c.TurnToUnit('target')
-        end
+    if st.combatMode and not st.move and st.speed == 0 and c.flags.autoLook and dist < 5 then
+        c.TurnToUnit('target')
     end
 
     if not st.attack and not st.combatTarget and not st.autoattack then
