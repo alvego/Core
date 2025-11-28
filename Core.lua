@@ -23,7 +23,7 @@ c.advance = 0.05
 c.latency = c.advance
 c.gcdSpellId = 61304
 -------------------------------------------------------------------------------
-local flags = { -- defauts
+local flags = { -- defaults
     paused = true,
     loot = false,
     move = false,
