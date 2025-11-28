@@ -193,7 +193,7 @@ local function initEnemy()
     wipe(enemy)
     enemy.uid = nil
     -- если autoMelee и не attack, то до 5м.
-    enemy.dist = (not st.attack and c.flags.autoMelee) and 5 or 9999
+    enemy.dist = (not st.invalidTarget and not st.attack and c.flags.autoMelee) and 5 or 9999
     -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
     enemy.combat = st.combatMode and not st.attack
     enemy.look = false
