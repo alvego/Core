@@ -31,7 +31,7 @@ function c.GetBagsFreeSlots()
 end
 
 -------------------------------------------------------------------------------
-function c.EachBugsSlot(fn)
+function c.EachBagsSlot(fn)
     for bag = 0, NUM_BAG_SLOTS do
         for slot = 1, GetContainerNumSlots(bag) do
             local value = fn(bag, slot)
@@ -188,7 +188,7 @@ function c.RemoveJunk()
     ClearCursor()
     local cnt = 0
     local free = c.GetBagsFreeSlots()
-    c.EachBugsSlot(function(bag, slot)
+    c.EachBagsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 then -- and lootable ~= 1
             local junk = isJunk(link)
@@ -224,7 +224,7 @@ c.AttachEvent('MERCHANT_SHOW', function()
     local sum = 0
     local cnt = 0
     local free = c.GetBagsFreeSlots()
-    c.EachBugsSlot(function(bag, slot)
+    c.EachBagsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
         if icon and not locked ~= 1 and lootable ~= 1 then
             local isTrash, sellPrice = isJunk(link)
