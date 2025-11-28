@@ -102,11 +102,11 @@ end
 -------------------------------------------------------------------------------
 function c.DoSpell(reason, spell, target)
     if type(reason) ~= 'string' then
-        c.Error(format('DoSpell: reason requared! - [%s]', c.ToStr(reason, spell, target)))
+        c.Error(format('DoSpell: reason required! - [%s]', c.ToStr(reason, spell, target)))
         return
     end
     if type(spell) ~= 'string' then
-        c.Error(format('DoSpell: spell requared! - [%s]', c.ToStr(reason, spell, target)))
+        c.Error(format('DoSpell: spell required! - [%s]', c.ToStr(reason, spell, target)))
         return
     end
 
