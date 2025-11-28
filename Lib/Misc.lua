@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- by Unknown Coder
+-- By by Unknown Coder
 -------------------------------------------------------------------------------
 local c = Core
 -------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ local tostring = tostring;
 local select = select
 local table_concat = table.concat
 local wipe = wipe
-local time = time
+local date = date
 local WrapTextInColorCode = WrapTextInColorCode
 local UnitClass = UnitClass
 local UnitCreatureType = UnitCreatureType
@@ -17,11 +17,9 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local IsMouseButtonDown = IsMouseButtonDown
 local sqrt = sqrt
 local UnitIsUnit = UnitIsUnit
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local GetCursorInfo = GetCursorInfo
 local ClearCursor = ClearCursor
-local StaticPopup1 = StaticPopup1
-local StaticPopup1Button1 = StaticPopup1Button1
-local StaticPopup1Button2 = StaticPopup1Button2
 -------------------------------------------------------------------------------
 function c.StrContains(str, sub)
     if (not str or not sub) then
@@ -56,14 +54,7 @@ end
 -- Возвращает текущее локальное время в формате hh:mm:ss.
 -- @return (string) Текущее время в секундах, hh:mm:ss.
 function c.GetCurrentTime()
-    -- Получаем локальное время в секундах
-    local t = time()
-    -- Вычисляем часы, минуты, секунды
-    local hours = math.floor(t / 3600) % 24
-    local minutes = math.floor(t / 60) % 60
-    local seconds = math.floor(t % 60)
-    -- Форматируем результат в hh:mm:ss
-    return string.format('%02d:%02d:%02d', hours, minutes, seconds)
+    return date("%H:%M:%S")
 end
 
 -------------------------------------------------------------------------------
@@ -89,9 +80,9 @@ end
 -- @return (number) Округленное число.
 function c.Round(number, decimals)
     decimals = decimals or 0
-    local multiplier = 10 ^
-        decimals                                              -- Множитель для преобразования числа к целому типу после умножения
-    return math.floor(number * multiplier + 0.5) / multiplier -- Округление и возвращение результата
+    if decimals <= 0 then return math.floor(number + 0.5) end
+    local multiplier = 10 ^ decimals
+    return math.floor(number * multiplier + 0.5) / multiplier
 end
 
 -------------------------------------------------------------------------------
@@ -186,7 +177,7 @@ function c.UnitInfo(unit)
     if d then
         name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
     end
-    if UnitIsDead(unit) then
+    if UnitIsDeadOrGhost(unit) then
         name = name .. WrapTextInColorCode('труп', 'ff333333')
     end
     return name
@@ -194,21 +185,28 @@ end
 
 -------------------------------------------------------------------------------
 local function autoButton(btn, btnText)
-    if btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
-    local text = btn:GetText()
-    if text ~= btnText then return false end
+    if not btn or btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
+    if btn:GetText() ~= btnText then return false end
     c.Log('Жмем', btnText)
     btn:Click()
     return true
 end
 -------------------------------------------------------------------------------
 function c.AutoPopup(messagePart, btnText)
-    local popup = StaticPopup1
-    if popup:IsVisible() ~= 1 then return false end
-    local text = popup.text:GetText()
-    if not c.StrContains(text, messagePart) then return false end
-    c.Log('Диалог', text)
-    return autoButton(StaticPopup1Button1, btnText) or autoButton(StaticPopup1Button2, btnText)
+    for i = 1, 4 do
+        local popupName = 'StaticPopup' .. i
+        local popup = _G[popupName]
+        if popup and popup:IsVisible() and popup.text then
+            local text = popup.text:GetText()
+            if c.StrContains(popup.text:GetText(), messagePart) then
+                c.Log('Диалог', text)
+                for j = 1, 3 do
+                    if autoButton(_G[popupName .. 'Button' .. j], btnText) then return true end
+                end
+            end
+        end
+    end
+    return false
 end
 
 -------------------------------------------------------------------------------

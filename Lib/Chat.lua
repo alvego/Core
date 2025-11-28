@@ -189,25 +189,50 @@ end
 -------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений без частого спама с указанием времени
 local times = 0
-function c.Log(...)
-    local log = c.ToStr(...)
-    if not c.IsChanged('Log', log) and c.TimerLess('Log', 1) then
-        times = times + 1
-        return
-    end
-    c.TimerStart('Log')
+local lastLog = nil
+local function getLogMsg(log, times)
     if times > 1 then
-        log = log .. ' (' .. times .. ')'
+        return log .. ' (' .. times .. ')'
     end
-    times = 0
+    return log
+end
+local function chatLogMsg(log, times)
     debugChat(
-        log,
+        getLogMsg(log, times),
         c.GetCurrentTime(),
         iconLog,
         GRAY_FONT_COLOR.r,
         GRAY_FONT_COLOR.g,
         GRAY_FONT_COLOR.b
     )
+end
+function c.Log(...)
+    local log = c.ToStr(...)
+
+    if c.IsChanged('Log', log) then
+        -- выводим прошлоее сообщение если накопилось
+        if lastLog and times > 0 then
+            chatLogMsg(lastLog, times)
+        end
+        -- сброс
+        times = 0
+        -- выводим новое
+        chatLogMsg(log, times)
+        -- запоминаем последнее
+        lastLog = log
+    elseif lastLog then
+        if c.TimerLess('Log', 1) then
+            -- прошло менее секунды, не частим, накапливаем счетчик
+            times = times + 1
+            return
+        end
+        -- перезапускаем таймер
+        c.TimerStart('Log')
+        -- сливаем, что накопилось
+        chatLogMsg(log, times)
+        -- сброс
+        times = 0
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -227,7 +252,7 @@ end
 
 -------------------------------------------------------------------------------
 function c.Success(msg, icon)
-    if not c.IsChanged('Succes', msg) then return end
+    if not c.IsChanged('Success', msg) then return end
     debugChat(
         msg,
         'Успех',

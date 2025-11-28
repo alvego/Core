@@ -7,7 +7,6 @@ local st                    = c.state
 local GetLootMethod         = GetLootMethod
 local GetCVar               = GetCVar
 local UnitExists            = UnitExists
-local UnitIsDead            = UnitIsDead
 local UnitIsDeadOrGhost     = UnitIsDeadOrGhost
 local UnitIsPlayer          = UnitIsPlayer
 local UnitIsTapped          = UnitIsTapped
@@ -79,7 +78,8 @@ c.AttachEvent('LOOT_OPENED', function()
         for i = 1, GetNumLootItems() do
             local texture, item, quantity, quality, locked = GetLootSlotInfo(i)
             local link = GetLootSlotLink(i) or item
-            quantity = (type(quantity) == 'number' and quantity > 1) and (' (' .. quantity .. ')') or ''
+            quantity = (type(quantity) == 'number' and quantity > 1) and
+                WrapTextInColorCode('x' .. quantity, 'ff00ff00') or ''
             c.MessageLog('#добыча ' .. link .. quantity, lootTitle, texture)
         end
 
@@ -179,7 +179,7 @@ end)
 -------------------------------------------------------------------------------
 local function checkCorpseForLoot(unit)
     if not UnitExists(unit) then return end
-    if not UnitIsDead(unit) then return end
+    if not UnitIsDeadOrGhost(unit) then return end
     if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then return end
     if UnitIsPlayer(unit) then return end
     if c.UnitDistance('player', unit) > lootDist then return end -- so far
@@ -220,7 +220,7 @@ local maxDist = 40
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
     if not UnitExists(unit) then return end
-    if not UnitIsDead(unit) then return end
+    if not UnitIsDeadOrGhost(unit) then return end
     if UnitIsPlayer(unit) then return end
     local loot = not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) and canLoot(unit)
     local skin = allowSkin and not loot and canSkin(unit)

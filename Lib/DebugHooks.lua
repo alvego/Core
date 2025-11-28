@@ -16,7 +16,7 @@ local c = Core
 -- }
 --local ignored = { 191, 171, 168, 169, 170 }
 -- local function findOffset()
---     if UnitExists('target') and UnitIsDead('target') then
+--     if UnitExists('target') and UnitIsDeadOrGhost('target') then
 --         --if UnitExists('target') then
 --         local ptr = c.UnitPtr('target')
 --         local line = false

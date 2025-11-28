@@ -208,7 +208,7 @@ end
 
 c.AttachEvent('LOOT_CLOSED', function()
     if not c.flags.autoDelJunk then return end
-    if c.TimerLess(junkTimer, 300) then return end
+    if c.TimerLess(junkTimer, 60) then return end
     local free = c.GetBagsFreeSlots()
     if free > 5 then return end
     c.Message(format('В сумках осталось всего %s свободных слот(ов). Запускаем автоматическое удаление хлама.', free),

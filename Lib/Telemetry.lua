@@ -6,6 +6,8 @@ local c = Core
 local tostring = tostring
 local tinsert = tinsert
 local wipe = wipe
+local type = type
+local error = error
 local table_concat = table.concat
 local WrapTextInColorCode = WrapTextInColorCode
 
@@ -18,8 +20,6 @@ frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft'
 frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
 frame.text:SetAllPoints()
 frame:SetPoint('TOPLEFT', 0, 0)
-frame:SetScale(1);
-frame:SetAlpha(1)
 local texture = frame:CreateTexture('Texture', 'BACKGROUND')
 texture:SetBlendMode('DISABLE')
 texture:SetTexture(0, 0, 0)
@@ -56,8 +56,8 @@ end
 
 local data = {}
 local function createTelemetryMessage()
-    for _, fn in pairs(list) do
-        local msg = fn()
+    for i = 1, #list do
+        local msg = list[i]()
         if msg then
             tinsert(data, tostring(msg))
         end

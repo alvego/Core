@@ -13,7 +13,6 @@ Lib\Extended.lua
 Lib\TablePool.lua
 Lib\Timers.lua
 Lib\Misc.lua
-Lib\Data.lua
 Lib\Events.lua
 Lib\Debug.lua
 Lib\Chat.lua
