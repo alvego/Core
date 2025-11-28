@@ -192,7 +192,8 @@ local enemy = {}
 local function initEnemy()
     wipe(enemy)
     enemy.uid = nil
-    enemy.dist = 9999
+    -- если autoMelee и не attack, то до 5м.
+    enemy.dist = (not st.attack and c.flags.autoMelee) and 5 or 9999
     -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
     enemy.combat = st.combatMode and not st.attack
     enemy.look = false
@@ -281,10 +282,11 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     initSearch(maxDistance, inViewfield)
     -- assist
     if tryAssist and st.group then
-        if searchSelect(getGroupTarget()) then return end
+        if searchSelect(getGroupTarget()) then return true end
     end
     -- enemy
-    searchSelect(getEnemyTarget())
+    if searchSelect(getEnemyTarget()) then return true end
+    return false
 end
 
 -------------------------------------------------------------------------------

@@ -63,8 +63,6 @@ local function updateEnhance()
     reason = c.TryTarget(true, 30, st.attack or st.look)
     -- есть ли причина для отстановки?.
     if reason then return reason end
-
-    if dist > 5 and (dist < 25 or st.attack) then c.MoveToUnit('target', 100) end
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------

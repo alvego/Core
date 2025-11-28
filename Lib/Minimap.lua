@@ -81,6 +81,7 @@ local logIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_white]]
 local debugIcon = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_blue]]
 local delJunkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
 local autoLookIcon = [[Interface\Icons\Ability_Hunter_SniperShot]]
+local autoMeleeIcon = [[Interface\Icons\Ability_SteelMelee]]
 local flagFunc = function(btn)
   local flag = btn.value
   if not flag then return end
@@ -150,9 +151,18 @@ local menu = {
       isNotRadio = true
     },
     {
-      text = 'Aвтоповорот к цели',
+      text = 'Всегда лицом к цели',
       value = 'autoLook',
       icon = autoLookIcon,
+      func = flagFunc,
+      checked = true,
+      notCheckable = false,
+      isNotRadio = true
+    },
+    {
+      text = 'Цели ближнего боя',
+      value = 'autoMelee',
+      icon = autoMeleeIcon,
       func = flagFunc,
       checked = true,
       notCheckable = false,

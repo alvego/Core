@@ -101,7 +101,7 @@ local function moveEnd(cond)
     maveMaxDist = nil
     c.TimerReset('PlayerMove')
     c.Log('#пришли', cond)
-    if st.speed > 0 and not st.move then
+    if st.speed > 0 and not st.move and not st.playerCasting then
         c.Log('#тормозим')
         c.MoveTo(getPointAhead(0.1))
     end
@@ -140,7 +140,7 @@ local function moveUpdate()
     local ratio = d / dist
     -- Ограничиваем, чтобы остаться на отрезке (опционально)
     if ratio > 1 then
-        moveEnd(format('пришли ratio > 1 (%.3f) при d: %d', ratio, d))
+        moveEnd(format('пришли ratio(%.1f) > 1  при d: %d', ratio, d))
         return
     end
     local x, y, z = tx + ratio * dx, ty + ratio * dy, tz + ratio * dz
@@ -148,7 +148,7 @@ local function moveUpdate()
 
     local delta = c.Distance(px, py, pz, x, y, z)
     if delta < 1 then
-        moveEnd(format('пришли delta < 1 (%.3f) при d: %d', delta, d))
+        moveEnd(format('пришли delta(%.1f) < 1  при d: %d', delta, d))
         return
     end
 
@@ -168,7 +168,7 @@ c.AttachBeforeUpdate(moveUpdate)
 function c.MoveToUnit(target, maxDist)
     moveUnit = target
     maveMaxDist = maxDist
-    c.Log('#MoveToUnit: ', c.UnitInfo(moveUnit))
+    c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
     -- идем
     moveUpdate()
     return moveUnit ~= nil

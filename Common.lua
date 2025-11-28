@@ -88,16 +88,27 @@ local stopAttackDebuff = {
 
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
-        if st.combatMode then
-            c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) -- enable by default
+        if st.combatMode and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
             -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
             c.ImmediatelyNextUpdate()
             -- выходим так как нужно обновить state
             return '#выбираем новую цель, причина: ' .. st.invalidTarget
         end
         return '#' .. st.invalidTarget
-    elseif c.flags.autoLook and st.combatMode then
-        c.TurnToUnit('target')
+    end
+
+    local dist = c.UnitDistance('target', 'player')
+    if not st.attack and c.flags.autoMelee and dist > 5 and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
+        -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
+        c.ImmediatelyNextUpdate()
+        -- выходим так как нужно обновить state
+        return '#выбираем новую цель в 5 м, причина: dist = ' .. c.Round(dist)
+    end
+
+    if st.combatMode then
+        if c.flags.autoLook then
+            c.TurnToUnit('target')
+        end
     end
 
     if not st.attack and not st.combatTarget and not st.autoattack then
@@ -115,6 +126,10 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     elseif not stopDebuff then
         c.Command('/startattack [exists, harm, nodead]')
         c.Command('/petattack [exists, harm, nodead]')
+    end
+
+    if c.flags.move and dist > 5 and (dist < 25 or st.attack) then
+        c.MoveToUnit('target', 100)
     end
     return nil
 end
