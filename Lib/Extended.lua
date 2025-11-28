@@ -146,13 +146,14 @@ c.UnitDistance = c.GetCachedFunc(function(unit1, unit2)
 end)
 
 -------------------------------------------------------------------------------
-function c.UnitAuraByID(unit, spellIds, isMine)
+function c.UnitAuraByID(unit, spellIds, mineOnly)
     if isReadyFunc(oUnitAuraByID) then
         if type(spellIds) == 'table' then
             spellIds = table_concat(spellIds, ' ')
         end
 
-        local spellId, count, duration, endTime, isMine, isDebuff = oUnitAuraByID(unit, spellIds, isMine and '1' or nil)
+        local spellId, count, duration, endTime, isMine, isDebuff = oUnitAuraByID(unit, spellIds,
+            mineOnly and '1' or nil)
         if spellId == nil then
             return nil
         end
