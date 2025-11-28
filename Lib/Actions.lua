@@ -174,11 +174,11 @@ local mouseButtons = {
 
 function c.DoAction(reason, name, target, btnNum)
     if type(reason) ~= 'string' then
-        c.Error(format('DoAction: reason requared! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        c.Error(format('DoAction: reason required! - [%s]', c.ToStr(reason, name, target, btnNum)))
         return
     end
     if type(name) ~= 'string' then
-        c.Error(format('DoAction: name requared! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        c.Error(format('DoAction: name required! - [%s]', c.ToStr(reason, name, target, btnNum)))
         return
     end
     local button = mouseButtons[btnNum]
