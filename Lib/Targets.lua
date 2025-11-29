@@ -65,12 +65,14 @@ end
 
 local function afterMouseUp()
     local unit = 'target'
-    if not UnitExists('mouseover') then return end
-    if not UnitIsUnit('mouseover', unit) then return end
     local name = UnitName(unit)
-    if name ~= mouseUnitName then return end
+    if name ~= mouseUnitName then
+        return
+    end
     local guid = UnitGUID(unit)
-    if guid == prevGUID then return end
+    if guid == prevGUID then
+        return
+    end
     prevGUID = guid
     searchLastGuid = nil
     manualLastGuid = guid
@@ -135,7 +137,7 @@ c.AttachEvent('PLAYER_TARGET_CHANGED', function()
         manualLastGuid = nil
         return
     end
-    prevGUID = lastGUID
+    --prevGUID = lastGUID
     lastGUID = UnitGUID(unit)
     c.Message(format('#Новая цель %s', c.UnitInfo(unit)), title, icon)
 end)
