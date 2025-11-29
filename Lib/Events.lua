@@ -96,7 +96,12 @@ local function onUpdate()
         return
     end
     -- не чаще нескольких раз в секунду
-    if c.TimerLess('UPDATE', 0.33) then return end
+    local interval = 0.33
+    local gcdLeft = c.GetSlotCooldownLeft(c.gcdSpellId)
+    if gcdLeft > 0 and gcdLeft < interval then
+        interval = gcdLeft
+    end
+    if c.TimerLess('UPDATE', interval) then return end
 
     if not c.IsLoaded() then return end
 
