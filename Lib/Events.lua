@@ -47,6 +47,13 @@ end
 frame:SetScript('OnEvent', onEvent)
 
 -------------------------------------------------------------------------------
+local listNextTick = {}
+function c.NextTick(func)
+    if type(func) ~= 'function' then error('Wrong type') end
+    if tContains(listNextTick, func) then return end
+    tinsert(listNextTick, func)
+end
+
 local listBeforeUpdate = {}
 function c.AttachBeforeUpdate(func)
     if type(func) ~= 'function' then error('Wrong type') end
@@ -75,12 +82,20 @@ end
 -------------------------------------------------------------------------------
 -- Выполняем обработчики события OnUpdate
 local function onUpdate()
+    local nextTickCount = #listNextTick
+    if nextTickCount > 0 then
+        for i = 1, nextTickCount do
+            listNextTick[i]()
+        end
+        wipe(listNextTick)
+    end
+
     if immediatelyNextUpdate then
         c.TimerReset('UPDATE')
         immediatelyNextUpdate = false
         return
     end
-    -- не чаще 5 раз в секунду
+    -- не чаще нескольких раз в секунду
     if c.TimerLess('UPDATE', 0.33) then return end
 
     if not c.IsLoaded() then return end

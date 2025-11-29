@@ -161,7 +161,7 @@ function c.ClearCursor()
 end
 
 -------------------------------------------------------------------------------
-function c.UnitInfo(unit)
+c.UnitInfo = c.GetCachedFunc(function(unit)
     if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
     local name = UnitName(unit)
     if not name then return WrapTextInColorCode('!name', 'aaff0000') end
@@ -181,7 +181,7 @@ function c.UnitInfo(unit)
         name = name .. WrapTextInColorCode('труп', 'ff333333')
     end
     return name
-end
+end)
 
 -------------------------------------------------------------------------------
 local function autoButton(btn, btnText)

@@ -105,9 +105,6 @@ function c.CanUseSlot(slot, unit)
     if c.GetSlotCooldownLeft(slot) > c.latency then
         return false, '!ready'
     end
-    if c.IsBusySpell(c.GetActionSpell(slot)) then
-        return false, '!busy'
-    end
     return true, ''
 end
 
@@ -188,7 +185,11 @@ function c.DoAction(reason, name, target, btnNum)
     local slot = c.GetSlot(name)
     local canuse, canuseinfo = c.CanUseSlot(slot, target)
     if not canuse then
-        c.MessageLog(format('%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
+        c.MessageLog(format('#%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
+        return
+    end
+    if c.IsBusySpell(c.GetActionSpell(slot)) then
+        c.MessageLog(format('#%s - [busy]', reason), name, GetActionTexture(slot))
         return
     end
     c.LogWhatHappend(reason, true)

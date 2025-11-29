@@ -85,28 +85,24 @@ local stopAttackDebuff = {
     -- 'Глубинный ужас',
     -- 'Ментальный крик'
 }
-
+local meleeDist = 5
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
             -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
             c.ImmediatelyNextUpdate()
             -- выходим так как нужно обновить state
-            return '#выбираем новую цель, причина: ' .. st.invalidTarget
+            return '#выбирали новую цель, причина: ' .. st.invalidTarget
         end
         return '#' .. st.invalidTarget
     end
-
     local dist = c.UnitDistance('target', 'player')
-    if not st.attack and c.flags.autoMelee and dist > 5 and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
+    local inMelee = dist <= meleeDist
+    if c.flags.autoMelee and not inMelee and not c.IsManualTarget() and c.SearchTarget(tryAssist == false, meleeDist, inViewfield) then
         -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
         c.ImmediatelyNextUpdate()
         -- выходим так как нужно обновить state
-        return '#выбираем новую цель в 5 м, причина: dist = ' .. c.Round(dist)
-    end
-
-    if st.combatMode and not st.move and st.speed == 0 and c.flags.autoLook and dist < 5 then
-        c.TurnToUnit('target')
+        return '#выбирали цель в 5 м, причина: dist = ' .. c.Round(dist)
     end
 
     if not st.attack and not st.combatTarget and not st.autoattack then
@@ -126,8 +122,11 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         c.Command('/petattack [exists, harm, nodead]')
     end
 
-    if c.flags.move and dist > 5 and (dist < 25 or st.attack) then
+    if c.flags.move and not inMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() then
         c.MoveToUnit('target', 100)
+    end
+    if c.flags.autoLook and inMelee and st.combatMode and st.still then
+        c.TurnToUnit('target')
     end
     return nil
 end

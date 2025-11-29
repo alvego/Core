@@ -10,6 +10,7 @@ local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
 local UnitIsUnit = UnitIsUnit
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitGUID = UnitGUID
+local GameTooltip = GameTooltip
 local bit = bit
 local wipe = wipe
 local math_max = math.max
@@ -44,22 +45,76 @@ function c.GetGroupUnits()
 end
 
 -------------------------------------------------------------------------------
-local lastGUID = nil
+local search         = {}
+local title          = 'Цель'
+local icon           = [[Interface\Icons\Ability_Hunter_SniperShot]]
+-------------------------------------------------------------------------------
+local prevGUID       = nil
+local lastGUID       = nil
+local manualLastGuid = nil
 local searchLastGuid = nil
 
--- c.DebugHook('TargetUnit')
--- c.DebugHook('TargetLastTarget')
--- c.DebugHook('TargetLastFriend')
--- c.DebugHook('TargetLastEnemy')
--- c.DebugHook('AssistUnit')
--- c.DebugHook('TargetNearest')
--- c.DebugHook('TargetNearestEnemy')
--- c.DebugHook('TargetNearestEnemyPlayer')
--- c.DebugHook('TargetNearestFriend')
--- c.DebugHook('TargetNearestFriendPlayer')
--- c.DebugHook('TargetNearestPartyMember')
--- c.DebugHook('TargetNearestRaidMember')
--- c.DebugHook('SpellTargetUnit')
+local mouseButton    = ''
+local mouseUnitName  = ''
+local manualSource   = WrapTextInColorCode('выбрано рукми', 'FF00A6FF')
+local searchSource   = WrapTextInColorCode('выбрано поиском', 'FF81FF7D')
+
+local function logTargetSource(source, method)
+    c.MessageLog(format('#%s через %s', source, method), title, icon)
+end
+
+local function afterMouseUp()
+    local unit = 'target'
+    if not UnitExists('mouseover') then return end
+    if not UnitIsUnit('mouseover', unit) then return end
+    local name = UnitName(unit)
+    if name ~= mouseUnitName then return end
+    local guid = UnitGUID(unit)
+    if guid == prevGUID then return end
+    prevGUID = guid
+    searchLastGuid = nil
+    manualLastGuid = guid
+    logTargetSource(manualSource, mouseButton)
+end
+
+c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
+    if button ~= 'LeftButton' and button ~= 'RightButton' then return end
+    mouseUnitName = GameTooltip:GetUnit()
+    if not mouseUnitName then return end
+    mouseButton = button
+    c.NextTick(afterMouseUp)
+end)
+
+local function hookTargetChange(funcName)
+    hooksecurefunc(funcName, function(...)
+        local unit = 'target'
+        if not UnitExists(unit) then return end
+        local guid = UnitGUID(unit)
+        if guid == prevGUID then return end
+        prevGUID = guid
+        if funcName == 'TargetUnit' and guid == searchLastGuid then
+            manualLastGuid = nil
+            logTargetSource(searchSource, c.ToStr(funcName, ...))
+            return
+        end
+        searchLastGuid = nil
+        manualLastGuid = guid
+        logTargetSource(manualSource, c.ToStr(funcName, ...))
+    end)
+end
+hookTargetChange('TargetUnit')
+-- hookTargetChange('TargetLastTarget')
+-- hookTargetChange('TargetLastFriend')
+-- hookTargetChange('TargetLastEnemy')
+hookTargetChange('AssistUnit')
+hookTargetChange('TargetNearest')
+hookTargetChange('TargetNearestEnemy')
+-- hookTargetChange('TargetNearestEnemyPlayer')
+hookTargetChange('TargetNearestFriend')
+-- hookTargetChange('TargetNearestFriendPlayer')
+-- hookTargetChange('TargetNearestPartyMember')
+-- hookTargetChange('TargetNearestRaidMember')
+-- hookTargetChange('SpellTargetUnit')
 
 -- hooksecurefunc('SpellStopCasting', function(...)
 --     c.Log('SpellStopCasting', ..., GetTime())
@@ -73,21 +128,21 @@ local searchLastGuid = nil
 --     c.Log('UnitIsCharmed', ..., GetTime())
 -- end)
 
-
-
-local search = {}
-local title  = 'Цель'
-local icon   = [[Interface\Icons\Ability_Hunter_SniperShot]]
-
 c.AttachEvent('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
-    if not UnitExists(unit) then return end
+    if not UnitExists(unit) then
+        searchLastGuid = nil
+        manualLastGuid = nil
+        return
+    end
+    prevGUID = lastGUID
     lastGUID = UnitGUID(unit)
-    if lastGUID == searchLastGuid then return end
-    c.MessageLog(format('#%s', c.UnitInfo(unit)), title, icon)
+    c.Message(format('#Новая цель %s', c.UnitInfo(unit)), title, icon)
 end)
 
-
+function c.IsManualTarget()
+    return manualLastGuid and lastGUID == manualLastGuid
+end
 
 c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
@@ -192,8 +247,7 @@ local enemy = {}
 local function initEnemy()
     wipe(enemy)
     enemy.uid = nil
-    -- если autoMelee и не attack, то до 5м.
-    enemy.dist = (not st.invalidTarget and not st.attack and c.flags.autoMelee) and 5 or 9999
+    enemy.dist = search.maxDistance or 999
     -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
     enemy.combat = st.combatMode and not st.attack
     enemy.look = false
@@ -256,7 +310,6 @@ end
 -------------------------------------------------------------------------------
 local function searchSelect(tar)
     if not tar then return false end
-    if not st.invalidTarget and not st.attack and c.flags.autoMelee and c.UnitDistance('player', tar) > 5 then return false end
     c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
     c.MessageLog(
         format('#бой: игрок - %s, цель - %s',

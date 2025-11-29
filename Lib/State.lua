@@ -71,7 +71,7 @@ local function updateState()
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
     c.TimerToggle('Falling', st.falling)
-    st.still = st.speed == 0 and not st.falling
+    st.still = st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit()
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
 c.AttachBeforeUpdate(updateState)

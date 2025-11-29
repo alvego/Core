@@ -33,6 +33,11 @@ local function turnUpdate()
     --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
+c.AttachBeforeUpdate(turnUpdate)
+
+function c.IsTurnToUnit()
+    return turnUnit ~= nil -- поворачиваемся
+end
 
 function c.TurnToUnit(target)
     if not target then
@@ -40,10 +45,9 @@ function c.TurnToUnit(target)
     end
     turnUnit = target
     turnUpdate()
-    return turnUnit ~= nil -- поворачиваемся
+    return c.IsTurnToUnit()
 end
 
-c.AttachBeforeUpdate(turnUpdate)
 -------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
@@ -90,10 +94,7 @@ local maveMaxDist = nil
 local function getPointAhead(d)
     local x, y, z = c.UnitPosition('player')
     local facing = GetPlayerFacing()
-    local nx = x + d * math.cos(facing)
-    local ny = y + d * math.sin(facing)
-    local nz = z -- или скорректируй через TraceLine, если нужно
-    return nx, ny, nz
+    return x + d * math.cos(facing), y + d * math.sin(facing), z
 end
 
 local function moveEnd(cond)
@@ -165,11 +166,15 @@ local function moveUpdate()
 end
 c.AttachBeforeUpdate(moveUpdate)
 
+function c.IsMoveUnit()
+    return moveUnit ~= nil
+end
+
 function c.MoveToUnit(target, maxDist)
     moveUnit = target
     maveMaxDist = maxDist
     c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
     -- идем
     moveUpdate()
-    return moveUnit ~= nil
+    return c.IsMoveUnit()
 end

@@ -93,9 +93,6 @@ function c.CanUseSpell(spell, unit)
     if not c.IsReadySpell(spell) then
         return false, '!ready'
     end
-    if c.IsBusySpell(spell) then
-        return false, '!busy'
-    end
     return true
 end
 
@@ -112,7 +109,11 @@ function c.DoSpell(reason, spell, target)
 
     local canuse, canuseinfo = c.CanUseSpell(spell, target)
     if not canuse then
-        c.MessageLog(format('%s - [%s]', reason, canuseinfo), spell, GetSpellTexture(spell))
+        c.MessageLog(format('#%s - [%s]', reason, canuseinfo), spell, GetSpellTexture(spell))
+        return
+    end
+    if c.IsBusySpell(spell) then
+        c.MessageLog(format('#%s - [busy]', reason), spell, GetSpellTexture(spell))
         return
     end
     c.LogWhatHappend(reason, true)
