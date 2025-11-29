@@ -12,6 +12,7 @@ if className ~= 'SHAMAN' then return end
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
 local st = c.state
+c.updateDelay = 0.02
 local GetTotemInfo = GetTotemInfo
 
 -------------------------------------------------------------------------------

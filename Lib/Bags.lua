@@ -226,8 +226,9 @@ c.AttachEvent('MERCHANT_SHOW', function()
     local free = c.GetBagsFreeSlots()
     c.EachBagsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
-        if icon and not locked ~= 1 and lootable ~= 1 then
+        if icon and not locked ~= 1 then --and lootable ~= 1
             local isTrash, sellPrice = isJunk(link)
+            --c.MessageLog(c.ToStr(link, isTrash), 'Очистка', icon)
             if isTrash then
                 cnt = cnt + 1
                 if sellPrice > 0 then
