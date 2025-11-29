@@ -30,7 +30,6 @@ Lib\SpellError.lua
 Lib\SpellStore.lua
 Lib\SpellRange.lua
 Lib\SpellKick.lua
-Lib\SpellBusy.lua
 Lib\Auras.lua
 Lib\Dotes.lua
 Lib\Objects.lua

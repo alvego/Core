@@ -83,13 +83,15 @@ c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
 -------------------------------------------------------------------------------
 local skipErrors = {
     'Заклинание пока недоступно.',
-    'Еще не готово.'
+    'Еще не готово.',
+    'Прервано'
 }
 -------------------------------------------------------------------------------
 local function onErrorUpdate()
     for message, spellName in pairs(errorBuffer) do
         if not tContains(skipErrors, message) then
             if type(spellName) == 'string' then
+                c.TimerStart('FAILED:' .. spellName)
                 local spellId = c.GetSpellId(spellName, nil, true)
                 c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
             else
@@ -103,7 +105,7 @@ c.AttachBeforeUpdate(onErrorUpdate)
 -------------------------------------------------------------------------------
 
 function c.IsSpellFailedRecently(spellName)
-    return c.TimerLess('Fail:' .. spellName, 0.2)
+    return c.TimerLess('FAILED:' .. spellName, 0.5)
 end
 
 -- if c.TimerMore('Удар грома', 3) then

@@ -188,10 +188,6 @@ function c.DoAction(reason, name, target, btnNum)
         c.MessageLog(format('#%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
         return
     end
-    if c.IsBusySpell(c.GetActionSpell(slot)) then
-        c.MessageLog(format('#%s - [busy]', reason), name, GetActionTexture(slot))
-        return
-    end
     c.LogWhatHappend(reason, true)
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end

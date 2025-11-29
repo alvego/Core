@@ -112,10 +112,6 @@ function c.DoSpell(reason, spell, target)
         c.MessageLog(format('#%s - [%s]', reason, canuseinfo), spell, GetSpellTexture(spell))
         return
     end
-    if c.IsBusySpell(spell) then
-        c.MessageLog(format('#%s - [busy]', reason), spell, GetSpellTexture(spell))
-        return
-    end
     c.LogWhatHappend(reason, true)
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end

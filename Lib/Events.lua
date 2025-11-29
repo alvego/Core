@@ -95,9 +95,18 @@ local function onUpdate()
         immediatelyNextUpdate = false
         return
     end
-    -- не чаще нескольких раз в секунду
-    if c.TimerLess('UPDATE', c.updateDelay) then return end
 
+
+    local gcdLeft = c.GetSpellCooldownLeft(c.gcdSpellId)
+    if gcdLeft > 0 and gcdLeft < c.updateDelay then
+        c.TimerStart('gcdUpdate')
+    end
+    if c.TimerMore('gcdUpdate', 0.1) then
+        -- не чаще нескольких раз в секунду
+        if c.TimerLess('UPDATE', c.updateDelay) then return end
+    end
+    --print(c.GetCurrentTime())
+    --c.Log('Update')
     if not c.IsLoaded() then return end
 
     c.CheckExtendedFunc()
