@@ -33,7 +33,7 @@ local tinsert = tinsert
 -------------------------------------------------------------------------------
 local isLoaded = false
 local cleanseTypes = { 'Magic', 'Disease', 'Poison' }
-local sealAuras, stanceAuras, stanceDefenceAuras, blessingAuras, tauntSpells
+local sealAuras, stanceAuras, stanceAurasDD, stanceDefenceAuras, blessingAuras, tauntSpells
 -------------------------------------------------------------------------------
 local function onLoad()
     if isLoaded then return end
@@ -96,6 +96,16 @@ local function onLoad()
         spell['Аура воина Света']
     }
 
+    stanceAurasDD = {
+        spell['Аура воздаяния'],
+        spell['Аура благочестия'],
+        spell['Аура защиты от темной магии'],
+        spell['Аура защиты от магии льда'],
+        spell['Аура защиты от огня'],
+        spell['Аура сосредоточенности'],
+        spell['Аура воина Света']
+    }
+
     stanceDefenceAuras = {
         spell['Аура благочестия'],
         spell['Аура защиты от темной магии'],
@@ -135,9 +145,12 @@ c.CustomCanSpell = function(spell, unit)
     return true
 end
 -------------------------------------------------------------------------------
+local isTank = false
+
 local function getAvailableStance(unit)
-    for i = 1, #stanceAuras do
-        local stance = stanceAuras[i]
+    local stances = isTank and stanceAuras or stanceAurasDD
+    for i = 1, #stances do
+        local stance = stances[i]
         if not c.UnitAuraByID(unit, stance) then
             return stance
         end
@@ -156,7 +169,7 @@ local function getAvailableBlessing(unit)
     return nil
 end
 
-local isTank = false
+
 -------------------------------------------------------------------------------
 c.AttachTelemetry(function()
     if not isLoaded then return end
@@ -340,6 +353,7 @@ local function updateProto()
             return reason
         end
         -------------------------------------------------------------------------------
+
         reason, action, unit = 'Нужно обновить стойку', isTank and 'Аура благочестия' or 'Аура воздаяния', 'player'
         if c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
             -- Могу прожать стойку
