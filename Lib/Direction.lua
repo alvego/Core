@@ -13,7 +13,8 @@ local atan2 = atan2
 
 local turnUnit = nil
 
-local function turnUpdate()
+local function turnUpdate(first)
+    if not first and c.busy then return end
     -- не поворачиваемся
     if c.Paused() or
         not turnUnit or
@@ -44,7 +45,7 @@ function c.TurnToUnit(target)
         target = 'target'
     end
     turnUnit = target
-    turnUpdate()
+    turnUpdate(true)
     return c.IsTurnToUnit()
 end
 
@@ -107,7 +108,8 @@ local function moveEnd(cond)
         c.MoveTo(getPointAhead(0.1))
     end
 end
-local function moveUpdate()
+local function moveUpdate(first)
+    if not first and c.busy then return end
     -- не идем
     if not moveUnit then return end
 
@@ -175,6 +177,6 @@ function c.MoveToUnit(target, maxDist)
     maveMaxDist = maxDist
     c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
     -- идем
-    moveUpdate()
+    moveUpdate(true)
     return c.IsMoveUnit()
 end

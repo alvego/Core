@@ -81,6 +81,9 @@ end
 
 -------------------------------------------------------------------------------
 -- Выполняем обработчики события OnUpdate
+local timeGap = c.advance
+local immediatelyTimer = 'immediatelyNextUpdate'
+local updateTimer = 'Update'
 local function onUpdate()
     local nextTickCount = #listNextTick
     if nextTickCount > 0 then
@@ -90,23 +93,36 @@ local function onUpdate()
         wipe(listNextTick)
     end
 
-    if immediatelyNextUpdate then
-        c.TimerReset('UPDATE')
-        immediatelyNextUpdate = false
-        return
-    end
-
-
+    -- осталось секунд до конца гкд или 0
     local gcdLeft = c.GetSpellCooldownLeft(c.gcdSpellId)
-    if gcdLeft > 0 and gcdLeft < c.updateDelay then
-        c.TimerStart('gcdUpdate')
+    if gcdLeft > 0 then
+        -- гкд запущено
+        if gcdLeft < (c.updateDelay + timeGap) then
+            --осталось меньше такта
+
+            if gcdLeft > timeGap then
+                -- ничего не делаем, ждем конца гкд
+                return
+            end
+
+            -- конец гкд, запускаем таймер немедленного обновления
+            c.TimerStart(immediatelyTimer)
+        else
+            -- гкд успешно запущен, до его конца еще есть время, не частим
+            -- стопаем таймер немедленного обновления
+            c.TimerReset(immediatelyTimer)
+        end
     end
-    if c.TimerMore('gcdUpdate', 0.1) then
-        -- не чаще нескольких раз в секунду
-        if c.TimerLess('UPDATE', c.updateDelay) then return end
+    c.busy = false -- не занят
+    if immediatelyNextUpdate or c.TimerLess(immediatelyTimer, timeGap) then
+        c.TimerReset(updateTimer)
+        immediatelyNextUpdate = false
+        c.busy = true -- занят прожимом гкд спела, не используй лишней логики
     end
-    --print(c.GetCurrentTime())
-    --c.Log('Update')
+
+    -- не чаще нескольких раз в секунду
+    if c.TimerLess(updateTimer, c.updateDelay) then return end
+
     if not c.IsLoaded() then return end
 
     c.CheckExtendedFunc()
@@ -116,6 +132,13 @@ local function onUpdate()
     end
     ----------------------------------------------------------------
     if not (skipNextUpdate or c.Paused()) and type(c.Update) == 'function' then
+        -- print(
+        --     c.TelemetryBool('gcd', gcdLeft > 0),
+        --     c.TelemetryBool('imm', c.TimerLess(immediatelyTimer, timeGap)),
+        --     c.TelemetryBool('busy', c.busy),
+        --     'interval:', c.Round(c.TimerElapsed('test'), 3)
+        -- )
+        -- c.TimerStart('test')
         c.Update()
     end
     skipNextUpdate = false
@@ -124,7 +147,7 @@ local function onUpdate()
         listAfterUpdate[i]()
     end
     ----------------------------------------------------------------
-    c.TimerStart('UPDATE') -- Обновляем таймер после вызова (плюс время выполнения)
+    c.TimerStart(updateTimer) -- Обновляем таймер после вызова (плюс время выполнения)
 end
 frame:SetScript('OnUpdate', onUpdate)
 -------------------------------------------------------------------------------

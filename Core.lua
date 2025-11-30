@@ -18,6 +18,7 @@ c.db = {}
 c.state = {}
 c.stateCache = {}
 c.loaded = false
+c.busy = true
 -------------------------------------------------------------------------------
 c.advance = 0.05
 c.updateDelay = 0.33

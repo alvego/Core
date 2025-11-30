@@ -422,7 +422,7 @@ local function waitForFindCorpse()
     -- ищем ближайший полезный труп
     local corpse = getNearCorpse()
     if corpse and c.MoveToUnit(corpse, maxDist) then
-        c.Message('идем к ' .. c.UnitInfo(corpse), 'Loot', lootIcon)
+        c.MessageLog('#идем к ' .. c.UnitInfo(corpse), 'Loot', lootIcon)
         c.TimerStart('waitForFindCorpse')
         lastCorpse = corpse
     end
@@ -431,6 +431,7 @@ end
 -------------------------------------------------------------------------------
 
 c.AttachBeforeUpdate(function()
+    if c.busy then return end
     if waitForLoot() then return end
     resetTimers()
     if st.mounted then return end

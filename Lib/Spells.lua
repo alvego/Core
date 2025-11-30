@@ -17,6 +17,7 @@ local type = type
 local tostring = tostring
 local SpellHasRange = SpellHasRange
 local GetSpellIDByName = GetSpellIDByName
+local ConsoleExec = ConsoleExec
 -------------------------------------------------------------------------------
 function c.UnitCasting(unit)
     unit = unit or 'player'
@@ -117,6 +118,8 @@ function c.DoSpell(reason, spell, target)
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end
     c.ClearCursor()
     c.Message(reason, spell, GetSpellTexture(spell))
+    ConsoleExec('Sound_EnableSFX 0')
     c.Spell(spell, target)
+    ConsoleExec('Sound_EnableSFX 1')
     st.lastSpell = spell
 end

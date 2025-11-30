@@ -20,6 +20,7 @@ end
 
 -------------------------------------------------------------------------------
 local function updateDotes()
+    if c.busy then return end
     -- Не чичтим если нужно обновлять
     if needUpdateDotes() then return end
     if (next(db) ~= nil) then
