@@ -361,7 +361,6 @@ function c.LogWhatHappend(msg, skipLogging)
     if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
     c.MessageLog(msg)
     if string.sub(msg, 1, 1) == '#' then msg = string.sub(msg, 2) end
-    if msg == 'none' then return end
     frame.text:SetText(format('|T%s:16:16:0:0|t %s', c.icon, msg))
     local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
     local textHeight = frame.text:GetStringHeight()
