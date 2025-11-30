@@ -287,7 +287,7 @@ local function updateProto()
     local reason, action, unit
     -------------------------------------------------------------------------------
     -- иногда в ротации есть необходимость прерывания своего каста
-    reason = '#cast [%s]'
+    reason = '#cast: %s'
     if st.playerCasting then return format(reason, st.playerCasting) end
 
     -------------------------------------------------------------------------------

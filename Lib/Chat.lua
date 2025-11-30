@@ -12,6 +12,7 @@ local FCF_DockFrame = FCF_DockFrame
 local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
+local IsControlKeyDown = IsControlKeyDown
 
 local format = format
 local tostring = tostring
@@ -20,6 +21,28 @@ local GRAY_FONT_COLOR = GRAY_FONT_COLOR
 local RED_FONT_COLOR = RED_FONT_COLOR
 local GREEN_FONT_COLOR = GREEN_FONT_COLOR
 local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
+-------------------------------------------------------------------------------
+local frame = CreateFrame('Frame', c.name .. 'WhatHappend', UIParent)
+frame:ClearAllPoints()
+frame:SetPoint("CENTER", UIParent, "TOP", 0, -5)
+frame:SetHeight(10)
+frame:SetWidth(10)
+frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
+frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
+frame.text:SetTextColor(0.8, 0.8, 0.8, 0.8)
+frame.text:SetAllPoints()
+-------------------------------------------------------------------------------
+-- очистка чата по Ctrl + LeftButton клик на табик
+local FCF_Tab_OnClick = FCF_Tab_OnClick
+_G.FCF_Tab_OnClick = function(self, button)
+    local chatFrame = _G["ChatFrame" .. self:GetID()];
+    if (IsControlKeyDown() == 1 and button == "LeftButton") then
+        chatFrame:Clear()
+        return
+    end
+    return FCF_Tab_OnClick(self, button)
+end
+
 -------------------------------------------------------------------------------
 -- Функция для получения текущего активного чата
 local function getDebugChatFrame()
@@ -35,8 +58,20 @@ local function getDebugChatFrame()
     return debugChatFrame, tab
 end
 -------------------------------------------------------------------------------
+-- очистка чата по началу боя
+-- c.AttachEvent('PLAYER_REGEN_DISABLED', function()
+--     local chatFrame, tab = getDebugChatFrame()
+--     if not chatFrame then return end
+--     chatFrame:Clear()
+-- end)
+-------------------------------------------------------------------------------
 local docked = true
 local function toggleChatVisibility(visible)
+    if visible then
+        if not frame:IsVisible() then frame:Show() end
+    else
+        if frame:IsVisible() then frame:Hide() end
+    end
     local chatFrame, tab = getDebugChatFrame()
     if chatFrame then
         if tab:IsShown() then
@@ -289,7 +324,7 @@ function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в U
     msg = tostring(msg)
     UIErrorsFrame:Clear()
     UIErrorsFrame:AddMessage(
-        formatMessage(
+        title == false and msg or formatMessage(
             icon or iconEcho,
             title or c.name,
             msg
@@ -320,11 +355,18 @@ UIErrorsFrame:UnregisterEvent('UI_ERROR_MESSAGE')
 -------------------------------------------------------------------------------
 function c.LogWhatHappend(msg, skipLogging)
     if not msg then
-        c.Error('WhatHappend is "' .. tostring(msg) .. '"?!!')
+        c.EchoError('WhatHappend is "' .. tostring(msg) .. '"?!!')
         return
     end
     if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
     c.MessageLog(msg)
+    if string.sub(msg, 1, 1) == '#' then msg = string.sub(msg, 2) end
+    if msg == 'none' then return end
+    frame.text:SetText(format('|T%s:16:16:0:0|t %s', c.icon, msg))
+    local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
+    local textHeight = frame.text:GetStringHeight()
+    frame:SetWidth(textWidth)
+    frame:SetHeight(textHeight)
 end
 
 -------------------------------------------------------------------------------

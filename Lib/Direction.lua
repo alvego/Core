@@ -8,6 +8,7 @@ local UnitIsUnit = UnitIsUnit
 local GetPlayerFacing = GetPlayerFacing
 local deg = deg
 local atan2 = atan2
+local WrapTextInColorCode = WrapTextInColorCode
 -------------------------------------------------------------------------------
 
 
@@ -101,7 +102,7 @@ local function moveEnd(cond)
     moveUnit = nil
     maveMaxDist = nil
     c.TimerReset('PlayerMove')
-    c.Log('#пришли', cond)
+    c.Log('#пришли', WrapTextInColorCode(cond, 'ff333333'))
     if st.speed > 0 and not st.move and not st.playerCasting then
         c.Log('#тормозим')
         c.MoveTo(getPointAhead(0.1))
@@ -120,7 +121,15 @@ local function moveUpdate()
         or not UnitExists(moveUnit)
         or not c.UnitInLOS('player', moveUnit)
     then
-        moveEnd('условия')
+        -- print(
+        --     c.TelemetryBool('move', st.move),
+        --     c.TelemetryBool('look', st.look),
+        --     c.TelemetryBool('playerCasting', st.playerCasting),
+        --     c.TelemetryBool('!moveUnit', not moveUnit),
+        --     c.TelemetryBool('!exists', not UnitExists(moveUnit)),
+        --     c.TelemetryBool('!los', not c.UnitInLOS('player', moveUnit))
+        -- )
+        moveEnd('по проверкам')
         return
     end
 
@@ -130,18 +139,18 @@ local function moveUpdate()
     local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
     local d = st.combatMode and 4 or 2 -- нет смысла подходить ближе
     if dist <= d then
-        moveEnd(format('ближе %dм.', d))
+        moveEnd(format('дист. < %dм.', d))
         return
     end
     if maveMaxDist and dist > maveMaxDist then
-        moveEnd(format('дальше %dм.', d))
+        moveEnd(format('дист. > %dм.', d))
         return
     end
 
     local ratio = d / dist
     -- Ограничиваем, чтобы остаться на отрезке (опционально)
     if ratio > 1 then
-        moveEnd(format('пришли ratio(%.1f) > 1  при d: %d', ratio, d))
+        moveEnd(format('ratio(%.1f) > 1 при d: %d', ratio, d))
         return
     end
     local x, y, z = tx + ratio * dx, ty + ratio * dy, tz + ratio * dz
@@ -149,18 +158,18 @@ local function moveUpdate()
 
     local delta = c.Distance(px, py, pz, x, y, z)
     if delta < 1 then
-        moveEnd(format('пришли delta(%.1f) < 1  при d: %d', delta, d))
+        moveEnd(format('delta(%.1f) < 1  при d: %d', delta, d))
         return
     end
 
     if c.TimerLess('PlayerMove', 0.5) then return end
     -- поворачиваемся
     if c.TurnToUnit(moveUnit) then
-        c.Log('#поворачиваем к ', c.UnitInfo(moveUnit))
+        --c.Log('#поворачиваем к ', c.UnitInfo(moveUnit))
         return
     end
     -- идем
-    c.Log('#идем к ', c.UnitInfo(moveUnit))
+    --c.Log('#идем к ', c.UnitInfo(moveUnit))
     c.MoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
@@ -171,9 +180,12 @@ function c.IsMoveUnit()
 end
 
 function c.MoveToUnit(target, maxDist)
-    moveUnit = target
+    local unit = moveUnit
+    moveUnit = c.GetUnitID(target)
     maveMaxDist = maxDist
-    c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
+    if moveUnit and unit ~= moveUnit then
+        c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
+    end
     -- идем
     moveUpdate()
     return c.IsMoveUnit()

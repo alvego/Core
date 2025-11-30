@@ -13,6 +13,8 @@ local VehicleExit = VehicleExit
 local IsUsableItem = IsUsableItem
 local IsUsableSpell = IsUsableSpell
 local IsCurrentSpell = IsCurrentSpell
+local GetUnitSpeed = GetUnitSpeed
+local UnitIsUnit = UnitIsUnit
 local type = type
 -------------------------------------------------------------------------------
 local mountAuras = {
@@ -122,7 +124,8 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         c.Command('/petattack [exists, harm, nodead]')
     end
 
-    if c.flags.move and not inMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() then
+    if c.flags.move and not inMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
+        not (GetUnitSpeed('target') > 0 and UnitIsUnit('target-target', 'player')) then
         c.MoveToUnit('target', 100)
     end
     if c.flags.autoLook and inMelee and st.combatMode and st.still then

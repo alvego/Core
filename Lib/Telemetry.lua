@@ -14,12 +14,12 @@ local WrapTextInColorCode = WrapTextInColorCode
 -------------------------------------------------------------------------------
 local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
+frame:SetPoint('TOPLEFT', 0, 0)
 frame:SetHeight(10)
 frame:SetWidth(10)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
 frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
 frame.text:SetAllPoints()
-frame:SetPoint('TOPLEFT', 0, 0)
 local texture = frame:CreateTexture('Texture', 'BACKGROUND')
 texture:SetBlendMode('DISABLE')
 texture:SetTexture(0, 0, 0)

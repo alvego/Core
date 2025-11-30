@@ -436,6 +436,7 @@ c.AttachBeforeUpdate(function()
     resetTimers()
     if st.mounted then return end
     if st.combatMode then return end
+    if st.combatLock and not st.invalidTarget then return end
     if waitForFishing() then return end
     if c.Paused() then return end
     if st.gcd or st.playerCasting then return end
