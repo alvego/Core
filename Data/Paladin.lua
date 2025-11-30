@@ -256,14 +256,14 @@ local function tryMouseTaunt()
     if not UnitExists(unit) or UnitIsDeadOrGhost(unit) then return end
 
     if UnitCanAttack('player', unit) and c.CanSpell(action, unit) and not c.HasBuff('Длань', unit) and (UnitThreatSituation('player', unit) ~= 3) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         mouseoverUid = nil
         return reason
     end
 
     reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', mouseoverUid
     if c.UnitInGroup(unit) and c.CanSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         mouseoverUid = nil
         return reason
     end
@@ -298,14 +298,14 @@ local function updateProto()
     local roleTank, roleHeal, roleDD = UnitGroupRolesAssigned("player")
     reason, action, unit = 'Влючаем баф для танкования', 'Праведное неистовство', 'player'
     if not isTank and roleTank and c.CanGcdSpell(action, unit, 5) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
 
     -------------------------------------------------------------------------------
     reason, action, unit = 'Деф PVE с созвездия', 'Криво-пружинный механизм', 'player'
     if not st.pvp and needHeal and c.CanSpell(action, unit) then
-        c.DoSpell(reason, action, unit) -- мгновенка
+        c.DoAction(reason, action, unit) -- мгновенка
         return reason
     end
     -------------------------------------------------------------------------------
@@ -313,20 +313,20 @@ local function updateProto()
     reason, action, unit = format('group: Хилка без каста на %s%% hp', c.Round(st.playerHP100)),
         (st.playerHP100 < 85) and 'Свет небес' or 'Вспышка Света', 'player'
     if not st.gcd and st.playerHP100 < 99 and c.CanGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
 
     -------------------------------------------------------------------------------
     reason, action, unit = 'Очень мало хп в бою, нужен хил', 'Возложение рук', 'player'
     if st.combatMode and st.playerHP100 < 20 and c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     -- reason, action, unit = 'Мало хп в бою, нужен деф', 'Божественная защита', 'player'
     -- if st.combatMode and needHeal and c.CanSpell(action, unit) then
-    --     c.DoSpell(reason, action, unit) -- мгновенка
+    --     c.DoAction(reason, action, unit) -- мгновенка
     -- end
     -------------------------------------------------------------------------------
     reason = tryMouseTaunt()
@@ -336,7 +336,7 @@ local function updateProto()
         -------------------------------------------------------------------------------
         reason, action, unit = 'Нужно обновить печать', 'Печать повиновения', 'player'
         if c.CanGcdSpell(action, unit, 10) and not c.UnitAuraByID(unit, sealAuras) then
-            c.DoSpell(reason, action, unit)
+            c.DoAction(reason, action, unit)
             return reason
         end
         -------------------------------------------------------------------------------
@@ -348,7 +348,7 @@ local function updateProto()
                 -- на мне ecть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
                 if stance == spell['Аура воина Света'] and not c.HasAuraByID(unit, spell[action]) then
-                    c.DoSpell(reason, action, unit) --  переключаемся в атуальную стойку
+                    c.DoAction(reason, action, unit) --  переключаемся в атуальную стойку
                     return reason
                 end
             else
@@ -356,7 +356,7 @@ local function updateProto()
                 stance = getAvailableStance(unit) -- что можно включить?
                 if stance then
                     action = spell[stance]
-                    c.DoSpell(reason, action, unit)
+                    c.DoAction(reason, action, unit)
                     return reason
                 end
             end
@@ -366,7 +366,7 @@ local function updateProto()
             isTank and 'Благословение неприкосновенности' or 'Благословение могущества', 'player'
         if useMana and not st.gcd and c.IsSpellNotUsed(blessingAuras, 15) and not c.HasMyBuff('Благословение', unit) then
             if not c.HasBuff(action, unit) and c.CanGcdSpell(action, unit) then
-                c.DoSpell(reason, action, unit)
+                c.DoAction(reason, action, unit)
                 return reason
             end
 
@@ -374,7 +374,7 @@ local function updateProto()
             if blessing then
                 action = blessing
                 if c.CanGcdSpell(action, unit) then
-                    c.DoSpell(reason, action, unit)
+                    c.DoAction(reason, action, unit)
                     return reason
                 end
             end
@@ -392,7 +392,7 @@ local function updateProto()
         if isPull then
             reason, action = 'пул', 'Освящение'
             if still and useMana and dist < 8 and c.CanGcdSpell(action) and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) then
-                c.DoSpell(reason, action)
+                c.DoAction(reason, action)
                 return reason
             end
         elseif st.combatLock and c.IsSpellNotUsed(tauntSpells, 0.5) then
@@ -401,7 +401,7 @@ local function updateProto()
             if c.CanSpell(action) then
                 unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 3) -- 3 red indicator
                 if unit then
-                    c.DoSpell(reason, action, unit)                               -- мговенка
+                    c.DoAction(reason, action, unit)                              -- мговенка
                     return reason                                                 -- не частим
                 end
             end
@@ -411,8 +411,8 @@ local function updateProto()
             if c.CanSpell(action) then
                 unit = getTauntTarget(action, true)
                 if unit then
-                    c.DoSpell(reason, action, unit) -- мговенка
-                    return reason                   -- не частим
+                    c.DoAction(reason, action, unit) -- мговенка
+                    return reason                    -- не частим
                 end
             end
 
@@ -421,7 +421,7 @@ local function updateProto()
             if not st.gcd and c.CanSpell(action) then
                 unit = c.FindValue(c.GetGroupUnits(), checkThreatUnit, action, 2, true) -- 2 orange indicator
                 if unit then
-                    c.DoSpell(reason, action, unit)
+                    c.DoAction(reason, action, unit)
                     return reason -- не частим
                 end
             end
@@ -430,7 +430,7 @@ local function updateProto()
             if useMana and not st.gcd and c.CanSpell(action) then
                 unit = getTauntTarget(action, false)
                 if unit then
-                    c.DoSpell(reason, action, unit)
+                    c.DoAction(reason, action, unit)
                     return reason -- не частим
                 end
             end
@@ -447,7 +447,7 @@ local function updateProto()
         local cleanseDebuff = c.HasDebuff(cleanseTypes, unit, 5) -- яд, болезнь и маг эффект
         reason = reason .. tostring(cleanseDebuff)
         if cleanseDebuff and c.CanGcdSpell(action, unit, 10) then
-            c.DoSpell(reason, action, unit)
+            c.DoAction(reason, action, unit)
             return reason
         end
     end
@@ -464,36 +464,36 @@ local function updateProto()
         (c.targetHard and 'страшно' or 'враги окружили'),
         'Освящение', 'target'
     if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
     if c.CanGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Обновляем поглощение', 'Священный щит', 'player'
     if c.CanGcdSpell(action, unit, 5) and not c.HasAuraByID(unit, spell[action]) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Нужнен баф на блокирование', 'Щит небес', 'player'
     if not st.gcd and dist < 10 and useMana and c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Урон агрилкой', 'Длань возмездия', 'target'
     if useMana and (isTank or not st.group) and not (UnitExists(unit .. '-target') and UnitIsUnit(unit .. '-target', 'player') == 1) and c.CanSpell(action, unit) then
-        c.DoSpell(reason, action, unit) -- мгновенка
+        c.DoAction(reason, action, unit) -- мгновенка
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Экзорцизм без каста', 'Экзорцизм', 'target'
     if useMana and st.playerHP100 >= 99 and c.CanGcdSpell(action, unit) and c.HasBuff('Криво-пружинный механизм') then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
@@ -501,7 +501,7 @@ local function updateProto()
     if useMana and not st.gcd and c.CanSpell(action) then
         unit = c.FindValue(c.GetTargets(), checkFinishTarget, action)
         if unit then
-            c.DoSpell(reason, action, unit)
+            c.DoAction(reason, action, unit)
             return reason -- не частим
         end
     end
@@ -510,39 +510,39 @@ local function updateProto()
     if useMana and c.CanGcdSpell(action) then
         unit = c.FindValue(c.GetTargets(), checkCastTarget, action)
         if unit then
-            c.DoSpell(reason, action, unit)
+            c.DoAction(reason, action, unit)
             return reason -- не частим
         end
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Молот в 3 цели', 'Молот праведника', 'target'
     if c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Вершим правосудие!', mana100 < 80 and 'Правосудие мудрости' or 'Правосудие света', 'target'
     if c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     local creatureType = UnitCreatureType('target')
     reason, action, unit = creatureType, 'Гнев небес', 'target'
     if not st.gcd and useMana and dist < 10 and c.GetEnemyCount(10, 'player') > 1 and (creatureType == 'Нежить' or creatureType == 'Демон') and c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Заполнитель', 'Щит праведности', 'target'
     if useMana and c.CanGcdSpell(action, unit) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason
     end
     -------------------------------------------------------------------------------
     reason, action, unit = 'Прям совсем нечего нажать, кидаем Сало', 'Щит мстителя', 'target'
     if useMana and c.CanGcdSpell(action, unit, 3) then
-        c.DoSpell(reason, action, unit)
+        c.DoAction(reason, action, unit)
         return reason -- не частим
     end
 
@@ -561,7 +561,7 @@ function c.Update()
         if stopReason == c.stopReasonMount and not UnitOnTaxi("player") then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
             if not c.HasAuraByID(unit, spell[action]) and c.CanGcdSpell(action, unit) then
-                c.DoSpell(reason, action, unit)
+                c.DoAction(reason, action, unit)
                 stopReason = reason
             end
         end

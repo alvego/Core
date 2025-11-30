@@ -74,7 +74,7 @@ end
 
 local function getButton(slot)
     if type(slot) == "string" then slot = c.GetSlot(slot, true) end
-    if type(slot) ~= 'number' or slot <= 0 then return end
+    if not slot then return end
     return _G["BT4Button" .. slot]
 end
 
@@ -105,7 +105,7 @@ end
 -------------------------------------------------------------------------------
 hooksecurefunc(c, 'Spell', function(spell, ...)
     local slot = c.GetSlot(spell, true)
-    if type(slot) ~= 'number' or slot <= 0 then return end
+    if not slot then return end
     c.ShowActionGlow(slot, 2)
 end)
 

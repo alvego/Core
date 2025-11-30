@@ -111,16 +111,16 @@ end
 -------------------------------------------------------------------------------
 function c.GetSlot(action, skipError)
     if action == 'none' then
-        return 0
+        return
     end
-    if not action and not skipError then
-        c.Error('Неверное действие. Используй none для бездействия.');
-        return 0
+    if not action then
+        if not skipError then c.Error('Неверное действие. Используй none для бездействия.') end
+        return
     end
     local slot = actions[action]
-    if not slot and not skipError then
-        c.Error('Не могу найти на панели [' .. action .. ']');
-        return 0
+    if not slot then
+        if not skipError then c.Error('Не могу найти на панели [' .. action .. ']') end
+        return
     end
     return slot
 end
@@ -182,7 +182,11 @@ function c.DoAction(reason, name, target, btnNum)
     if type(button) ~= 'string' then
         button = mouseButtons[1]
     end
-    local slot = c.GetSlot(name)
+    local slot = c.GetSlot(name, true)
+    if not slot then
+        c.DoSpell(reason, name, target) -- failback
+        return
+    end
     local canuse, canuseinfo = c.CanUseSlot(slot, target)
     if not canuse then
         c.MessageLog(format('#%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
@@ -192,7 +196,7 @@ function c.DoAction(reason, name, target, btnNum)
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end
     c.ClearCursor()
-    c.Message(reason, name, GetActionTexture(slot))
+    c.Message(reason, name, GetActionTexture(slot), 1, 0.8431, 0) -- permanent gold
     c.Action(slot, target, button)
     st.lastAction = name
 end

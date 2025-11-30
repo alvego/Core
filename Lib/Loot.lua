@@ -341,7 +341,7 @@ local function waitForFishing()
             fish.guid = nil
             if not c.Paused() then
                 CombatLogClearEntries()
-                c.DoSpell('Забрасываем', fish.spell)
+                c.DoAction('Забрасываем', fish.spell)
                 fish.run = true
                 fish.delay = 0.5 + math_random() * 2.5 -- [0.5 .. 3]
             end
@@ -406,7 +406,7 @@ local function waitForCorpseSkin()
     -- ищем кого можно освежевать
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForSkin)
     if not corpse then return false end
-    c.DoSpell('Свежуем', skinSpell, corpse)
+    c.DoAction('Свежуем', skinSpell, corpse)
     skinTarget = corpse
     c.TimerStart(skinTimer)
     return true
