@@ -293,12 +293,10 @@ local function updateProto()
     -------------------------------------------------------------------------------
     c.TimerToggle('needHeal', st.playerHP100 < (st.group and 40 or 60)) -- таймер идет пока hp < 40
     c.TimerToggle('needMoreDamage', st.ttd and st.ttd > 10)             -- таймер идет пока ttd > 20
-    c.TimerToggle('still', st.still)
     -------------------------------------------------------------------------------
     -- hp меньше половины уже 2 секунды
     local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 1.5) and st.combatMode
     local needMoreDamage = c.TimerStarted('needMoreDamage') and c.TimerMore('needMoreDamage', 3)
-    local still = c.TimerStarted('still') and c.TimerMore('still', 1)
     -- нужно бурстить
     local needBurst = st.targetHard and needMoreDamage --and dancingRuneWeaponReady
     -------------------------------------------------------------------------------
@@ -405,7 +403,7 @@ local function updateProto()
 
         if isPull then
             reason, action = 'пул', 'Освящение'
-            if still and useMana and dist < 8 and c.CanGcdSpell(action) and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) then
+            if st.still and useMana and dist < 8 and c.CanGcdSpell(action) and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) then
                 c.DoAction(reason, action)
                 return reason
             end
@@ -477,7 +475,7 @@ local function updateProto()
         'Нужно пустить лужу - ' ..
         (c.targetHard and 'страшно' or 'враги окружили'),
         'Освящение', 'target'
-    if not st.gcd and still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanGcdSpell(action, unit) then
+    if not st.gcd and st.still and useMana and dist < 8 and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end

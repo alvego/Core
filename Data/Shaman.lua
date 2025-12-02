@@ -33,10 +33,8 @@ local function updateEnhance()
     if st.playerCasting then return format(reason, st.playerCasting) end
     -------------------------------------------------------------------------------
     c.TimerToggle('needHeal', st.playerHP100 < (st.group and 50 or 80))
-    c.TimerToggle('still', st.still)
     c.TimerToggle('needMagmaTotem', st.ttd and st.ttd > 20)
     local needMagmaTotem = c.TimerStarted('needMagmaTotem') and c.TimerMore('needMagmaTotem', 2)
-    local still = c.TimerStarted('still') and c.TimerMore('still', 1)
     local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 2)
     local mana100 = c.UnitMana100('player')
     local aoe = c.GetEnemyCount(10, 'player') > 2
@@ -68,7 +66,7 @@ local function updateEnhance()
     -------------------------------------------------------------------------------
     -- Дальше считаем что у нас есть валидная цель
     -------------------------------------------------------------------------------
-  
+
     reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
     if isInstant and not aoe and c.CanGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) then
         c.DoAction(reason, action, unit)
@@ -105,7 +103,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'АОЕ или босс', 'Тотем магмы', 'target'
-    if mana100 >= 30 and still and (aoe or needMagmaTotem) and c.CanGcdSpell(action) and dist < 6 and not HasMagmaTotem() then
+    if mana100 >= 30 and st.still and (aoe or needMagmaTotem) and c.CanGcdSpell(action) and dist < 6 and not HasMagmaTotem() then
         c.DoAction(reason, action)
         return reason
     end

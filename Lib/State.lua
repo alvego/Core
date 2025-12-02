@@ -71,7 +71,11 @@ local function updateState()
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
     c.TimerToggle('Falling', st.falling)
-    st.still = st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit()
+    c.TimerToggle('Still', st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit())
+    st.still = c.TimerStarted('Still') and c.TimerMore('Still', 0.5)
+    st.targetSpeed = GetUnitSpeed('target') or 0
+    c.TimerToggle('TargetStill', st.existsTarget and st.targetSpeed == 0)
+    st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.5)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
 c.AttachBeforeUpdate(updateState)

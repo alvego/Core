@@ -358,8 +358,8 @@ function c.LogWhatHappend(msg, skipLogging)
         c.EchoError('WhatHappend is "' .. tostring(msg) .. '"?!!')
         return
     end
-    if not c.IsChanged('WhatHappend', msg) or skipLogging then return end
-    c.MessageLog(msg)
+    if not c.IsChanged('WhatHappend', msg) then return end
+    if not skipLogging then c.MessageLog(msg) end
     if string.sub(msg, 1, 1) == '#' then msg = string.sub(msg, 2) end
     frame.text:SetText(format('|T%s:16:16:0:0|t %s', c.icon, msg))
     local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста

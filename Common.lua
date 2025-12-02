@@ -125,7 +125,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     end
 
     if c.flags.move and not inMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
-        not (GetUnitSpeed('target') > 0 and UnitIsUnit('target-target', 'player')) then
+        (st.targetStill or not UnitIsUnit('target-target', 'player')) then
         c.MoveToUnit('target', 100)
     end
     if c.flags.autoLook and inMelee and st.combatMode and st.still then
