@@ -14,6 +14,8 @@ local GameTooltip = GameTooltip
 local bit = bit
 local wipe = wipe
 local math_max = math.max
+local IsControlKeyDown = IsControlKeyDown
+local ChatFrame_OpenChat = ChatFrame_OpenChat
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
@@ -63,16 +65,14 @@ local function logTargetSource(source, method)
     c.MessageLog(format('#%s через %s', source, method), title, icon)
 end
 
-local function afterMouseUp()
+local afterMouseUp = function()
     local unit = 'target'
-    local name = UnitName(unit)
+    local name = UnitName('target')
     if name ~= mouseUnitName then
         return
     end
     local guid = UnitGUID(unit)
-    if guid == prevGUID then
-        return
-    end
+    if guid == prevGUID then return end
     prevGUID = guid
     searchLastGuid = nil
     manualLastGuid = guid
@@ -85,6 +85,10 @@ c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
     if not mouseUnitName then return end
     mouseButton = button
     c.NextTick(afterMouseUp)
+
+    if button == 'LeftButton' and IsControlKeyDown() == 1 then
+        ChatFrame_OpenChat(mouseUnitName)
+    end
 end)
 
 local function hookTargetChange(funcName)

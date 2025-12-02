@@ -189,11 +189,11 @@ function c.DoAction(reason, name, target, btnNum)
         return
     end
     c.LogWhatHappend(reason, true)
-    local canuse, canuseinfo = c.CanUseSlot(slot, target)
-    if not canuse then
-        c.MessageLog(format('#%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
-        return
-    end
+    -- local canuse, canuseinfo = c.CanUseSlot(slot, target)
+    -- if not canuse then
+    --     c.MessageLog(format('#%s - [%s]', reason, canuseinfo), name, GetActionTexture(slot))
+    --     return
+    -- end
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end
     c.ClearCursor()

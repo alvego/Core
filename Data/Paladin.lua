@@ -256,6 +256,7 @@ local mouseoverTimer = 'mouseoverTimer'
 c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
     if button ~= "MiddleButton" then return end
     local unit = 'mouseover'
+
     if not UnitExists(unit) then return end
     mouseoverUid = c.GetUnitID(unit)
     c.TimerStart(mouseoverTimer)

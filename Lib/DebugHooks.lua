@@ -5,7 +5,35 @@ local c = Core
 -------------------------------------------------------------------------------
 -- local GetCVar = GetCVar
 -- local SetCVar = SetCVar
+local SetRaidTarget = SetRaidTarget
+local ChatFrame_OpenChat = ChatFrame_OpenChat
+local ChatEdit_ChooseBoxForSend = ChatEdit_ChooseBoxForSend
+local IsControlKeyDown = IsControlKeyDown
+local type = type
 -------------------------------------------------------------------------------
+
+local function checkByName(unit, unitName)
+    if not UnitExists(unit) then return end
+    local name = UnitName(unit)
+    if not name then return end
+    if not c.StrContains(name, unitName) then return end
+    return unit
+end
+
+local function lookUnitByName(name)
+    if type(name) ~= 'string' or name == '' then return end
+    local units = c.GetUnits()
+    local unit = c.FindValue(units, checkByName, name)
+    if not unit then return end
+    c.Command('/target ' .. unit)
+    SetRaidTarget(unit, 8)
+    c.LookAtUnit(unit)
+end
+
+c.AttachActionHook('tar', function()
+    local editBox = ChatEdit_ChooseBoxForSend()
+    lookUnitByName(editBox:GetText())
+end)
 
 
 -- Константы оффсетов для WoW 3.3.5a (100% точные на 2025 год)
@@ -59,5 +87,4 @@ c.AttachActionHook('test', function()
     --c.LookAtUnit('target')
     --c.LookAtUnit(c.GetUnitID('target'))
     --c.hasSkinTooltip(c.GetUnitID('target'))
-    print(c.IsManualTarget())
 end)
