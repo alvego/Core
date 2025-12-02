@@ -66,7 +66,7 @@ local function updateState()
     end
 
     st.autoattack = IsCurrentSpell('Автоматическая атака')
-    st.combatMode = st.attack or c.TimerLess('combatTarget', 1)
+    st.combatMode = st.attack or c.TimerLess('combatTarget', c.updateDelay * 2)
 
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
@@ -75,9 +75,12 @@ local function updateState()
     st.still = c.TimerStarted('Still') and c.TimerMore('Still', 0.5)
     st.targetSpeed = GetUnitSpeed('target') or 0
     c.TimerToggle('TargetStill', st.existsTarget and st.targetSpeed == 0)
-    st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.5)
+    st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.55)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
 c.AttachBeforeUpdate(updateState)
 updateState() -- for init
 -------------------------------------------------------------------------------
+c.AttachEvent('PLAYER_REGEN_DISABLED', function()
+    c.TimerStart('combatTarget')
+end)
