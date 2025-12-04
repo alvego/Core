@@ -36,7 +36,7 @@ local function updateState()
     st.playerHP100 = c.UnitHealth100()
     st.playerMana100 = c.UnitMana100()
 
-    st.existsTarget = UnitExists('target')
+    st.targetExists = UnitExists('target')
     st.ttd = c.UnitTimeToDie('target')
     st.invalidTarget = c.IsInvalidTarget()
 
@@ -52,21 +52,21 @@ local function updateState()
 
     st.combatLock = InCombatLockdown()
     c.TimerToggle('combatLock', st.combatLock)
-    st.combatTarget = st.existsTarget and UnitAffectingCombat('target')
-    st.bossTarget = st.existsTarget and c.UnitIsBoss('target')
-    st.targetPlayer = st.existsTarget and UnitIsPlayer('target')
+    st.targetCombat = st.targetExists and UnitAffectingCombat('target')
+    st.targetBoss = st.targetExists and c.UnitIsBoss('target')
+    st.targetPlayer = st.targetExists and UnitIsPlayer('target')
 
     st.targetImmune = st.invalidTarget or c.UnitIsImmune('target')
     st.targetImmuneMagic = st.targetImmune or c.UnitIsMagicImmune('target')
-    st.targetVisible = st.existsTarget and c.UnitInLOS('player', 'target')
-    st.targetBehind = st.existsTarget and c.UnitBehind('target')
+    st.targetVisible = st.targetExists and c.UnitInLOS('player', 'target')
+    st.targetBehind = st.targetExists and c.UnitBehind('target')
 
-    if not st.invalidTarget and st.combatTarget then
-        c.TimerStart('combatTarget')
+    if not st.invalidTarget and st.targetCombat then
+        c.TimerStart('targetCombat')
     end
 
     st.autoattack = IsCurrentSpell('Автоматическая атака')
-    st.combatMode = st.attack or c.TimerLess('combatTarget', c.updateDelay * 2)
+    st.combatMode = st.attack or c.TimerLess('targetCombat', c.updateDelay * 2)
 
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
@@ -74,7 +74,7 @@ local function updateState()
     c.TimerToggle('Still', st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit())
     st.still = c.TimerStarted('Still') and c.TimerMore('Still', 0.5)
     st.targetSpeed = GetUnitSpeed('target') or 0
-    c.TimerToggle('TargetStill', st.existsTarget and st.targetSpeed == 0)
+    c.TimerToggle('TargetStill', st.targetExists and st.targetSpeed == 0)
     st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.55)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
@@ -82,5 +82,5 @@ c.AttachBeforeUpdate(updateState)
 updateState() -- for init
 -------------------------------------------------------------------------------
 c.AttachEvent('PLAYER_REGEN_DISABLED', function()
-    c.TimerStart('combatTarget')
+    c.TimerStart('targetCombat')
 end)

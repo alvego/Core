@@ -107,7 +107,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#выбирали цель в 5 м, причина: dist = ' .. c.Round(dist)
     end
 
-    if not st.attack and not st.combatTarget and not st.autoattack then
+    if not st.attack and not st.targetCombat and not st.autoattack then
         return '#цель не в бою, не нажата атака, не вкл автоатака'
     end
     local stopDebuff = not st.attack and c.HasDebuff(stopAttackDebuff)

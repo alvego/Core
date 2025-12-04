@@ -42,6 +42,7 @@ Lib\StateHooks.lua
 Lib\DuelHooks.lua
 Lib\MoveHooks.lua
 Lib\DebugHooks.lua
+Lib\UnitFinder.lua
 
 Common.lua
 

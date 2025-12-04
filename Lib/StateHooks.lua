@@ -31,7 +31,7 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
         end
     elseif button == "Button5" then
         if c.Paused() then
-            if st.existsTarget then
+            if st.targetExists then
                 c.Command('/cleartarget')
                 c.Log('#сброс цели')
             elseif c.UnitCasting() or SpellIsTargeting() then

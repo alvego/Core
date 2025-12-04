@@ -324,7 +324,7 @@ function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в U
     msg = tostring(msg)
     UIErrorsFrame:Clear()
     UIErrorsFrame:AddMessage(
-        title == false and msg or formatMessage(
+        title == nil and icon == nil and msg or formatMessage(
             icon or iconEcho,
             title or c.name,
             msg

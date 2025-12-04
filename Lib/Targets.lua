@@ -364,6 +364,6 @@ c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent
     -- нас пытаются ударить
     if not (subEvent:match('_DAMAGE') or subEvent:match('_MISSED')) then return end
     c.MessageLog(format('#нас атакует: %s', sourceName), title, icon)
-    c.TimerStart('combatTarget') -- повлияет на st.combatMode и выбор цели
+    c.TimerStart('targetCombat') -- повлияет на st.combatMode и выбор цели
 end)
 -------------------------------------------------------------------------------
