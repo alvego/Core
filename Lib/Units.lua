@@ -20,6 +20,7 @@ local GetActiveSpecGroup = GetActiveSpecGroup
 local UnitClass = UnitClass
 local UnitInRaid = UnitInRaid
 local UnitInParty = UnitInParty
+
 -------------------------------------------------------------------------------
 function c.UnitHealth100(unit)
     unit = unit or 'player'

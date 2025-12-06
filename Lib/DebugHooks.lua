@@ -57,4 +57,9 @@ c.ActionHook('test', function()
     --c.LookAtUnit('target')
     --c.LookAtUnit(c.GetUnitID('target'))
     --c.hasSkinTooltip(c.GetUnitID('target'))
+    --IsSpellInRange("Автоматическая атака", "target") == 1
+    --ChatFrame_OpenChat(c.ToStr(GetPlayerMapPosition("player")))
+    --ChatFrame_OpenChat(c.ToStr(c.UnitPosition("player")))
+    -- print()
 end)
+

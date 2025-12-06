@@ -21,6 +21,7 @@ local GetUnitSpeed = GetUnitSpeed
 local IsFalling = IsFalling
 local IsMouselooking = IsMouselooking
 local wipe = wipe
+local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 local function updateState()
     wipe(c.stateCache)
@@ -55,7 +56,7 @@ local function updateState()
     st.targetCombat = st.targetExists and UnitAffectingCombat('target')
     st.targetBoss = st.targetExists and c.UnitIsBoss('target')
     st.targetPlayer = st.targetExists and UnitIsPlayer('target')
-
+    st.targetMelee = st.targetExists and c.InMelee('target')
     st.targetImmune = st.invalidTarget or c.UnitIsImmune('target')
     st.targetImmuneMagic = st.targetImmune or c.UnitIsMagicImmune('target')
     st.targetVisible = st.targetExists and c.UnitInLOS('player', 'target')
@@ -70,12 +71,13 @@ local function updateState()
 
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
-    c.TimerToggle('Falling', st.falling)
-    c.TimerToggle('Still', st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit())
-    st.still = c.TimerStarted('Still') and c.TimerMore('Still', 0.5)
+    c.TimerToggle('falling', st.falling)
+    c.TimerToggle('still', st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit())
+    st.still = c.TimerStarted('still') and c.TimerMore('still', 0.5)
+    st.afk = UnitIsAFK('player') == 1 and c.TimerStarted('still') and c.TimerMore('still', 60)
     st.targetSpeed = GetUnitSpeed('target') or 0
-    c.TimerToggle('TargetStill', st.targetExists and st.targetSpeed == 0)
-    st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.55)
+    c.TimerToggle('targetStill', st.targetExists and st.targetSpeed == 0)
+    st.targetStill = c.TimerStarted('targetStill') and c.TimerMore('targetStill', 0.55)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
 c.BeforeUpdate(updateState)

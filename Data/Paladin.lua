@@ -189,7 +189,7 @@ c.Telemetry(function()
 
     return c.TelemetryRedBool(
         format('Dist: %dм.', UnitExists('target') and c.Round(c.UnitDistance('player', 'target')) or 0),
-        not UnitExists('target') or c.IsSpellInRange('Молот праведника', 'target')
+        c.InMelee('target')
     )
 end)
 

@@ -20,9 +20,11 @@ local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
 local UnitIsPlayer = UnitIsPlayer
+local IsItemInRange = IsItemInRange
 local WrapTextInColorCode = WrapTextInColorCode
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
+local C_Item = C_Item
 -------------------------------------------------------------------------------
 local localDebug = false
 -------------------------------------------------------------------------------
@@ -109,30 +111,11 @@ local function hookTargetChange(funcName)
     end)
 end
 hookTargetChange('TargetUnit')
--- hookTargetChange('TargetLastTarget')
--- hookTargetChange('TargetLastFriend')
--- hookTargetChange('TargetLastEnemy')
 hookTargetChange('AssistUnit')
 hookTargetChange('TargetNearest')
 hookTargetChange('TargetNearestEnemy')
--- hookTargetChange('TargetNearestEnemyPlayer')
 hookTargetChange('TargetNearestFriend')
--- hookTargetChange('TargetNearestFriendPlayer')
--- hookTargetChange('TargetNearestPartyMember')
--- hookTargetChange('TargetNearestRaidMember')
--- hookTargetChange('SpellTargetUnit')
 
--- hooksecurefunc('SpellStopCasting', function(...)
---     c.Log('SpellStopCasting', ..., GetTime())
--- end)
-
--- hooksecurefunc('SpellStoTargeting', function(...)
---     c.Log('SpellStopTargeting', ..., GetTime())
--- end)
-
--- hooksecurefunc('UnitIsCharmed', function(...)
---     c.Log('UnitIsCharmed', ..., GetTime())
--- end)
 
 c.Event('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
@@ -141,7 +124,6 @@ c.Event('PLAYER_TARGET_CHANGED', function()
         manualLastGuid = nil
         return
     end
-    --prevGUID = lastGUID
     lastGUID = UnitGUID(unit)
     c.Message(format('#Новая цель %s', c.UnitInfo(unit)), title, icon)
 end)
@@ -216,10 +198,18 @@ local function isInvalidEnemy(unit)
     if search.inViewfield and not enemyInView(unit) then
         return 'skip: out of view field'
     end
-    -- слишком далеко
-    if search.maxDistance and enemyDistance(unit) > search.maxDistance then
-        return c.ToStr('skip: too far')
+
+    if search.maxDistance then
+        -- слишком далеко
+        if enemyDistance(unit) > search.maxDistance then
+            return c.ToStr('skip: too far')
+        end
+    else -- maxDistance == nil, melee only
+        if not c.InMelee(unit) then
+            return c.ToStr('skip: !melee')
+        end
     end
+
     return nil
 end
 
@@ -257,9 +247,10 @@ local function initEnemy()
     -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
     enemy.combat = st.combatMode and not st.attack
     enemy.look = false
+    enemy.melee = false
 end
 
-local meleeDist = 5
+
 local function checkEnemy(uid)
     local invalidEnemy = isInvalidEnemy(uid)
     if invalidEnemy then
@@ -275,22 +266,27 @@ local function checkEnemy(uid)
         return 'skip: !attack & !combat'
     end
 
+    local melee = c.InMelee(uid)
+    if enemy.melee and not melee then
+        return format('skip: !melee')
+    end
 
-    local dist = math_max(meleeDist, enemyDistance(uid)) -- melee
-    -- уже нашел ближе
-    if dist > enemy.dist then
+    local dist = enemyDistance(uid)
+    -- если в мили, растояние уже не существенно
+    if not melee and dist > enemy.dist then -- уже нашел ближе
         return format('skip: dist(%.1f) > enemy.dist(%.1f)', dist, enemy.dist)
     end
 
-    local look = enemyInView(uid) -- meleeDist
-    if dist == enemy.dist and enemy.look and not look then
-        return 'skip: melee !look'
+    local look = enemyInView(uid)
+    if (enemy.melee or not melee) and enemy.look and not look then
+        return 'skip: !look'
     end
 
     enemy.uid = uid
     enemy.combat = combat
     enemy.dist = dist
     enemy.look = look
+    enemy.melee = melee
     return c.ToStr(
         'success,',
         'combat:', enemy.combat,
@@ -337,7 +333,7 @@ local function searchSelect(tar)
     c.Command('/target ' .. tar)
     return true
 end
-
+-- if maxDistance == nil then find only melle target
 function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     initSearch(maxDistance, inViewfield)
     -- assist
@@ -367,3 +363,33 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
     c.TimerStart('targetCombat') -- повлияет на st.combatMode и выбор цели
 end)
 -------------------------------------------------------------------------------
+--[[
+    ItemID: 37727
+    ---
+    Ruby Acorn
+    Quest Item
+    Item Level 1
+    Use: Use on the corpse of a fallen Ruby Keeper to return the dragon to the earth.
+    ---
+    Рубиновый желудь
+    Уровень предмета: 1
+    Предмет, необходимый для задания
+    Использование: Примените на тело Рубинового хранителя, чтобы вернуть дракона земле.
+    ]]
+local meleeItemID = 37727
+c.Event('PLAYER_LOGIN', function()
+    if not C_Item.GetItemInfoRaw(meleeItemID) then
+        C_Item.RequestServerCache(meleeItemID)
+    end
+end)
+local meleeDist = 5
+c.InMelee = c.GetCachedFunc(function(target)
+    target = target or 'target'
+    -- Рубиновый желудь (5 ярдов melee)
+    local result = IsItemInRange(meleeItemID, "target")
+    if not result or result == -1 then
+        -- fallback to 5yrd check
+        return c.UnitDistance('player', target) < meleeDist
+    end
+    return result == 1
+end)

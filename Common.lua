@@ -87,7 +87,6 @@ local stopAttackDebuff = {
     -- 'Глубинный ужас',
     -- 'Ментальный крик'
 }
-local meleeDist = 5
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
@@ -98,13 +97,12 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         end
         return '#' .. st.invalidTarget
     end
-    local dist = c.UnitDistance('target', 'player')
-    local inMelee = dist <= meleeDist
-    if c.flags.autoMelee and not inMelee and not c.IsManualTarget() and c.SearchTarget(tryAssist == false, meleeDist, inViewfield) then
+
+    if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(tryAssist == false, nil, inViewfield) then
         -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
         c.ImmediatelyNextUpdate()
         -- выходим так как нужно обновить state
-        return '#выбирали цель в 5 м, причина: dist = ' .. c.Round(dist)
+        return '#выбирали цель для ближнего боя'
     end
 
     if not st.attack and not st.targetCombat and not st.autoattack then
@@ -123,12 +121,12 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         c.Command('/startattack [exists, harm, nodead]')
         c.Command('/petattack [exists, harm, nodead]')
     end
-
-    if c.flags.move and not inMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
+    local dist = c.UnitDistance('target', 'player')
+    if c.flags.move and not st.targetMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
         (st.targetStill or not UnitIsUnit('target-target', 'player')) then
         c.MoveToUnit('target', 100)
     end
-    if c.flags.autoLook and inMelee and st.combatMode and st.still then
+    if c.flags.autoLook and st.targetMelee and st.combatMode and st.still then
         c.TurnToUnit('target')
     end
     return nil

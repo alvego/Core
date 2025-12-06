@@ -10,7 +10,6 @@ local tostring = tostring
 local error = error
 local setmetatable = setmetatable
 local format = format
-local UnitIsAFK = UnitIsAFK
 -------------------------------------------------------------------------------
 c.name = ...
 c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
@@ -69,7 +68,7 @@ function c.Paused(value)
     if type(value) == 'boolean' then
         c.flags.paused = value
     end
-    if UnitIsAFK('player') == 1 then
+    if c.state.afk then
         return true
     end
     return c.flags.paused
