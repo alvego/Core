@@ -20,10 +20,10 @@ local function updateLagTime(event, ...)
         end
     end
 end
-c.AttachEvent('UNIT_SPELLCAST_SENT', updateLagTime)
-c.AttachEvent('UNIT_SPELLCAST_START', updateLagTime)
-c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', updateLagTime)
-c.AttachEvent('UNIT_SPELLCAST_FAILED', updateLagTime)
+c.Event('UNIT_SPELLCAST_SENT', updateLagTime)
+c.Event('UNIT_SPELLCAST_START', updateLagTime)
+c.Event('UNIT_SPELLCAST_SUCCEEDED', updateLagTime)
+c.Event('UNIT_SPELLCAST_FAILED', updateLagTime)
 -------------------------------------------------------------------------------
 local function updateLatency() -- Время сетевой задержки
     if c.TimerMore('updateLagTime', 15) then
@@ -31,5 +31,5 @@ local function updateLatency() -- Время сетевой задержки
         c.TimerStart('updateLagTime')
     end
 end
-c.AttachBeforeUpdate(updateLatency)
+c.BeforeUpdate(updateLatency)
 -------------------------------------------------------------------------------

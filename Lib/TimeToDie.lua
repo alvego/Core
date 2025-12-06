@@ -38,7 +38,7 @@ local function clearUnits()
         wipe(db)
     end
 end
-c.AttachBeforeUpdate(clearUnits)
+c.BeforeUpdate(clearUnits)
 -------------------------------------------------------------------------------
 local function updateUnit(guid, amount)
     -- Берем по гуиду, запоминаем начало боя и суммируем весь входящий в таргет урон, потом делим на время с начала
@@ -82,7 +82,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
         killUnit(destGUID)
     end
 end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
 -------------------------------------------------------------------------------
 function c.UnitTimeToDie(unit)

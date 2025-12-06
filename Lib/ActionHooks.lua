@@ -38,7 +38,7 @@ end
 local userActionTimer = 'userAction'
 local actionHooks = {}
 
-function c.AttachActionHook(name, func)
+function c.ActionHook(name, func)
     if type(name) ~= 'string' then error('Wrong name type') end
     if type(func) ~= 'function' then error('Wrong func type') end
     actionHooks[name] = func
@@ -141,5 +141,5 @@ local function updateUserAction()
     c.Action(userAction.slot, userAction.target, userAction.button)
     c.SkipNextUpdate()
 end
-c.AttachBeforeUpdate(updateUserAction)
+c.BeforeUpdate(updateUserAction)
 -------------------------------------------------------------------------------

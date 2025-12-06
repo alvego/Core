@@ -11,7 +11,7 @@ local ChatEdit_ChooseBoxForSend = ChatEdit_ChooseBoxForSend
 local type = type
 -------------------------------------------------------------------------------
 local unitName, unit, dist
-c.AttachActionHook('tar', function()
+c.ActionHook('tar', function()
     local editBox = ChatEdit_ChooseBoxForSend()
     if not editBox then return end
     local name = editBox:GetText()
@@ -39,7 +39,7 @@ local function checkByName(u)
     dist = d
 end
 
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     if not unitName then return end
     if st.targetExists then return end
     if st.combatMode then return end
@@ -92,13 +92,13 @@ end)
 --     end
 -- end
 
--- c.AttachBeforeUpdate(findOffset)
+-- c.BeforeUpdate(findOffset)
 
 -- hooksecurefunc('ClearTarget', function(...)
 --     c.Log('ClearTarget', ..., GetTime())
 -- end)
 local ignored = {}
-c.AttachActionHook('test', function()
+c.ActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
     -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())
     --ChatFrame_OpenChat(StaticPopup1Button1:GetText())

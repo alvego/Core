@@ -41,13 +41,13 @@ local c = Core
 --     end
 -- end
 
--- c.AttachBeforeUpdate(findOffset)
+-- c.BeforeUpdate(findOffset)
 
 -- hooksecurefunc('ClearTarget', function(...)
 --     c.Log('ClearTarget', ..., GetTime())
 -- end)
 local ignored = {}
-c.AttachActionHook('test', function()
+c.ActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
     -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())
     --ChatFrame_OpenChat(StaticPopup1Button1:GetText())

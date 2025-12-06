@@ -59,7 +59,7 @@ local function getDebugChatFrame()
 end
 -------------------------------------------------------------------------------
 -- очистка чата по началу боя
--- c.AttachEvent('PLAYER_REGEN_DISABLED', function()
+-- c.Event('PLAYER_REGEN_DISABLED', function()
 --     local chatFrame, tab = getDebugChatFrame()
 --     if not chatFrame then return end
 --     chatFrame:Clear()
@@ -105,7 +105,7 @@ local function toggleChatVisibility(visible)
         end
     end
 end
-c.AttachUpdateDebugState(toggleChatVisibility)
+c.UpdateDebugState(toggleChatVisibility)
 
 -------------------------------------------------------------------------------
 -- Функция для получения свободного чат-фрейма
@@ -158,7 +158,7 @@ local function createDebugChatTab()
     end
     configureDebugChatFrame(chatFrame)
 end
-c.AttachEvent('PLAYER_LOGIN', createDebugChatTab)
+c.Event('PLAYER_LOGIN', createDebugChatTab)
 
 -------------------------------------------------------------------------------
 local iconSuccess = [[Interface\Icons\ability_vehicle_shellshieldgenerator_green]]

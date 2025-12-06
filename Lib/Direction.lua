@@ -34,7 +34,7 @@ local function turnUpdate()
     --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
-c.AttachBeforeUpdate(turnUpdate)
+c.BeforeUpdate(turnUpdate)
 
 function c.IsTurnToUnit()
     return turnUnit ~= nil -- поворачиваемся
@@ -59,7 +59,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
         end
     end
 end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
 -------------------------------------------------------------------------------
 local function onUIErrorMessage(event, ...)
@@ -68,7 +68,7 @@ local function onUIErrorMessage(event, ...)
         c.TurnToUnit('target')
     end
 end
-c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
+c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 
 -------------------------------------------------------------------------------
 function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
@@ -173,7 +173,7 @@ local function moveUpdate()
     c.MoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
-c.AttachBeforeUpdate(moveUpdate)
+c.BeforeUpdate(moveUpdate)
 
 function c.IsMoveUnit()
     return moveUnit ~= nil

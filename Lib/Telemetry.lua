@@ -34,11 +34,11 @@ local function updateTelemetryVisibility(visible)
     end
     if frame:IsVisible() then frame:Hide() end
 end
-c.AttachUpdateDebugState(updateTelemetryVisibility)
+c.UpdateDebugState(updateTelemetryVisibility)
 
 -------------------------------------------------------------------------------
 local list = {}
-function c.AttachTelemetry(fn)
+function c.Telemetry(fn)
     if type(fn) ~= 'function' then error('Telemetry fn must be a getter function') end
     tinsert(list, fn)
 end
@@ -79,6 +79,6 @@ local function updateTelemetry()
         frame:SetHeight(textHeight)
     end
 end
-c.AttachAfterUpdate(updateTelemetry)
+c.AfterUpdate(updateTelemetry)
 
 -------------------------------------------------------------------------------

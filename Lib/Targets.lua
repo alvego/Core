@@ -79,7 +79,7 @@ local afterMouseUp = function()
     logTargetSource(manualSource, mouseButton)
 end
 
-c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
+c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'LeftButton' and button ~= 'RightButton' then return end
     mouseUnitName = GameTooltip:GetUnit()
     if not mouseUnitName then return end
@@ -134,7 +134,7 @@ hookTargetChange('TargetNearestFriend')
 --     c.Log('UnitIsCharmed', ..., GetTime())
 -- end)
 
-c.AttachEvent('PLAYER_TARGET_CHANGED', function()
+c.Event('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then
         searchLastGuid = nil
@@ -150,7 +150,7 @@ function c.IsManualTarget()
     return manualLastGuid and lastGUID == manualLastGuid
 end
 
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
+c.Event('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
              destFlags, ...)
         if subEvent == 'UNIT_DIED' and lastGUID == destGUID then
@@ -350,9 +350,9 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
 end
 
 -------------------------------------------------------------------------------
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
-                                                      sourceGUID, sourceName, sourceFlags,
-                                                      destGUID, destName, destFlags, ...)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
+                                                sourceGUID, sourceName, sourceFlags,
+                                                destGUID, destName, destFlags, ...)
     if not st.combatLock then return end -- только в бою
     if st.combatMode then return end     -- если нет цели
     -- только направленные на меня

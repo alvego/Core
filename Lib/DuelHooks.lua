@@ -14,6 +14,6 @@ hooksecurefunc('StartDuel', startDuel);
 local function duelUpdate(event)
     st.duel = event == 'DUEL_REQUESTED'
 end
-c.AttachEvent('DUEL_REQUESTED', duelUpdate)
-c.AttachEvent('DUEL_FINISHED', duelUpdate)
+c.Event('DUEL_REQUESTED', duelUpdate)
+c.Event('DUEL_FINISHED', duelUpdate)
 -------------------------------------------------------------------------------

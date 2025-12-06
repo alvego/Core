@@ -162,7 +162,7 @@ end
 GameTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 -------------------------------------------------------------------------------
-c.AttachEvent('GLOBAL_MOUSE_UP', function(event, button)
+c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'MiddleButton' then return end
     local name, link = GameTooltip:GetItem()
     if not name or not link then return end
@@ -206,7 +206,7 @@ function c.RemoveJunk()
     c.TimerStart(junkTimer)
 end
 
-c.AttachEvent('LOOT_CLOSED', function()
+c.Event('LOOT_CLOSED', function()
     if not c.flags.autoDelJunk then return end
     if c.TimerLess(junkTimer, 60) then return end
     local free = c.GetBagsFreeSlots()
@@ -219,7 +219,7 @@ end
 
 -------------------------------------------------------------------------------
 local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
-c.AttachEvent('MERCHANT_SHOW', function()
+c.Event('MERCHANT_SHOW', function()
     ClearCursor()
     local sum = 0
     local cnt = 0

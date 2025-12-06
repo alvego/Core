@@ -44,7 +44,7 @@ local skinIcon              = nil
 -------------------------------------------------------------------------------
 local maxTryCount           = 2
 -------------------------------------------------------------------------------
-c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+c.Event('PLAYER_ENTERING_WORLD', function()
     allowSkin = IsUsableSpell(skinSpell)
     if allowSkin then
         skinIcon = GetSpellTexture(skinSpell)
@@ -66,7 +66,7 @@ local function isLooting()
 end
 
 
-c.AttachEvent('LOOT_OPENED', function()
+c.Event('LOOT_OPENED', function()
     if lootTarget then
         -- успешло полутали цель, у нее есть лут
         lootList[lootTarget] = true -- добавлем в список уже лутаных целей, чтоб не лутать повторно
@@ -124,8 +124,8 @@ local function onEvent(event, ...)
 
     skinTarget = nil
 end
-c.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', onEvent)
+c.Event('UNIT_SPELLCAST_FAILED', onEvent)
+c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
 -------------------------------------------------------------------------------
 local function resetTimers()
     if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 300) then
@@ -301,11 +301,11 @@ fish.guid = nil
 fish.bobber = nil
 fish.delay = 1
 -------------------------------------------------------------------------------
-c.AttachActionHook(fish.spell, function()
+c.ActionHook(fish.spell, function()
     fish.run = true
 end)
 -------------------------------------------------------------------------------
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED',
+c.Event('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
              destFlags, ...)
         local spellName = select(2, ...)
@@ -430,7 +430,7 @@ end
 
 -------------------------------------------------------------------------------
 
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     if c.busy then return end
     if waitForLoot() then return end
     resetTimers()

@@ -6,11 +6,11 @@ local c = Core
 local InCombatLockdown = InCombatLockdown
 local CombatLogClearEntries = CombatLogClearEntries
 -------------------------------------------------------------------------------
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', function(...)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(...)
     c.TimerStart('CombatLog') -- начинаем отсчет с последнего полученного сообщения
 end)
 
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     if c.busy then return end
     if not InCombatLockdown() then
         return -- не в бою
@@ -28,6 +28,6 @@ c.AttachBeforeUpdate(function()
 end
 )
 
--- c.AttachTelemetry(function()
+-- c.Telemetry(function()
 --     return c.TelemetryBool('CL', c.TimerLess('CombatLog', 3))
 -- end)

@@ -31,7 +31,7 @@ local function updateDotes()
         wipe(db)
     end
 end
-c.AttachBeforeUpdate(updateDotes)
+c.BeforeUpdate(updateDotes)
 
 -------------------------------------------------------------------------------
 local function addDotedUnit(guid, spell)
@@ -65,7 +65,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
         removeDotedUnit(destGUID, spellName)
     end
 end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
 ------------------------------------------------------------------------------------------------------------------
 function c.DotedUnitCount(spell) -- Count of units with my dote <spell>

@@ -50,7 +50,7 @@ hooksecurefunc('MoveAndSteerStop', function() st.moveAndSteer = false end);
 st.jump = false
 st.fly = false
 st.swim = false
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     st.fly = IsFlying()
     st.swim = IsSwimming()
     st.jump = st.moveUp and not st.fly and not st.swim
@@ -59,7 +59,7 @@ c.AttachBeforeUpdate(function()
 end)
 
 
--- c.AttachTelemetry(function()
+-- c.Telemetry(function()
 --     return c.ToStr(
 --         c.TelemetryBool('jp', st.jump),
 --         c.TelemetryBool('st', st.still),

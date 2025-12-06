@@ -47,8 +47,8 @@ local function refreshBookSpells()
         end
     end
 end
-c.AttachEvent('SPELLS_CHANGED', refreshBookSpells)
-c.AttachEvent('PLAYER_ENTERING_WORLD', refreshBookSpells)
+c.Event('SPELLS_CHANGED', refreshBookSpells)
+c.Event('PLAYER_ENTERING_WORLD', refreshBookSpells)
 -------------------------------------------------------------------------------
 function c.IsSpellInRange(spell, unit)
     if next(bookSpellIds) == nil then refreshBookSpells() end

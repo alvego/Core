@@ -33,7 +33,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
         end
     end
 end
-c.AttachEvent('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 -------------------------------------------------------------------------------
 local failedSpell = nil
 local function onEvent(event, ...)
@@ -61,15 +61,15 @@ local function onEvent(event, ...)
         c.TimerStart('Fail:' .. failedSpell)
     end
 end
-c.AttachEvent('UNIT_SPELLCAST_START', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_STOP', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_FAILED', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_DELAYED', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_SUCCEEDED', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_INTERRUPTED', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_CHANNEL_START', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
-c.AttachEvent('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
+c.Event('UNIT_SPELLCAST_START', onEvent)
+c.Event('UNIT_SPELLCAST_STOP', onEvent)
+c.Event('UNIT_SPELLCAST_FAILED', onEvent)
+c.Event('UNIT_SPELLCAST_DELAYED', onEvent)
+c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
+c.Event('UNIT_SPELLCAST_INTERRUPTED', onEvent)
+c.Event('UNIT_SPELLCAST_CHANNEL_START', onEvent)
+c.Event('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
+c.Event('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
 -------------------------------------------------------------------------------
 
 local function onUIErrorMessage(event, ...)
@@ -78,7 +78,7 @@ local function onUIErrorMessage(event, ...)
     local message = ...
     pushError(message, action)
 end
-c.AttachEvent('UI_ERROR_MESSAGE', onUIErrorMessage)
+c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 
 -------------------------------------------------------------------------------
 local skipErrors = {
@@ -101,7 +101,7 @@ local function onErrorUpdate()
     end
     wipe(errorBuffer)
 end
-c.AttachBeforeUpdate(onErrorUpdate)
+c.BeforeUpdate(onErrorUpdate)
 -------------------------------------------------------------------------------
 
 function c.IsSpellFailedRecently(spellName)

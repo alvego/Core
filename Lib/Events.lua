@@ -14,7 +14,7 @@ local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
 -------------------------------------------------------------------------------
 -- Список событие -> обработчики
 local eventList = {}
-function c.AttachEvent(event, func)
+function c.Event(event, func)
     if type(func) ~= 'function' then error('Wrong type') end
     local funcList = eventList[event]
     if nil == funcList then
@@ -55,14 +55,14 @@ function c.NextTick(func)
 end
 
 local listBeforeUpdate = {}
-function c.AttachBeforeUpdate(func)
+function c.BeforeUpdate(func)
     if type(func) ~= 'function' then error('Wrong type') end
     tinsert(listBeforeUpdate, func)
 end
 
 -------------------------------------------------------------------------------
 local listAfterUpdate = {}
-function c.AttachAfterUpdate(func)
+function c.AfterUpdate(func)
     if type(func) ~= 'function' then error('Wrong type') end
     tinsert(listAfterUpdate, func)
 end

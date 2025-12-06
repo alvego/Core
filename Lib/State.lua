@@ -78,9 +78,9 @@ local function updateState()
     st.targetStill = c.TimerStarted('TargetStill') and c.TimerMore('TargetStill', 0.55)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
-c.AttachBeforeUpdate(updateState)
+c.BeforeUpdate(updateState)
 updateState() -- for init
 -------------------------------------------------------------------------------
-c.AttachEvent('PLAYER_REGEN_DISABLED', function()
+c.Event('PLAYER_REGEN_DISABLED', function()
     c.TimerStart('targetCombat')
 end)

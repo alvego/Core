@@ -16,7 +16,7 @@ local st = c.state
 local GetTotemInfo = GetTotemInfo
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
+c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(10, 'player'))
 end)
 -------------------------------------------------------------------------------

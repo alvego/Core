@@ -129,7 +129,7 @@ local function onLoad()
 
     isLoaded = true;
 end
-c.AttachEvent('PLAYER_ENTERING_WORLD', onLoad)
+c.Event('PLAYER_ENTERING_WORLD', onLoad)
 
 -------------------------------------------------------------------------------
 --local forbearanceId = 25771 -- Воздержанность
@@ -171,20 +171,20 @@ end
 
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
+c.Telemetry(function()
     if not isLoaded then return end
     isTank = c.HasAuraByID('player', spell['Праведное неистовство']) and true or false
     return c.TelemetryRedBool('Tank', isTank)
 end)
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
+c.Telemetry(function()
     if not isLoaded then return end
     return c.TelemetryRedBool('Aura', c.UnitAuraByID('player', stanceDefenceAuras))
 end)
 
 -------------------------------------------------------------------------------
-c.AttachTelemetry(function()
+c.Telemetry(function()
     if not isLoaded then return end
 
     return c.TelemetryRedBool(
@@ -253,7 +253,7 @@ end
 -------------------------------------------------------------------------------
 local mouseoverUid = nil
 local mouseoverTimer = 'mouseoverTimer'
-c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
+c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
     if button ~= "MiddleButton" then return end
     local unit = 'mouseover'
 

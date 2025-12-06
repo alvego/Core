@@ -9,14 +9,14 @@ local SpellIsTargeting = SpellIsTargeting
 -------------------------------------------------------------------------------
 st.attack = false
 st.start = false
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     st.attack = c.TimerLess('attack', 1)
     st.start = c.TimerLess('start', 10)
     if not UnitIsDeadOrGhost('player') then return end
     if not c.Paused() then c.Paused(true) end
 end)
 
-c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
+c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
     if button == "Button4" then
         if c.Paused() then
             c.Paused(false)
@@ -49,7 +49,7 @@ c.AttachEvent('GLOBAL_MOUSE_DOWN', function(event, button)
     end
 end)
 -------------------------------------------------------------------------------
-c.AttachEvent('ADDON_LOADED', function(event, addonName)
+c.Event('ADDON_LOADED', function(event, addonName)
     if addonName ~= c.name then return end
     CoreDB = CoreDB or {}
     c.db = CoreDB
@@ -59,5 +59,5 @@ end)
 local function inWorldUpdate(event)
     st.inWorld = event == 'PLAYER_ENTERING_WORLD'
 end
-c.AttachEvent('PLAYER_ENTERING_WORLD', inWorldUpdate)
-c.AttachEvent('PLAYER_LEAVING_WORLD', inWorldUpdate)
+c.Event('PLAYER_ENTERING_WORLD', inWorldUpdate)
+c.Event('PLAYER_LEAVING_WORLD', inWorldUpdate)

@@ -21,7 +21,7 @@ end
 
 -------------------------------------------------------------------------------
 local funcList = {}
-function c.AttachUpdateDebugState(func)
+function c.UpdateDebugState(func)
     if type(func) ~= 'function' then error('Wrong type') end
     tinsert(funcList, func)
 end
@@ -35,7 +35,7 @@ local function updateDebugState()
         end
     end
 end
-c.AttachEvent('PLAYER_ENTERING_WORLD', updateDebugState)
+c.Event('PLAYER_ENTERING_WORLD', updateDebugState)
 -------------------------------------------------------------------------------
 local function updateDebugStateHook(key, value)
     if key ~= 'scriptErrors' then return end
@@ -55,11 +55,11 @@ end
 
 -- local lastMana = 0
 
--- c.AttachEvent('PLAYER_ENTERING_WORLD', function()
+-- c.Event('PLAYER_ENTERING_WORLD', function()
 --     lastMana = UnitMana('player')
 -- end)
 
--- c.AttachEvent('UNIT_MANA', function(event, unit)
+-- c.Event('UNIT_MANA', function(event, unit)
 --     if unit ~= 'player' then return end
 --     local currentMana = UnitMana('player')
 --     local spent = lastMana - currentMana

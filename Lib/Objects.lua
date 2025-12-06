@@ -15,7 +15,7 @@ local units = {}
 local targets = {}
 local objects = {}
 -------------------------------------------------------------------------------
-c.AttachBeforeUpdate(function()
+c.BeforeUpdate(function()
     if c.busy then return end
     if c.TimerMore('resetObjectCache', 1.5) then
         actual = false

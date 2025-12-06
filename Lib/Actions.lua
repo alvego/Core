@@ -47,8 +47,8 @@ local updateActions = function()
         end
     end
 end
-c.AttachEvent('ACTIONBAR_SLOT_CHANGED', updateActions)
-c.AttachEvent('PLAYER_ENTERING_WORLD', updateActions)
+c.Event('ACTIONBAR_SLOT_CHANGED', updateActions)
+c.Event('PLAYER_ENTERING_WORLD', updateActions)
 
 
 -------------------------------------------------------------------------------
