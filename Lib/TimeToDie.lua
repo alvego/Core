@@ -27,7 +27,6 @@ local function needUpdateUnits()
 end
 -------------------------------------------------------------------------------
 local function clearUnits()
-    if c.busy then return end
     -- Не чиcтим если нужно обновлять
     if needUpdateUnits() then return end
     if (next(db) ~= nil) then

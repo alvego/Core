@@ -34,7 +34,7 @@ local function turnUpdate()
     --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
-c.BeforeUpdate(turnUpdate)
+c.BeforeUpdate(turnUpdate, true)
 
 function c.IsTurnToUnit()
     return turnUnit ~= nil -- поворачиваемся
@@ -173,7 +173,7 @@ local function moveUpdate()
     c.MoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
-c.BeforeUpdate(moveUpdate)
+c.BeforeUpdate(moveUpdate, true)
 
 function c.IsMoveUnit()
     return moveUnit ~= nil

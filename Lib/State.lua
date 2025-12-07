@@ -80,7 +80,7 @@ local function updateState()
     st.targetStill = c.TimerStarted('targetStill') and c.TimerMore('targetStill', 0.55)
     st.gcd = not c.IsReadySpell(c.gcdSpellId)
 end
-c.BeforeUpdate(updateState)
+c.BeforeUpdate(updateState, true)
 updateState() -- for init
 -------------------------------------------------------------------------------
 c.Event('PLAYER_REGEN_DISABLED', function()

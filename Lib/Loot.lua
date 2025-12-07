@@ -431,7 +431,6 @@ end
 -------------------------------------------------------------------------------
 
 c.BeforeUpdate(function()
-    if c.busy then return end
     if waitForLoot() then return end
     resetTimers()
     if st.mounted then return end

@@ -14,7 +14,7 @@ c.BeforeUpdate(function()
     st.start = c.TimerLess('start', 10)
     if not UnitIsDeadOrGhost('player') then return end
     if not c.Paused() then c.Paused(true) end
-end)
+end, true)
 
 c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
     if button == "Button4" then

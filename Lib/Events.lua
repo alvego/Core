@@ -54,17 +54,36 @@ function c.NextTick(func)
     tinsert(listNextTick, func)
 end
 
-local listBeforeUpdate = {}
-function c.BeforeUpdate(func)
-    if type(func) ~= 'function' then error('Wrong type') end
-    tinsert(listBeforeUpdate, func)
+local function callNextTick()
+    local nextTickCount = #listNextTick
+    if nextTickCount > 0 then
+        for i = 1, nextTickCount do
+            listNextTick[i]()
+        end
+        wipe(listNextTick)
+    end
 end
 
 -------------------------------------------------------------------------------
+local listBeforeUpdate = {}
+function c.BeforeUpdate(func, important)
+    if type(func) ~= 'function' then error('Wrong type') end
+    listBeforeUpdate[func] = important or false
+end
+
 local listAfterUpdate = {}
-function c.AfterUpdate(func)
+function c.AfterUpdate(func, important)
     if type(func) ~= 'function' then error('Wrong type') end
     tinsert(listAfterUpdate, func)
+    listAfterUpdate[func] = important or false
+end
+
+local function callUpdateList(list)
+    for func, important in pairs(list) do
+        if not c.busy or important then
+            func()
+        end
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -85,13 +104,7 @@ local timeGap = c.advance
 local immediatelyTimer = 'immediatelyNextUpdate'
 local updateTimer = 'Update'
 local function onUpdate()
-    local nextTickCount = #listNextTick
-    if nextTickCount > 0 then
-        for i = 1, nextTickCount do
-            listNextTick[i]()
-        end
-        wipe(listNextTick)
-    end
+    callNextTick()
 
     -- осталось секунд до конца гкд или 0
     local gcdLeft = c.GetSpellCooldownLeft(c.gcdSpellId)
@@ -127,9 +140,7 @@ local function onUpdate()
 
     c.CheckExtendedFunc()
     ----------------------------------------------------------------
-    for i = 1, #listBeforeUpdate do
-        listBeforeUpdate[i]()
-    end
+    callUpdateList(listBeforeUpdate)
     ----------------------------------------------------------------
     if not (skipNextUpdate or c.Paused()) and type(c.Update) == 'function' then
         -- print(
@@ -143,9 +154,7 @@ local function onUpdate()
     end
     skipNextUpdate = false
     ----------------------------------------------------------------
-    for i = 1, #listAfterUpdate do
-        listAfterUpdate[i]()
-    end
+    callUpdateList(listAfterUpdate)
     ----------------------------------------------------------------
     c.TimerStart(updateTimer) -- Обновляем таймер после вызова (плюс время выполнения)
 end

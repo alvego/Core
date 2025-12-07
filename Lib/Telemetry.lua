@@ -69,7 +69,6 @@ end
 -------------------------------------------------------------------------------
 
 local function updateTelemetry()
-    if c.busy then return end
     local telemetry = createTelemetryMessage()
     if c.IsChanged('UpdateTelemetry', telemetry) then
         frame.text:SetText(telemetry)

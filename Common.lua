@@ -13,9 +13,9 @@ local VehicleExit = VehicleExit
 local IsUsableItem = IsUsableItem
 local IsUsableSpell = IsUsableSpell
 local IsCurrentSpell = IsCurrentSpell
-local GetUnitSpeed = GetUnitSpeed
 local UnitIsUnit = UnitIsUnit
 local type = type
+
 -------------------------------------------------------------------------------
 local mountAuras = {
     311563, -- Магический пузырь

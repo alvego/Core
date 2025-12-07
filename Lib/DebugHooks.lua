@@ -43,23 +43,14 @@ local c = Core
 
 -- c.BeforeUpdate(findOffset)
 
--- hooksecurefunc('ClearTarget', function(...)
---     c.Log('ClearTarget', ..., GetTime())
--- end)
-local ignored = {}
+--local ignored = {}
 c.ActionHook('test', function()
     -- print(StaticPopup1:IsVisible() == 1, StaticPopup1.text:GetText())
     -- print(StaticPopup1Button1:IsVisible() == 1 and StaticPopup1Button1:IsEnabled() == 1, StaticPopup1Button1:GetText())
     --ChatFrame_OpenChat(StaticPopup1Button1:GetText())
 
-    -- local x, y, z = c.UnitPosition('player')
-    -- ChatFrame_OpenChat(c.ToStr(c.Round(x), c.Round(y), c.Round(z)))
-    --c.LookAtUnit('target')
-    --c.LookAtUnit(c.GetUnitID('target'))
-    --c.hasSkinTooltip(c.GetUnitID('target'))
-    --IsSpellInRange("Автоматическая атака", "target") == 1
-    --ChatFrame_OpenChat(c.ToStr(GetPlayerMapPosition("player")))
-    --ChatFrame_OpenChat(c.ToStr(c.UnitPosition("player")))
-    -- print()
+    local pmx, pmy = GetPlayerMapPosition('player')
+    local px, py, pz = c.UnitPosition('player')
+    print('map:', pmx, pmy, 'WorldToMap:', c.WorldToMap(px, py))
+    print('world:', px, py, pz, 'MapToWorld:', c.MapToWorld(pmx, pmy))
 end)
-

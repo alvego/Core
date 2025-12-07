@@ -19,6 +19,7 @@ Lib\Chat.lua
 Lib\Telemetry.lua
 Lib\TelemetryHooks.lua
 Lib\Minimap.lua
+Lib\Zones.lua
 Lib\CombatLog.lua
 Lib\Units.lua
 Lib\TimeToDie.lua

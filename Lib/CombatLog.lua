@@ -11,7 +11,6 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(...)
 end)
 
 c.BeforeUpdate(function()
-    if c.busy then return end
     if not InCombatLockdown() then
         return -- не в бою
     end

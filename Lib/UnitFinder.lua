@@ -11,6 +11,7 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 local ChatEdit_ChooseBoxForSend = ChatEdit_ChooseBoxForSend
 local type = type
 local PlaySound = PlaySound
+local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local SOUNDKIT = SOUNDKIT
 -------------------------------------------------------------------------------
 local unitName, unit, dist
@@ -33,6 +34,7 @@ end)
 
 local function checkByName(u)
     if not UnitExists(u) then return end
+    if UnitIsTappedByPlayer(u) then return end
     local name = UnitName(u)
     if not name then return end
     if not c.StrContains(name, unitName) then return end
@@ -43,7 +45,6 @@ local function checkByName(u)
 end
 
 c.AfterUpdate(function()
-    if c.busy then return end
     if not unitName then return end
     if st.targetExists then return end
     if st.combatMode then return end

@@ -56,7 +56,7 @@ c.BeforeUpdate(function()
     st.jump = st.moveUp and not st.fly and not st.swim
     st.move = st.moveForward or st.moveBackward or st.strafeLeft or st.strafeRight or st.moveAndSteer
     if st.still and st.autorun then st.autorun = false end
-end)
+end, true)
 
 
 -- c.Telemetry(function()

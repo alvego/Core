@@ -141,5 +141,5 @@ local function updateUserAction()
     c.Action(userAction.slot, userAction.target, userAction.button)
     c.SkipNextUpdate()
 end
-c.BeforeUpdate(updateUserAction)
+c.BeforeUpdate(updateUserAction, true)
 -------------------------------------------------------------------------------

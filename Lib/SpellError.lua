@@ -101,7 +101,7 @@ local function onErrorUpdate()
     end
     wipe(errorBuffer)
 end
-c.BeforeUpdate(onErrorUpdate)
+c.BeforeUpdate(onErrorUpdate, true)
 -------------------------------------------------------------------------------
 
 function c.IsSpellFailedRecently(spellName)
