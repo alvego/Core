@@ -108,11 +108,6 @@ function c.DoSpell(reason, spell, target)
         return
     end
     c.LogWhatHappend(reason, true)
-    -- local canuse, canuseinfo = c.CanUseSpell(spell, target)
-    -- if not canuse then
-    --     c.MessageLog(format('#%s - [%s]', reason, canuseinfo), spell, GetSpellTexture(spell))
-    --     return
-    -- end
     local targetName = target and UnitName(target) or nil
     if targetName then reason = reason .. ' ' .. c.UnitInfo(target) end
     c.ClearCursor()

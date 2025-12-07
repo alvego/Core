@@ -10,7 +10,6 @@ local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
-local GetMacroSpell = GetMacroSpell
 -------------------------------------------------------------------------------
 local userAction = {}
 local function userActionReset()
@@ -136,8 +135,6 @@ local function updateUserAction()
         return
     end
     c.Message('жмем!', userAction.name, userAction.icon)
-    -- print(userAction.slot, userAction.target, userAction.button)
-    -- print(c.GetSlotName(userAction.slot), UnitExists(userAction.target or 'target'))
     c.Action(userAction.slot, userAction.target, userAction.button)
     c.SkipNextUpdate()
 end

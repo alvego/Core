@@ -58,7 +58,6 @@ function c.GetStopReason()
         c.Command('/cancelaura ' .. auraName)
     end
 
-
     if not st.attack then
         local auraName = c.HasBuff(eatAuras, 'player')
         if auraName then

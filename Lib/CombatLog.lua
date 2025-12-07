@@ -23,10 +23,5 @@ c.BeforeUpdate(function()
     -- сброс CombatLog
     CombatLogClearEntries()
     c.TimerStart('CombatLogReset')
-    --c.Log('CombatLogClearEntries!')
 end
 )
-
--- c.Telemetry(function()
---     return c.TelemetryBool('CL', c.TimerLess('CombatLog', 3))
--- end)
