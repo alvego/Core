@@ -74,7 +74,6 @@ end
 local listAfterUpdate = {}
 function c.AfterUpdate(func, important)
     if type(func) ~= 'function' then error('Wrong type') end
-    tinsert(listAfterUpdate, func)
     listAfterUpdate[func] = important or false
 end
 

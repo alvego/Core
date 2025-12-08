@@ -215,7 +215,7 @@ end
 local function checkTauntTarget(target, action, checkHand) -- target for taunt
     if not target or not UnitExists(target) then return end
     if not UnitCanAttack('player', target) then return end
-    if not UnitAffectingCombat(target) == 1 then return end
+    if UnitAffectingCombat(target) ~= 1 then return end
     if not c.IsSpellInRange(action, target) then return end
     if checkHand and c.HasBuff('Длань', target) then return end
     if not c.UnitInLOS('player', target) then return end
