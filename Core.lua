@@ -1,8 +1,10 @@
 -------------------------------------------------------------------------------
--- by Unknown Coder
+-- Core by Unknown Coder
 -------------------------------------------------------------------------------
+---@class Core
 Core = {}
 -------------------------------------------------------------------------------
+---@class Core
 local c = Core
 -------------------------------------------------------------------------------
 local type = type
@@ -14,6 +16,8 @@ local format = format
 c.name = ...
 c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
 c.db = {}
+
+---@class Core.state
 c.state = {}
 c.stateCache = {}
 c.loaded = false
@@ -24,6 +28,7 @@ c.updateDelay = 0.25
 c.latency = c.advance
 c.gcdSpellId = 61304
 -------------------------------------------------------------------------------
+---@class Core.flags
 local flags = { -- defaults
     paused = true,
     loot = false,
@@ -33,7 +38,7 @@ local flags = { -- defaults
     autoLook = false,
     autoMelee = false
 }
-
+---@class Core.flags
 c.flags = {} -- metatable linked with db
 -- Метатаблица для c.flags
 local flagsMeta = {

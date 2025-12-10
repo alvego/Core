@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
--- by Unknown Coder
+-- Core by Unknown Coder
 -------------------------------------------------------------------------------
+---@class Core
 local c = Core
 -------------------------------------------------------------------------------
 local UnitClass = UnitClass
@@ -11,6 +12,7 @@ if className ~= 'SHAMAN' then return end
 -------------------------------------------------------------------------------
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
+---@class Core.state
 local st = c.state
 --c.updateDelay = 0.25
 local GetTotemInfo = GetTotemInfo
