@@ -87,8 +87,8 @@ function c.GetActionSpell(slot)
         if itemName then
             spellName = GetItemSpell(itemName)
         end
-    elseif actionType == 'pet' then
-        spellName = GetPetActionInfo(id) -- id как pet slot index
+        -- elseif actionType == 'pet' then
+        --     spellName = GetPetActionInfo(id) -- id как pet slot index
     end
     return spellName
 end

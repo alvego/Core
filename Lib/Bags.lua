@@ -232,7 +232,7 @@ c.Event('MERCHANT_SHOW', function()
             --c.MessageLog(c.ToStr(link, isTrash), 'Очистка', icon)
             if isTrash then
                 cnt = cnt + 1
-                if sellPrice > 0 then
+                if sellPrice and sellPrice > 0 then
                     sum = sum + sellPrice
                     c.MessageLog(format('%s за %s', link, GetCoinTextureString(sellPrice)),
                         'Продажа', icon)

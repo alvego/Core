@@ -12,6 +12,7 @@ local UnitIsPlayer          = UnitIsPlayer
 local UnitIsTapped          = UnitIsTapped
 local UnitIsTappedByPlayer  = UnitIsTappedByPlayer
 local GetSpellTexture       = GetSpellTexture
+local IsUsableSpell         = IsUsableSpell
 local LootFrame             = LootFrame
 local CloseLoot             = CloseLoot
 local GetLootSlotInfo       = GetLootSlotInfo
@@ -78,9 +79,9 @@ c.Event('LOOT_OPENED', function()
         for i = 1, GetNumLootItems() do
             local texture, item, quantity, quality, locked = GetLootSlotInfo(i)
             local link = GetLootSlotLink(i) or item
-            quantity = (type(quantity) == 'number' and quantity > 1) and
+            local count = (type(quantity) == 'number' and quantity > 1) and
                 WrapTextInColorCode('x' .. quantity, 'ff00ff00') or ''
-            c.MessageLog('#добыча ' .. link .. quantity, lootTitle, texture)
+            c.MessageLog('#добыча ' .. link .. count, lootTitle, texture)
         end
 
         lootTarget = nil
@@ -433,6 +434,7 @@ end
 c.BeforeUpdate(function()
     if waitForLoot() then return end
     resetTimers()
+    if st.mounted then return end
     if st.mounted then return end
     if st.combatMode then return end
     if st.combatLock and not st.invalidTarget then return end

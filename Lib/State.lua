@@ -24,6 +24,13 @@ local IsFalling = IsFalling
 local IsMouselooking = IsMouselooking
 local wipe = wipe
 local UnitIsAFK = UnitIsAFK
+local IsMounted = IsMounted
+local CanExitVehicle = CanExitVehicle
+-------------------------------------------------------------------------------
+local mountAuras = {
+    311563, -- Магический пузырь
+    32556   -- Полет
+}
 -------------------------------------------------------------------------------
 local function updateState()
     wipe(c.stateCache)
@@ -32,6 +39,10 @@ local function updateState()
     st.alt = gameFocus and IsAltKeyDown() == 1
     st.shift = gameFocus and IsShiftKeyDown() == 1
     st.look = IsMouselooking()
+    st.mount = IsMounted()
+    st.vehicle = CanExitVehicle()
+    st.mountAura = c.UnitAuraByID('player', mountAuras)
+    st.mounted = st.mount or st.vehicle or st.mountAura
     st.playerGUID = UnitGUID('player')
     st.pressedButton = c.ButtonIsPressed()
 

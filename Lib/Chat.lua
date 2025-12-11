@@ -226,15 +226,15 @@ end
 -- Функция для вывода отладочных сообщений без частого спама с указанием времени
 local times = 0
 local lastLog = nil
-local function getLogMsg(log, times)
+local function getLogMsg(log)
     if times > 1 then
         return log .. ' (' .. times .. ')'
     end
     return log
 end
-local function chatLogMsg(log, times)
+local function chatLogMsg(log)
     debugChat(
-        getLogMsg(log, times),
+        getLogMsg(log),
         c.GetCurrentTime(),
         iconLog,
         GRAY_FONT_COLOR.r,
@@ -248,12 +248,12 @@ function c.Log(...)
     if c.IsChanged('Log', log) then
         -- выводим прошлоее сообщение если накопилось
         if lastLog and times > 0 then
-            chatLogMsg(lastLog, times)
+            chatLogMsg(lastLog)
         end
         -- сброс
         times = 0
         -- выводим новое
-        chatLogMsg(log, times)
+        chatLogMsg(log)
         -- запоминаем последнее
         lastLog = log
     elseif lastLog then
@@ -265,7 +265,7 @@ function c.Log(...)
         -- перезапускаем таймер
         c.TimerStart('Log')
         -- сливаем, что накопилось
-        chatLogMsg(log, times)
+        chatLogMsg(log)
         -- сброс
         times = 0
     end

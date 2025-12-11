@@ -107,11 +107,11 @@ end
 hooksecurefunc(c, 'Spell', function(spell, ...)
     local slot = c.GetSlot(spell, true)
     if not slot then return end
-    c.ShowActionGlow(slot, 2)
+    c.ShowActionGlow(slot, 1)
 end)
 
 hooksecurefunc(c, 'Action', function(slot, ...)
     if type(slot) ~= 'number' or slot <= 0 then return end
-    c.ShowActionGlow(slot, 2)
+    c.ShowActionGlow(slot, 1)
 end)
 -------------------------------------------------------------------------------

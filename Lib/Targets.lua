@@ -85,7 +85,7 @@ end
 
 c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'LeftButton' and button ~= 'RightButton' then return end
-    mouseUnitName = GameTooltip:GetUnit()
+    mouseUnitName = GameTooltip:GetUnit() or ''
     if not mouseUnitName then return end
     mouseButton = button
     c.NextTick(afterMouseUp)

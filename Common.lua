@@ -8,9 +8,7 @@ local st = c.state
 -------------------------------------------------------------------------------
 local SpellIsTargeting = SpellIsTargeting
 local GetSpellInfo = GetSpellInfo
-local IsMounted = IsMounted
 local Dismount = Dismount
-local CanExitVehicle = CanExitVehicle
 local VehicleExit = VehicleExit
 local IsUsableItem = IsUsableItem
 local IsUsableSpell = IsUsableSpell
@@ -19,11 +17,6 @@ local UnitIsUnit = UnitIsUnit
 local type = type
 
 -------------------------------------------------------------------------------
-local mountAuras = {
-    311563, -- Магический пузырь
-    32556   -- Полет
-}
-
 local eatAuras = {
     'Пища',
     'Питье'
@@ -31,33 +24,37 @@ local eatAuras = {
 c.stopReasonMount = '#mount'
 c.stopReasonEat = '#eat'
 c.stopReasonTargeting = '#targeting'
+
+function c.Dismount()
+    if not st.mounted then return end
+    if st.mount then
+        Dismount()
+        return
+    end
+
+    if st.vehicle then
+        VehicleExit()
+        return
+    end
+
+    if st.mountAura then
+        local auraName = GetSpellInfo(st.mountAura)
+        c.Command('/cancelaura ' .. auraName)
+        return
+    end
+end
+
 -------------------------------------------------------------------------------
 function c.GetStopReason()
     if SpellIsTargeting() then
         return c.stopReasonTargeting
     end
 
-    if IsMounted() then
+    if st.mounted then
         if not st.attack then
             return c.stopReasonMount
         end
-        Dismount()
-    end
-
-    if CanExitVehicle() then
-        if not st.attack then
-            return c.stopReasonMount
-        end
-        VehicleExit()
-    end
-
-    local mountAura = c.UnitAuraByID('player', mountAuras)
-    if mountAura then
-        local auraName = GetSpellInfo(mountAura)
-        if not st.attack then
-            return c.stopReasonMount
-        end
-        c.Command('/cancelaura ' .. auraName)
+        c.Dismount()
     end
 
     if not st.attack then
