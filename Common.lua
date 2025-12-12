@@ -87,7 +87,7 @@ local stopAttackDebuff = {
 }
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
-        if st.combatMode and c.SearchTarget(tryAssist == false, maxDistance or 40, inViewfield) then
+        if st.combatMode and c.SearchTarget(tryAssist, maxDistance or 40, inViewfield) then
             -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
             c.ImmediatelyNextUpdate()
             -- выходим так как нужно обновить state
@@ -96,7 +96,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#' .. st.invalidTarget
     end
 
-    if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(tryAssist == false, nil, inViewfield) then
+    if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(false, nil, inViewfield) then
         -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
         c.ImmediatelyNextUpdate()
         -- выходим так как нужно обновить state

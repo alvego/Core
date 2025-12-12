@@ -388,7 +388,7 @@ local meleeDist = 5
 c.InMelee = c.GetCachedFunc(function(target)
     target = target or 'target'
     -- Рубиновый желудь (5 ярдов melee)
-    local result = IsItemInRange(meleeItemID, "target")
+    local result = IsItemInRange(meleeItemID, target)
     if not result or result == -1 then
         -- fallback to 5yrd check
         return c.UnitDistance('player', target) < meleeDist
