@@ -62,7 +62,7 @@ local searchLastGuid = nil
 
 local mouseButton    = ''
 local mouseUnitName  = ''
-local manualSource   = WrapTextInColorCode('выбрано рукми', 'FF00A6FF')
+local manualSource   = WrapTextInColorCode('выбрано руками', 'FF00A6FF')
 local searchSource   = WrapTextInColorCode('выбрано поиском', 'FF81FF7D')
 
 local function logTargetSource(source, method)
