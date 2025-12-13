@@ -99,6 +99,14 @@ function c.ImmediatelyNextUpdate()
 end
 
 -------------------------------------------------------------------------------
+local updateFunc = nil
+function c.Update(func)
+    if updateFunc then error('Update Func already setted!') end
+    if type(func) ~= 'function' then error('Wrong type') end
+    updateFunc = func
+end
+
+-------------------------------------------------------------------------------
 -- Выполняем обработчики события OnUpdate
 local timeGap = c.advance
 local immediatelyTimer = 'immediatelyNextUpdate'
@@ -142,7 +150,7 @@ local function onUpdate()
     ----------------------------------------------------------------
     callUpdateList(listBeforeUpdate)
     ----------------------------------------------------------------
-    if not (skipNextUpdate or c.Paused()) and type(c.Update) == 'function' then
+    if not (skipNextUpdate or c.Paused()) and type(updateFunc) == 'function' then
         -- print(
         --     c.TelemetryBool('gcd', gcdLeft > 0),
         --     c.TelemetryBool('imm', c.TimerLess(immediatelyTimer, timeGap)),
@@ -150,7 +158,7 @@ local function onUpdate()
         --     'interval:', c.Round(c.TimerElapsed('test'), 3)
         -- )
         -- c.TimerStart('test')
-        c.Update()
+        updateFunc()
     end
     skipNextUpdate = false
     ----------------------------------------------------------------

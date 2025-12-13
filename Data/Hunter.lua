@@ -12,6 +12,7 @@ if className ~= 'HUNTER' then return end
 -------------------------------------------------------------------------------
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
-function c.Update()
+c.Update(function()
+    -- Idle
     c.Log(className)
-end
+end)

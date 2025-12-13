@@ -144,7 +144,7 @@ local function updateEnhance()
     return '#none'
 end
 -------------------------------------------------------------------------------
-function c.Update()
+c.Update(function()
     local stopReason = c.GetStopReason()
     if stopReason then
         c.LogWhatHappend(stopReason)
@@ -152,6 +152,5 @@ function c.Update()
     end
 
     c.LogWhatHappend(updateEnhance())
-end
-
+end)
 -------------------------------------------------------------------------------

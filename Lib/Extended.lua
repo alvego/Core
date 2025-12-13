@@ -16,144 +16,173 @@ end
 
 -------------------------------------------------------------------------------
 function c.UnitsCount()
-    if isReadyFunc(oUnitsCount) then
-        return oUnitsCount()
+    local func = oUnitsCount
+    if isReadyFunc(func) then
+        return func()
     end
     return 0
 end
 
 -------------------------------------------------------------------------------
 function c.UnitPtr(unit)
-    if isReadyFunc(oUnitPtr) then
-        return oUnitPtr(unit)
+    local func = oUnitPtr
+    if isReadyFunc(func) then
+        return func(unit)
     end
     return 0
 end
 
 -------------------------------------------------------------------------------
 function c.UnitIDByIndex(idx)
-    if isReadyFunc(oUnitIDByIndex) then
-        return oUnitIDByIndex(idx)
+    local func = oUnitIDByIndex
+    if isReadyFunc(func) then
+        return func(idx)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.ReadUlong(ptr, offset)
-    if isReadyFunc(oReadUlong) then
-        return oReadUlong(ptr, offset)
+    local func = oReadUlong
+    if isReadyFunc(func) then
+        return func(ptr, offset)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.ReadInt(ptr, offset)
-    if isReadyFunc(oReadInt) then
-        return oReadInt(ptr, offset)
+    local func = oReadInt
+    if isReadyFunc(func) then
+        return func(ptr, offset)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.ReadFloat(ptr, offset)
-    if isReadyFunc(oReadFloat) then
-        return oReadFloat(ptr, offset)
+    local func = oReadFloat
+    if isReadyFunc(func) then
+        return func(ptr, offset)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.ReadByte(ptr, offset)
-    if isReadyFunc(oReadByte) then
-        return oReadByte(ptr, offset)
+    local func = oReadByte
+    if isReadyFunc(func) then
+        return func(ptr, offset)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.ReadString(ptr, offset)
-    if isReadyFunc(oReadString) then
-        return oReadString(ptr, offset)
+    local func = oReadString
+    if isReadyFunc(func) then
+        return func(ptr, offset)
     end
     return nil
 end
 
 -------------------------------------------------------------------------------
 function c.UnitBehind(unit)
-    if isReadyFunc(oUnitBehind) then
-        return oUnitBehind(unit)
+    local func = oUnitBehind
+    if isReadyFunc(func) then
+        return func(unit)
     end
     return true
 end
 
 -------------------------------------------------------------------------------
 function c.LookAt(x, y, z)
-    if isReadyFunc(oLookAt) then
-        oLookAt(x, y, z)
+    local func = oLookAt
+    if isReadyFunc(func) then
+        func(x, y, z)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.LookAtUnit(unit)
-    if isReadyFunc(oLookAtUnit) then
-        oLookAtUnit(unit)
+    local func = oLookAtUnit
+    if isReadyFunc(func) then
+        func(unit)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.MoveTo(x, y, z)
-    if isReadyFunc(oMove) then
-        oMove(x, y, z)
+    local func = oMove
+    if isReadyFunc(func) then
+        func(x, y, z)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.UnitInLOS(unit1, unit2)
-    if isReadyFunc(oUnitInLOS) then
-        return oUnitInLOS(unit1, unit2)
+    local func = oUnitInLOS
+    if isReadyFunc(func) then
+        return func(unit1, unit2)
     end
     return true
 end
 
 -------------------------------------------------------------------------------
 function c.UnitClick(unit, use)
-    if isReadyFunc(oUnitClick) then
-        oUnitClick(unit, use and '1' or nil)
+    local func = oUnitClick
+    if isReadyFunc(func) then
+        func(unit, use and '1' or nil)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.UnitPosition(unit)
-    if isReadyFunc(oUnitPosition) then
-        return oUnitPosition(unit)
+    local func = oUnitPosition
+    if isReadyFunc(func) then
+        return func(unit)
     end
     return 0, 0, 0
 end
 
 -------------------------------------------------------------------------------
 function c.UnitFacing(unit)
-    if isReadyFunc(oUnitFacing) then
-        return oUnitFacing(unit)
+    local func = oUnitFacing
+    if isReadyFunc(func) then
+        return func(unit)
     end
     return 0
 end
 
 -------------------------------------------------------------------------------
-c.UnitDistance = c.GetCachedFunc(function(unit1, unit2)
-    if isReadyFunc(oUnitDistance) then
-        return oUnitDistance(unit1, unit2)
+c.UnitDistance = c.GetCachedFunc(
+---Вычисляет роастояние между двумя существующими юнитами
+---@param unit1 string
+---@param unit2 string
+---@return number distance between  unit1 and unit2
+    function(unit1, unit2)
+        if unit1 and not UnitExists(unit1) then
+            error('UnitDistance work with exists unit1 only')
+        end
+        if unit2 and not UnitExists(unit2) then
+            error('UnitDistance work with exists unit2 only')
+        end
+        local func = oUnitDistance
+        if isReadyFunc(func) then
+            return func(unit1, unit2)
+        end
+        return 0
     end
-    return 0
-end)
-
+)
 -------------------------------------------------------------------------------
 function c.UnitAuraByID(unit, spellIds, mineOnly)
-    if isReadyFunc(oUnitAuraByID) then
+    local func = oUnitAuraByID
+    if isReadyFunc(func) then
         if type(spellIds) == 'table' then
             spellIds = table_concat(spellIds, ' ')
         end
 
-        local spellId, count, duration, endTime, isMine, isDebuff = oUnitAuraByID(unit, spellIds,
+        local spellId, count, duration, endTime, isMine, isDebuff = func(unit, spellIds,
             mineOnly and '1' or nil)
         if spellId == nil then
             return nil
@@ -167,8 +196,9 @@ c.HasAuraByID = c.GetCachedFunc(c.UnitAuraByID)
 
 -------------------------------------------------------------------------------
 function c.UnitAuraByIndex(unit, idx)
-    if isReadyFunc(oUnitAuraByIndex) then
-        local spellId, count, duration, endTime, isMine, isDebuff = oUnitAuraByIndex(unit, idx)
+    local func = oUnitAuraByIndex
+    if isReadyFunc(func) then
+        local spellId, count, duration, endTime, isMine, isDebuff = func(unit, idx)
         if spellId == nil then return nil end
         return spellId, count, duration, endTime, isMine, isDebuff
     end
@@ -177,22 +207,25 @@ end
 
 -------------------------------------------------------------------------------
 function c.Script(luaCode)
-    if isReadyFunc(oScript) then
-        oScript(luaCode)
+    local func = oScript
+    if isReadyFunc(func) then
+        func(luaCode)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.Command(chatCommandLine)
-    if isReadyFunc(oCommand) then
-        oCommand(chatCommandLine)
+    local func = oCommand
+    if isReadyFunc(func) then
+        func(chatCommandLine)
     end
 end
 
 -------------------------------------------------------------------------------
 function c.Spell(spell, target)
-    if isReadyFunc(oSpell) then
-        oSpell(spell, target)
+    local func = oSpell
+    if isReadyFunc(func) then
+        func(spell, target)
     end
 end
 
@@ -206,8 +239,9 @@ end
 --  MiddleButton - Third mouse button (typically middle button / scroll wheel)
 --  RightButton - Right mouse button
 function c.Action(slot, target, button)
-    if isReadyFunc(oAction) then
-        oAction(slot, target, button)
+    local func = oAction
+    if isReadyFunc(func) then
+        func(slot, target, button)
     end
 end
 

@@ -86,6 +86,9 @@ end
 
 -------------------------------------------------------------------------------
 local stateCacheIndex = 0
+---@generic T: function
+---@param func T
+---@return T
 function c.GetCachedFunc(func)
     stateCacheIndex = stateCacheIndex + 1
     local name = '#' .. stateCacheIndex

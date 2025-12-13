@@ -118,7 +118,6 @@ hookTargetChange('TargetNearest')
 hookTargetChange('TargetNearestEnemy')
 hookTargetChange('TargetNearestFriend')
 
-
 c.Event('PLAYER_TARGET_CHANGED', function()
     local unit = 'target'
     if not UnitExists(unit) then
@@ -385,13 +384,19 @@ c.Event('PLAYER_LOGIN', function()
     end
 end)
 local meleeDist = 5
-c.InMelee = c.GetCachedFunc(function(target)
-    target = target or 'target'
-    -- Рубиновый желудь (5 ярдов melee)
-    local result = IsItemInRange(meleeItemID, target)
-    if not result or result == -1 then
-        -- fallback to 5yrd check
-        return c.UnitDistance('player', target) < meleeDist
+c.InMelee = c.GetCachedFunc(
+--- Проверка на дистанцию ближнего боя
+---@param target string unitID
+---@return boolean melee is unit in destatce of melee
+    function(target)
+        target = target or 'target'
+        if not UnitExists(target) then return false end
+        -- Рубиновый желудь (5 ярдов melee)
+        local result = IsItemInRange(meleeItemID, target)
+        if not result or result == -1 then
+            -- fallback to 5yrd check
+            return c.UnitDistance('player', target) < meleeDist
+        end
+        return result == 1
     end
-    return result == 1
-end)
+)

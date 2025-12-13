@@ -13,6 +13,6 @@ if className ~= 'DEATHKNIGHT' then return end
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
 
-function c.Update()
-
-end
+c.Update(function()
+    -- Idle
+end)

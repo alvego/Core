@@ -21,6 +21,9 @@ local UnitIsUnit = UnitIsUnit
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local GetCursorInfo = GetCursorInfo
 local ClearCursor = ClearCursor
+local GetSpellInfo = GetSpellInfo
+local UnitDebuff = UnitDebuff
+local UnitBuff = UnitBuff
 -------------------------------------------------------------------------------
 function c.StrContains(str, sub)
     if (not str or not sub) then
@@ -162,27 +165,31 @@ function c.ClearCursor()
 end
 
 -------------------------------------------------------------------------------
-c.UnitInfo = c.GetCachedFunc(function(unit)
-    if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
-    local name = UnitName(unit)
-    if not name then return WrapTextInColorCode('!name', 'aaff0000') end
-    name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
-    local level = UnitLevel(unit)
-    if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
-    if UnitIsUnit(unit, 'player') then return name end
-    local ctype = UnitCreatureType(unit)
-    if ctype then
-        name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
+c.UnitInfo = c.GetCachedFunc(
+---@param unit string unitId
+---@return string information all about unit
+    function(unit)
+        if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
+        local name = UnitName(unit)
+        if not name then return WrapTextInColorCode('!name', 'aaff0000') end
+        name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
+        local level = UnitLevel(unit)
+        if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
+        if UnitIsUnit(unit, 'player') then return name end
+        local ctype = UnitCreatureType(unit)
+        if ctype then
+            name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
+        end
+        local d = c.UnitDistance('player', unit)
+        if d then
+            name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
+        end
+        if UnitIsDeadOrGhost(unit) then
+            name = name .. WrapTextInColorCode('труп', 'ff333333')
+        end
+        return name
     end
-    local d = c.UnitDistance('player', unit)
-    if d then
-        name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
-    end
-    if UnitIsDeadOrGhost(unit) then
-        name = name .. WrapTextInColorCode('труп', 'ff333333')
-    end
-    return name
-end)
+)
 
 -------------------------------------------------------------------------------
 local function autoButton(btn, btnText)
@@ -231,13 +238,15 @@ function c.PrintTargetAuras() -- for debug
                 local method = isDebuff and UnitDebuff or UnitBuff
                 local aura, _, _, _, _, _, _, _, _, _, auraId = method(target, name)
                 local findInUI = aura and (auraId == spellId)
+
                 c.MessageLog(
                     format(
-                        '%s |cff%sUI|r',
+                        '%s %s',
                         link or name,
-                        findInUI and '00ff00' or '000000'
+                        WrapTextInColorCode('UI', findInUI and 'ff00ff00' or 'ff000000')
                     ),
-                    format('|cff%s%s|r', isDebuff and 'ff0000' or '00ff00', spellId), icon, 1, 1, 1
+                    WrapTextInColorCode(spellId, isDebuff and 'ffff0000' or 'ff00ff00'),
+                    icon, 1, 1, 1
                 )
             end
         end

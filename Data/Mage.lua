@@ -12,6 +12,7 @@ if className ~= 'MAGE' then return end
 -------------------------------------------------------------------------------
 c.PrintLoadClassModuleMessage(className)
 -------------------------------------------------------------------------------
-function c.Update()
-    --c.Log(className)
-end
+c.Update(function()
+    -- Idle
+    c.Log(className)
+end)

@@ -564,7 +564,7 @@ local function updateProto()
     return '#none'
 end
 -------------------------------------------------------------------------------
-function c.Update()
+c.Update(function()
     if not isLoaded then return end
     local stopReason = c.GetStopReason()
     if stopReason then
@@ -584,6 +584,6 @@ function c.Update()
     end
 
     c.LogWhatHappend(updateProto())
-end
+end)
 
 -------------------------------------------------------------------------------
