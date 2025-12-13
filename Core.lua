@@ -53,14 +53,14 @@ local flagsMeta = {
             return def
         end
         -- Если флага вообще нет, возвращаем nil (или можно добавить error для отладки)
-        error('get: invalid flag - ' .. tostring(key))
+        c.Error('get: invalid flag - ' .. tostring(key))
         return nil
     end,
 
     __newindex = function(_, key, value)
         local def = flags[key]
         if def == nil then
-            error('set: invalid flag ' .. tostring(key))
+            c.Error('set: invalid flag ' .. tostring(key))
             return
         end
         -- При присвоении сохраняем в базу данных

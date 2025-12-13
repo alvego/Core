@@ -162,10 +162,10 @@ c.UnitDistance = c.GetCachedFunc(
 ---@return number distance between  unit1 and unit2
     function(unit1, unit2)
         if unit1 and not UnitExists(unit1) then
-            error('UnitDistance work with exists unit1 only')
+            error('UnitDistance работает только с существующим unit1', 2)
         end
         if unit2 and not UnitExists(unit2) then
-            error('UnitDistance work with exists unit2 only')
+            error('UnitDistance работает только с существующим unit2', 2)
         end
         local func = oUnitDistance
         if isReadyFunc(func) then

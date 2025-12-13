@@ -39,9 +39,9 @@ c.UpdateDebugState(updateTelemetryVisibility)
 
 -------------------------------------------------------------------------------
 local list = {}
-function c.Telemetry(fn)
-    if type(fn) ~= 'function' then error('Telemetry fn must be a getter function') end
-    tinsert(list, fn)
+function c.Telemetry(func)
+    if type(func) ~= 'function' then error('Функция для телеметрии должна возвращать значение', 2) end
+    tinsert(list, func)
 end
 
 -------------------------------------------------------------------------------

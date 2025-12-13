@@ -16,7 +16,7 @@ local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
 -- Список событие -> обработчики
 local eventList = {}
 function c.Event(event, func)
-    if type(func) ~= 'function' then error('Wrong type') end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     local funcList = eventList[event]
     if nil == funcList then
         funcList = {}
@@ -50,7 +50,7 @@ frame:SetScript('OnEvent', onEvent)
 -------------------------------------------------------------------------------
 local listNextTick = {}
 function c.NextTick(func)
-    if type(func) ~= 'function' then error('Wrong type') end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     if tContains(listNextTick, func) then return end
     tinsert(listNextTick, func)
 end
@@ -68,13 +68,13 @@ end
 -------------------------------------------------------------------------------
 local listBeforeUpdate = {}
 function c.BeforeUpdate(func, important)
-    if type(func) ~= 'function' then error('Wrong type') end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     listBeforeUpdate[func] = important or false
 end
 
 local listAfterUpdate = {}
 function c.AfterUpdate(func, important)
-    if type(func) ~= 'function' then error('Wrong type') end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     listAfterUpdate[func] = important or false
 end
 
@@ -101,8 +101,8 @@ end
 -------------------------------------------------------------------------------
 local updateFunc = nil
 function c.Update(func)
-    if updateFunc then error('Update Func already setted!') end
-    if type(func) ~= 'function' then error('Wrong type') end
+    if updateFunc then error('Функция для Update уже задана!', 2) end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     updateFunc = func
 end
 

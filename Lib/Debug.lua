@@ -23,7 +23,7 @@ end
 -------------------------------------------------------------------------------
 local funcList = {}
 function c.UpdateDebugState(func)
-    if type(func) ~= 'function' then error('Wrong type') end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     tinsert(funcList, func)
 end
 

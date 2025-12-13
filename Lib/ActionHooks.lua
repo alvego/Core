@@ -40,8 +40,8 @@ local userActionTimer = 'userAction'
 local actionHooks = {}
 
 function c.ActionHook(name, func)
-    if type(name) ~= 'string' then error('Wrong name type') end
-    if type(func) ~= 'function' then error('Wrong func type') end
+    if type(name) ~= 'string' then error('Имя должно быть строкой', 2) end
+    if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
     actionHooks[name] = func
 end
 

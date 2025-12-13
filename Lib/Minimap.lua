@@ -24,7 +24,7 @@ local minimapDropDown = CreateFrame('Frame', 'CoreMinimapDropDown', UIParent, 'U
 -- Функция для добавления элемента в меню
 function c.MinimapItem(getFunc, clickFunc)
   if type(getFunc) ~= 'function' or type(clickFunc) ~= 'function' then
-    error('AttachMinimapItem: Оба аргумента должны быть функциями')
+    error('AttachMinimapItem: Оба аргумента должны быть функциями', 2)
     return
   end
   tinsert(minimapItems, { get = getFunc, click = clickFunc })
