@@ -396,7 +396,7 @@ local function updateProto()
     end
 
     -------------------------------------------------------------------------------
-    local dist = st.targetExists and c.UnitDistance('player', 'target') or 0
+    local dist = st.targetExists and c.UnitDistance('player', 'target') or 999
     -------------------------------------------------------------------------------
     if isTank and st.group and not st.pvp then      -- только в группе
         -- Пуллтайм ротация

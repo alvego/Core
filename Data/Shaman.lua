@@ -42,7 +42,7 @@ local function updateEnhance()
     local aoe = c.GetEnemyCount(10, 'player') > 2
     local _, _, stacks = c.HasMyBuff('Оружие Водоворота')
     local isInstant = stacks > 4
-    local dist = st.targetExists and c.UnitDistance('player', 'target') or 0
+    local dist = st.targetExists and c.UnitDistance('player', 'target') or 999
     -------------------------------------------------------------------------------
     reason, action, unit = 'Хп упало, дэф', 'Ярость шамана', 'player'
     if st.combatMode and st.playerHP100 < 40 and c.CanGcdSpell(action, unit) then
