@@ -156,7 +156,7 @@ end
 
 -------------------------------------------------------------------------------
 c.UnitDistance = c.GetCachedFunc(
----Вычисляет роастояние между двумя существующими юнитами
+---Вычисляет расстояние между двумя существующими юнитами
 ---@param unit1 string
 ---@param unit2 string
 ---@return number distance between  unit1 and unit2
