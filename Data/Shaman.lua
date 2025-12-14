@@ -36,7 +36,8 @@ local function updateEnhance()
     -------------------------------------------------------------------------------
     c.TimerToggle('needHeal', st.playerHP100 < (st.group and 50 or 80))
     c.TimerToggle('needMagmaTotem', st.ttd and st.ttd > 20)
-    local needMagmaTotem = c.TimerStarted('needMagmaTotem') and c.TimerMore('needMagmaTotem', 2)
+    local needMagmaTotem = (c.TimerStarted('needMagmaTotem') and c.TimerMore('needMagmaTotem', 2)) or
+    (not st.invalidTarget and UnitHealthMax('target') > 300000)
     local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 2)
     local mana100 = c.UnitMana100('player')
     local aoe = c.GetEnemyCount(10, 'player') > 2
@@ -44,17 +45,11 @@ local function updateEnhance()
     local isInstant = stacks > 4
     local dist = st.targetExists and c.UnitDistance('player', 'target') or 999
     -------------------------------------------------------------------------------
-    reason, action, unit = 'Хп упало, дэф', 'Ярость шамана', 'player'
+    --[[     reason, action, unit = 'Хп упало, дэф', 'Ярость шамана', 'player'
     if st.combatMode and st.playerHP100 < 40 and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
-    end
-
-    reason, action, unit = 'МАНА упала, дэф', 'Ярость шамана', 'player'
-    if st.combatMode and mana100 < 50 and c.CanGcdSpell(action, unit) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
+    end ]]
 
     reason, action, unit = 'Мало ХП', 'Волна исцеления', 'player'
     if isInstant and st.combatMode and needHeal and c.CanGcdSpell(action, unit) then
@@ -92,9 +87,9 @@ local function updateEnhance()
         return reason
     end
 
-    reason, action, unit = 'Минибурст', 'Варварский ритуал', 'target'
-    if not c.pvp and c.CanSpell(action) and dist < 8 and not c.HasMyBuff('Варварский ритуал') then
-        c.DoAction(reason, action)
+    reason, action, unit = 'МАНА упала, дэф', 'Ярость шамана', 'player'
+    if st.combatMode and mana100 < 65 and c.CanGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
         return reason
     end
 
@@ -105,7 +100,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'АОЕ или босс', 'Тотем магмы', 'target'
-    if mana100 >= 30 and st.still and (aoe or needMagmaTotem) and c.CanGcdSpell(action) and dist < 6 and not HasMagmaTotem() then
+    if mana100 >= 30 and st.still and (aoe or needMagmaTotem) and c.CanGcdSpell(action) and dist < 10 and not HasMagmaTotem() then
         c.DoAction(reason, action)
         return reason
     end
@@ -117,7 +112,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Второй мили удар', 'Вскипание лавы', 'target'
-    if c.CanGcdSpell(action, unit) then
+    if c.CanGcdSpell(action, unit) and not c.IsReadySpell('Удар бури') then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -128,17 +123,23 @@ local function updateEnhance()
         return reason
     end
 
+    reason, action, unit = 'Рассовый спелл', 'Пламя дракона', 'target'
+    if not st.pvp and c.CanSpell(action) then
+        c.DoAction(reason, action)
+        return reason
+    end
+
     reason, action, unit = 'Приземляем', 'Земной шок', 'target'
-    if c.CanGcdSpell(action, unit) then
+    if c.CanGcdSpell(action, unit) and (c.HasMyDebuff('Огненный шок', unit, 1) or not c.IsReadySpell('Огненный шок')) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
-    reason, action, unit = 'Морозим', 'Ледяной шок', 'target'
-    if c.CanGcdSpell(action, unit) then
+    --[[     reason, action, unit = 'Морозим', 'Ледяной шок', 'target'
+    if c.CanGcdSpell(action, unit) and not c.IsReadySpell('Земной шок') then
         c.DoAction(reason, action, unit)
         return reason
-    end
+    end ]]
 
     if st.gcd then return '#gcd' end
     return '#none'
