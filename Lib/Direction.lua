@@ -25,7 +25,7 @@ local viewIndex = 5
 -- end)
 
 function c.SyncCam(reason)
-    if c.TimerMore('SetView', 5) then
+    if c.TimerMore('SetView', 5) and not st.look then
         c.TimerStart('SetView')
         c.Log('#SyncCam ' .. reason)
         SetView(viewIndex)

@@ -17,7 +17,7 @@ local bit = bit
 local wipe = wipe
 local math_max = math.max
 local IsControlKeyDown = IsControlKeyDown
-local ChatFrame_OpenChat = ChatFrame_OpenChat
+local ChatEdit_InsertLink = ChatEdit_InsertLink
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local UnitIsPossessed = UnitIsPossessed
@@ -90,8 +90,8 @@ c.Event('GLOBAL_MOUSE_UP', function(event, button)
     mouseButton = button
     c.NextTick(afterMouseUp)
 
-    if not InCombatLockdown() and button == 'LeftButton' and IsControlKeyDown() == 1 then
-        ChatFrame_OpenChat(mouseUnitName)
+    if (ChatEdit_GetActiveWindow() and button == 'LeftButton' and IsControlKeyDown() == 1) then
+        ChatEdit_InsertLink(mouseUnitName);
     end
 end)
 
