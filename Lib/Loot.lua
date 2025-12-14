@@ -71,8 +71,12 @@ c.Event('LOOT_OPENED', function()
     if lootTarget then
         -- успешло полутали цель, у нее есть лут
         lootList[lootTarget] = true -- добавлем в список уже лутаных целей, чтоб не лутать повторно
-        c.MessageLog(format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'), c.UnitInfo(lootTarget)), lootTitle,
-            lootIcon)
+
+        local info =
+            c.MessageLog(
+                format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'),
+                    IsFishingLoot() and UnitName(lootTarget) or c.UnitInfo(lootTarget)), lootTitle,
+                lootIcon)
         -- сбрасываем цель
 
 

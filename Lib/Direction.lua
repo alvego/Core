@@ -94,12 +94,6 @@ end
 local moveUnit = nil
 local maveMaxDist = nil
 
-local function getPointAhead(d)
-    local x, y, z = c.UnitPosition('player')
-    local facing = GetPlayerFacing()
-    return x + d * math.cos(facing), y + d * math.sin(facing), z
-end
-
 local function moveEnd(cond)
     moveUnit = nil
     maveMaxDist = nil
@@ -107,7 +101,7 @@ local function moveEnd(cond)
     c.Log('#пришли', WrapTextInColorCode(cond, 'ff333333'))
     if st.speed > 0 and not st.move and not st.playerCasting then
         c.Log('#тормозим')
-        c.MoveTo(getPointAhead(0.1))
+        c.MoveStop()
     end
 end
 local function moveUpdate()

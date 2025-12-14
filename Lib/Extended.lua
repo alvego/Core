@@ -120,6 +120,14 @@ function c.MoveTo(x, y, z)
 end
 
 -------------------------------------------------------------------------------
+function c.MoveStop()
+    local func = oMoveStop
+    if isReadyFunc(func) then
+        func()
+    end
+end
+
+-------------------------------------------------------------------------------
 function c.UnitInLOS(unit1, unit2)
     local func = oUnitInLOS
     if isReadyFunc(func) then

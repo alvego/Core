@@ -32,9 +32,9 @@ end)
 -- end)
 
 -------------------------------------------------------------------------------
--- c.Telemetry(function()
---     return format('SPD: %03d%%', c.Round(st.speed / 7 * 100))
--- end)
+c.Telemetry(function()
+    return format('SPD: %03d%%', c.Round(st.speed / 7 * 100))
+end)
 
 -------------------------------------------------------------------------------
 -- c.Telemetry(function()
@@ -42,13 +42,13 @@ end)
 -- end)
 
 -------------------------------------------------------------------------------
--- c.Telemetry(function()
---     return format('FPS: %03d', GetFramerate())
--- end)
+c.Telemetry(function()
+    return format('FPS: %03d', GetFramerate())
+end)
 
 -------------------------------------------------------------------------------
--- c.Telemetry(function()
---     return format('Mem: %.1fKB', GetAddOnMemoryUsage(c.name))
--- end)
+c.Telemetry(function()
+    return format('Mem: %.1fKB', GetAddOnMemoryUsage(c.name))
+end)
 
 -------------------------------------------------------------------------------
