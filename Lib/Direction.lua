@@ -11,8 +11,26 @@ local GetPlayerFacing = GetPlayerFacing
 local deg = deg
 local atan2 = atan2
 local WrapTextInColorCode = WrapTextInColorCode
+local SaveView = SaveView
+local SetView = SetView
 -------------------------------------------------------------------------------
 
+local viewIndex = 5
+-- c.AfterUpdate(function()
+--     if st.look and c.TimerMore('SaveView', 1) then
+--         c.Log('#SaveView (move and look)')
+--         c.TimerStart('SaveView')
+--         SaveView(viewIndex)
+--     end
+-- end)
+
+function c.SyncCam(reason)
+    if c.TimerMore('SetView', 5) then
+        c.TimerStart('SetView')
+        c.Log('#SyncCam ' .. reason)
+        SetView(viewIndex)
+    end
+end
 
 local turnUnit = nil
 
@@ -25,9 +43,14 @@ local function turnUpdate()
         st.look or
         st.playerCasting or
         c.PlayerFacingTarget(turnUnit, 30) then
-        turnUnit = nil
-        if c.TimerStarted('TurnToUnit') then
-            c.TimerReset('TurnToUnit')
+        if turnUnit then
+            if turnUnit ~= 'target' then
+                c.SyncCam('turnUpdate')
+            end
+            turnUnit = nil
+            if c.TimerStarted('TurnToUnit') then
+                c.TimerReset('TurnToUnit')
+            end
         end
         return
     end
@@ -103,6 +126,7 @@ local function moveEnd(cond)
         c.Log('#тормозим')
         c.MoveStop()
     end
+    c.SyncCam('moveEnd')
 end
 local function moveUpdate()
     -- не идем

@@ -1,3 +1,6 @@
+MACRO 34 "cam" Spell_druid_wildburst
+/run if IsAltKeyDown() == 1 then  SaveView(5); print('Save View') else SetView(5); print('Set View') end
+END
 MACRO 1 "clear" Ability_Ambush
 /cleartarget
 /clearfocus
@@ -7,13 +10,14 @@ MACRO 15 "dance" Ability_Warlock_Avoidance
 END
 MACRO 32 "dev" spell_warrior_dragoncharge
 /run UIParentLoadAddOn('Blizzard_DebugTools');
-/fstack true
 /etrace
+/stopmacro [nomod]
+/fstack true
 END
 MACRO 17 "focus" Ability_Hunter_MarkedForDeath
 /focus [target=mouseover, exists, nodead][]
 END
-MACRO 25 "icon" Ability_Hunter_SniperShot
+MACRO 25 "icon" Ability_SteelMelee
 /run ChatFrame_OpenChat(GetActionTexture(1))
 END
 MACRO 4 "macro" ability_vehicle_shellshieldgenerator_s_red
@@ -27,6 +31,9 @@ MACRO 22 "name" ability_vehicle_shellshieldgenerator_s_white
 END
 MACRO 5 "reload" Ability_Creature_Cursed_04
 /reload
+END
+MACRO 33 "resetcd" ability_bossmagistrix_timewarp1
+/run ResetInstances()
 END
 MACRO 16 "sleep" Spell_Nature_Sleep
 /sleep

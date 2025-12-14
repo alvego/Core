@@ -86,11 +86,11 @@ end
 c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'LeftButton' and button ~= 'RightButton' then return end
     mouseUnitName = GameTooltip:GetUnit() or ''
-    if not mouseUnitName then return end
+    if mouseUnitName == '' then return end
     mouseButton = button
     c.NextTick(afterMouseUp)
 
-    if button == 'LeftButton' and IsControlKeyDown() == 1 then
+    if not InCombatLockdown() and button == 'LeftButton' and IsControlKeyDown() == 1 then
         ChatFrame_OpenChat(mouseUnitName)
     end
 end)
