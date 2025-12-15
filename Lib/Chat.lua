@@ -14,7 +14,7 @@ local FCF_SetWindowName = FCF_SetWindowName
 local FCF_SetLocked = FCF_SetLocked
 local FCF_SelectDockFrame = FCF_SelectDockFrame
 local IsControlKeyDown = IsControlKeyDown
-
+local math_max = math.max
 local format = format
 local tostring = tostring
 local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
@@ -180,8 +180,18 @@ end
 -- Функция для вывода отладочных сообщений
 local function debugChat(msg, title, icon, r, g, b)
     if msg == nil then return end
-    if not c.flags.fullLog and string.sub(msg, 1, 1) == '#' then
+    local isCommented = string.sub(msg, 1, 1) == '#'
+    if not c.flags.fullLog and isCommented then
         return -- игнорируем комментарии
+    end
+    r = r or YELLOW_FONT_COLOR.r
+    g = g or YELLOW_FONT_COLOR.g
+    b = b or YELLOW_FONT_COLOR.b
+    if isCommented then
+        msg = WrapTextInColorCode('# ', 'ff333333') .. msg:sub(2)
+        r = math_max(r - 0.1, 0)
+        g = math_max(g - 0.1, 0)
+        b = math_max(b - 0.1, 0)
     end
     local chatFrame = getDebugChatFrame()
     if not chatFrame then
@@ -193,9 +203,9 @@ local function debugChat(msg, title, icon, r, g, b)
             title or c.name,
             msg
         ),
-        r or YELLOW_FONT_COLOR.r,
-        g or YELLOW_FONT_COLOR.g,
-        b or YELLOW_FONT_COLOR.b
+        r,
+        g,
+        b
     )
 end
 

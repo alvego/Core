@@ -11,8 +11,10 @@ local UnitIsDeadOrGhost     = UnitIsDeadOrGhost
 local UnitIsPlayer          = UnitIsPlayer
 local UnitIsTapped          = UnitIsTapped
 local UnitIsTappedByPlayer  = UnitIsTappedByPlayer
+local GetSpellInfo          = GetSpellInfo
 local GetSpellTexture       = GetSpellTexture
 local IsUsableSpell         = IsUsableSpell
+local GetSpellLink          = GetSpellLink
 local LootFrame             = LootFrame
 local CloseLoot             = CloseLoot
 local GetLootSlotInfo       = GetLootSlotInfo
@@ -305,9 +307,17 @@ fish.icon = select(3, GetSpellInfo(fish.spell))
 fish.guid = nil
 fish.bobber = nil
 fish.delay = 1
+
+local function startFishing()
+    if not fish.run then
+        c.Message('Сезон рыбалки открыт!', fish.spell, fish.icon)
+    end
+    fish.run = true
+    c.TimerStart(fish.spell)
+end
 -------------------------------------------------------------------------------
 c.ActionHook(fish.spell, function()
-    fish.run = true
+    startFishing()
 end)
 -------------------------------------------------------------------------------
 c.Event('COMBAT_LOG_EVENT_UNFILTERED',
@@ -315,25 +325,47 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED',
              destFlags, ...)
         local spellName = select(2, ...)
         if subEvent:match('SPELL_CREATE') and sourceGUID == st.playerGUID and spellName == fish.spell then
+            startFishing()
             fish.guid = destGUID
-            fish.run = true
             c.MessageLog('#забросили удочку', fish.spell, fish.icon)
         end
     end
 )
 -------------------------------------------------------------------------------
+local function stopFishing(reason)
+    if fish.run then
+        c.Message('Сезон рыбалки закрыт! ' .. reason, fish.spell, fish.icon)
+    end
+    fish.guid = nil
+    fish.bobber = nil
+    fish.run = false
+    c.TimerReset(fish.spell)
+end
 local function waitForFishing()
-    if not IsUsableSpell(fish.spell) or
-        not c.TimerLess(fish.spell, 5) or
-        st.playerCasting and st.playerCasting ~= fish.spell or
-        not st.still then
-        if fish.run then
-            c.MessageLog('#хватит рыбачить', fish.spell, fish.icon)
-            fish.guid = nil
-            fish.bobber = nil
-            fish.run = false
-        end
-        c.TimerReset(fish.spell)
+    if not c.TimerStarted(fish.spell) then return false end
+
+    if c.Paused() then
+        stopFishing(UnitIsAFK('player') and 'AFK' or 'Пауза')
+        return false
+    end
+
+    if not IsUsableSpell(fish.spell) then
+        stopFishing('Не могу использовать ' .. GetSpellLink(fish.spell))
+        return false
+    end
+
+    if c.TimerMore(fish.spell, 5) then
+        stopFishing('Не получается уже более 5 сек')
+        return false
+    end
+
+    if st.playerCasting and st.playerCasting ~= fish.spell then
+        stopFishing('Кастую ' .. GetSpellLink(c.GetSpellId(st.playerCasting, nil, true)))
+        return false
+    end
+
+    if not st.still then
+        stopFishing('Двигаюсь')
         return false
     end
 
@@ -341,44 +373,24 @@ local function waitForFishing()
 
     if not st.playerCasting then
         if c.CanGcdSpell(fish.spell, nil, fish.delay) then
-            fish.run = false
             fish.bobber = nil
             fish.guid = nil
-            if not c.Paused() then
-                CombatLogClearEntries()
-                c.DoAction('Забрасываем', fish.spell)
-                fish.run = true
-                fish.delay = 0.5 + math_random() * 2.5 -- [0.5 .. 3]
-            end
+            CombatLogClearEntries()
+            startFishing()
+            c.DoAction('Забрасываем', fish.spell)
+            fish.delay = nil --0.5 + math_random() * 2.5 -- [0.5 .. 3]
         end
         return true
     end
-
+    -- рыбачим, забросили и ждем
     c.TimerStart(fish.spell)
 
     if not fish.bobber and fish.guid then
         fish.bobber = c.GetObjectIdByGUID(fish.guid)
         if fish.bobber then
             c.MessageLog('#нашли поплавок', fish.spell, fish.icon)
-
-            -- local ptr = c.UnitPtr(fish.bobber)
-            -- for i = 0, 1200 do
-            --     local guid = c.ReadUlong(ptr, i)
-            --     if guid == st.playerGUID then c.Log('#', i) end
-            -- end
-            -- local guid = c.ReadUlong(ptr, 0x18)
-            -- c.Log('Created by me', guid == st.playerGUID, 0 + guid, 0 + st.playerGUID)
-
-            -- c.Log('UnitPlayerControlled', UnitPlayerControlled(fish.bobber))
-            -- c.Log('UnitIsTapped', UnitIsTapped(fish.bobber))
-            -- c.Log('UnitIsTappedByPlayer', UnitIsTappedByPlayer(fish.bobber))
             fish.guid = nil
         end
-    end
-
-    if fish.run and not fish.bobber and not fish.guid then
-        c.MessageLog('#завис combat log', fish.spell, fish.icon)
-        --c.Command('/stopcasting')
     end
 
     if fish.bobber and not lootList[fish.bobber] then
@@ -390,7 +402,6 @@ local function waitForFishing()
         c.Command('/stopcasting')
         fish.bobber = nil
         fish.guid = nil
-        fish.run = false
     end
     return true
 end
@@ -438,7 +449,6 @@ end
 c.BeforeUpdate(function()
     if waitForLoot() then return end
     resetTimers()
-    if st.mounted then return end
     if st.mounted then return end
     if st.combatMode then return end
     if st.combatLock and not st.invalidTarget then return end
