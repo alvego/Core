@@ -18,17 +18,7 @@ local WrapTextInColorCode = WrapTextInColorCode
 --local ForceQuit = ForceQuit
 -------------------------------------------------------------------------------
 -- Инициализация
-local minimapItems = {}                                                                                 -- Таблица для хранения зарегистрированных элементов меню
 local minimapDropDown = CreateFrame('Frame', 'CoreMinimapDropDown', UIParent, 'UIDropDownMenuTemplate') -- Фрейм для выпадающего меню
-
--- Функция для добавления элемента в меню
-function c.MinimapItem(getFunc, clickFunc)
-  if type(getFunc) ~= 'function' or type(clickFunc) ~= 'function' then
-    error('AttachMinimapItem: Оба аргумента должны быть функциями', 2)
-    return
-  end
-  tinsert(minimapItems, { get = getFunc, click = clickFunc })
-end
 
 -- Создание кнопки у миникарты
 local button = CreateFrame('Button', 'CoreMinimapButton', Minimap)
