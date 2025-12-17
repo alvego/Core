@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local GetTime = GetTime
@@ -20,7 +17,7 @@ local tostring = tostring
 local SpellHasRange = SpellHasRange
 local GetSpellIDByName = GetSpellIDByName
 local ConsoleExec = ConsoleExec
--------------------------------------------------------------------------------
+
 function c.UnitCasting(unit)
     unit = unit or 'player'
     local channel = false
@@ -38,7 +35,6 @@ function c.UnitCasting(unit)
     return spell, left, duration, channel, notInterruptible
 end
 
--------------------------------------------------------------------------------
 local spellToIdList = {}
 function c.GetSpellId(name, rank, skipError)
     local fullName = name
@@ -67,7 +63,6 @@ function c.GetSpellId(name, rank, skipError)
     return result
 end
 
--------------------------------------------------------------------------------
 function c.GetSpellCooldownLeft(spell)
     local start, duration = GetSpellCooldown(spell)
     if start then
@@ -76,12 +71,10 @@ function c.GetSpellCooldownLeft(spell)
     return 0, 0
 end
 
--------------------------------------------------------------------------------
 function c.IsReadySpell(spell)
     return c.GetSpellCooldownLeft(spell) < c.latency
 end
 
--------------------------------------------------------------------------------
 function c.CanUseSpell(spell, unit)
     if spell == nil or type(spell) ~= 'string' then
         return false, '!spell ' .. tostring(spell)
@@ -99,7 +92,6 @@ function c.CanUseSpell(spell, unit)
     return true
 end
 
--------------------------------------------------------------------------------
 function c.DoSpell(reason, spell, target)
     if type(reason) ~= 'string' then
         c.Error(format('DoSpell: reason required! - [%s]', c.ToStr(reason, spell, target)))

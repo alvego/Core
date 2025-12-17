@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local SpellIsTargeting = SpellIsTargeting
 local GetSpellInfo = GetSpellInfo
 local Dismount = Dismount
@@ -16,15 +13,23 @@ local IsCurrentSpell = IsCurrentSpell
 local UnitIsUnit = UnitIsUnit
 local type = type
 
--------------------------------------------------------------------------------
+
+---Строка причины остановки из-за еды
+c.stopReasonMount = '#mount'
+---Строка причины остановки из-за еды
+c.stopReasonEat = '#eat'
+---Строка причины остановки из-за цели
+c.stopReasonTargeting = '#targeting'
+
+
+---Список аур пищи и питья
 local eatAuras = {
     'Пища',
     'Питье'
 }
-c.stopReasonMount = '#mount'
-c.stopReasonEat = '#eat'
-c.stopReasonTargeting = '#targeting'
 
+
+---Снимает езду/транспорт/ауру
 function c.Dismount()
     if not st.mounted then return end
     if st.mount then
@@ -44,7 +49,8 @@ function c.Dismount()
     end
 end
 
--------------------------------------------------------------------------------
+---Получает причину остановки
+---@return string? Строка причины остановки или nil, если нет причины
 function c.GetStopReason()
     if SpellIsTargeting() then
         return c.stopReasonTargeting
@@ -67,10 +73,7 @@ function c.GetStopReason()
     return nil
 end
 
--------------------------------------------------------------------------------
-
--- FindAndSelectNewTarget
-
+---Список дебафов останавливающих атаку
 local stopAttackDebuff = {
     'Паралич',
     'Превращение',
@@ -85,6 +88,11 @@ local stopAttackDebuff = {
     -- 'Глубинный ужас',
     -- 'Ментальный крик'
 }
+---Пытается выбрать новую цель или проверяет текущую
+---@param tryAssist boolean? Попробовать ассистить
+---@param maxDistance number? Максимальная дистанция
+---@param inViewfield boolean? Видимость цели
+---@return string? Причина остановки или nil, если всё хорошо
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode and c.SearchTarget(tryAssist, maxDistance or 40, inViewfield) then
@@ -117,7 +125,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         end
     elseif not stopDebuff then
         c.Command('/startattack [exists, harm, nodead]')
-        c.Command('/petattack [exists, harm, nodead]')
+        c.Command('/petattack [exists, exists, nodead]')
     end
     local dist = c.UnitDistance('target', 'player')
     if c.flags.move and not st.targetMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
@@ -130,7 +138,11 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     return nil
 end
 
--------------------------------------------------------------------------------
+---Проверяет, можно ли использовать заклинание
+---@param spell string Заклинание
+---@param unit string? Юнит
+---@param interval number? Интервал между использованиями
+---@return boolean Можно ли использовать
 function c.CanSpell(spell, unit, interval)
     if not spell or type(spell) ~= 'string' then return false end
     if interval and not c.TimerMore(spell, interval) then return false end
@@ -141,19 +153,30 @@ function c.CanSpell(spell, unit, interval)
     return c.CanUseSpell(spell, unit)
 end
 
--------------------------------------------------------------------------------
+---Проверяет, можно ли использовать гкд заклинание
+---@param spell string Заклинание
+---@param unit string? Юнит
+---@param interval number? Интервал между использованиями
+---@return boolean Можно ли использовать
 function c.CanGcdSpell(spell, unit, interval)
     if st.gcd then return false end
     return c.CanSpell(spell, unit, interval)
 end
 
--------------------------------------------------------------------------------
+---Проверяет, можно ли использовать предмет
+---@param item string Предмет
+---@param unit string? Юнит
+---@return boolean canUse Можно ли использовать
+---@return string reason Можно ли использовать
 function c.CanItem(item, unit)
     if not IsUsableItem(item) then return false end
     return c.CanUseAction(item, unit)
 end
 
--------------------------------------------------------------------------------
+---Проверяет, можно ли использовать текущее заклинание
+---@param spell string Заклинание
+---@param unit string? Юнит
+---@return boolean canUse Можно ли использовать
 function c.CanCurrentSpell(spell, unit)
     if c.TimerLess('CurrentSpell', 0.1) then return false end
     if IsCurrentSpell(spell) then return false end
@@ -162,7 +185,10 @@ function c.CanCurrentSpell(spell, unit)
     return true
 end
 
--------------------------------------------------------------------------------
+---Проверяет, не использовалось ли заклинание в последний раз с заданным интервалом
+---@param spell string|number|table Заклинание или таблица заклинаний
+---@param interval number Интервал между использованиями
+---@return boolean notUsed Не использовалось ли
 local function isSpellNotUsed(spell, interval)
     if not spell then return false end
     if type(spell) == 'number' then
@@ -172,7 +198,11 @@ local function isSpellNotUsed(spell, interval)
     return c.TimerMore(spell, interval)
 end
 
--------------------------------------------------------------------------------
+
+---Проверяет, не использовалось ли заклинание в последний раз с заданным интервалом (для таблицы)
+---@param spell string|number|table Заклинание или таблица заклинаний
+---@param interval number Интервал между использованиями
+---@return boolean notUsed Не использовалось ли
 function c.IsSpellNotUsed(spell, interval)
     if type(spell) ~= 'table' then return isSpellNotUsed(spell, interval) end
     if #spell < 1 then return false end
@@ -181,5 +211,3 @@ function c.IsSpellNotUsed(spell, interval)
     end
     return true
 end
-
--------------------------------------------------------------------------------

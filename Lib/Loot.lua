@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 local c                     = Core
 local st                    = c.state
--------------------------------------------------------------------------------
+
 local GetLootMethod         = GetLootMethod
 local GetCVar               = GetCVar
 local UnitExists            = UnitExists
@@ -27,7 +24,7 @@ local math_random           = math.random
 local CombatLogClearEntries = CombatLogClearEntries
 local UIParent              = UIParent
 local WrapTextInColorCode   = WrapTextInColorCode
--------------------------------------------------------------------------------
+
 local lootList              = {}
 local lootTimer             = 'lootTimer'
 local lootDist              = 5
@@ -35,7 +32,7 @@ local lootFilterList        = {}
 local lootTitle             = 'Лутаем'
 local lootIcon              = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 local lootTarget            = nil
--------------------------------------------------------------------------------
+
 local skinList              = {}
 local skinTimer             = 'skinTimer';
 local skinDist              = 8
@@ -44,9 +41,9 @@ local allowSkin             = false
 local skinTarget            = nil
 local skinSpell             = 'Снятие шкур'
 local skinIcon              = nil
--------------------------------------------------------------------------------
+
 local maxTryCount           = 2
--------------------------------------------------------------------------------
+
 c.Event('PLAYER_ENTERING_WORLD', function()
     allowSkin = IsUsableSpell(skinSpell)
     if allowSkin then
@@ -133,7 +130,7 @@ local function onEvent(event, ...)
 end
 c.Event('UNIT_SPELLCAST_FAILED', onEvent)
 c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
--------------------------------------------------------------------------------
+
 local function resetTimers()
     if c.TimerStarted(lootTimer) and c.TimerMore(lootTimer, 300) then
         wipe(lootList)
@@ -144,7 +141,7 @@ local function resetTimers()
         wipe(skinFilterList)
     end
 end
--------------------------------------------------------------------------------
+
 local hasSkinTooltip = c.GetCachedFunc(function(unit)
     local tooltipName = 'SkinCheckTooltip'
     local tooltip = _G[tooltipName] or
@@ -166,7 +163,7 @@ local hasSkinTooltip = c.GetCachedFunc(function(unit)
     end
     return false
 end)
--------------------------------------------------------------------------------
+
 local canLoot = c.GetCachedFunc(function(unit)
     if lootList[unit] then return false end
     if skinList[unit] then return false end
@@ -183,7 +180,7 @@ local canLoot = c.GetCachedFunc(function(unit)
     if hasSkinTooltip(unit) then return false end
     return true
 end)
--------------------------------------------------------------------------------
+
 local function checkCorpseForLoot(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDeadOrGhost(unit) then return end
@@ -193,7 +190,7 @@ local function checkCorpseForLoot(unit)
     if not canLoot(unit) then return end                         -- can't loot
     return unit
 end
--------------------------------------------------------------------------------
+
 local canSkin = c.GetCachedFunc(function(unit)
     if skinList[unit] then return false end
     if (skinFilterList[unit] or 0) >= maxTryCount then return false end
@@ -202,7 +199,7 @@ local canSkin = c.GetCachedFunc(function(unit)
 end)
 
 
--------------------------------------------------------------------------------
+
 local function checkCorpseForSkin(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDeadOrGhost(unit) then return end
@@ -222,7 +219,7 @@ local function checkCorpseForSkin(unit)
     return unit
 end
 
--------------------------------------------------------------------------------
+
 local maxDist = 40
 local _corpse, _dist = nil, 0
 local function checkCorpse(unit)
@@ -240,13 +237,13 @@ local function checkCorpse(unit)
         _dist = dist
     end
 end
--------------------------------------------------------------------------------
+
 local function getNearCorpse()
     _corpse, _dist = nil, 0
     c.FindValue(c.GetUnits(), checkCorpse)
     return _corpse
 end
--------------------------------------------------------------------------------
+
 local function lootUnit(unit, name)
     -- и так уже лутаем кого-то
     -- if isLooting() then return end
@@ -263,7 +260,7 @@ local function lootUnit(unit, name)
         lootList[unit] = true
     end
 end
--------------------------------------------------------------------------------
+
 local function waitForLoot()
     -- core лут отключен, стоп
     if not c.flags.loot then return true end
@@ -299,7 +296,7 @@ local function waitForLoot()
     end
     return false        -- лута нет, можно что-то делать
 end
--------------------------------------------------------------------------------
+
 local fish = {}
 fish.run = false
 fish.spell = 'Рыбная ловля'
@@ -315,11 +312,11 @@ local function startFishing()
     fish.run = true
     c.TimerStart(fish.spell)
 end
--------------------------------------------------------------------------------
+
 c.ActionHook(fish.spell, function()
     startFishing()
 end)
--------------------------------------------------------------------------------
+
 c.Event('COMBAT_LOG_EVENT_UNFILTERED',
     function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
              destFlags, ...)
@@ -331,7 +328,7 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED',
         end
     end
 )
--------------------------------------------------------------------------------
+
 local function stopFishing(reason)
     if fish.run then
         c.Message('Сезон рыбалки закрыт! ' .. reason, fish.spell, fish.icon)
@@ -407,7 +404,7 @@ local function waitForFishing()
 end
 
 
--------------------------------------------------------------------------------
+
 local function waitForCorpseLoot()
     -- ищем кого можно лутануть
     local corpse = c.FindValue(c.GetUnits(), checkCorpseForLoot)
@@ -415,7 +412,7 @@ local function waitForCorpseLoot()
     lootUnit(corpse)
     return true
 end
--------------------------------------------------------------------------------
+
 local function waitForCorpseSkin()
     if not st.still then return false end
     if not allowSkin then return false end
@@ -427,7 +424,7 @@ local function waitForCorpseSkin()
     c.TimerStart(skinTimer)
     return true
 end
--------------------------------------------------------------------------------
+
 local lastCorpse = nil
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 1) then return true end
@@ -444,7 +441,7 @@ local function waitForFindCorpse()
     end
 end
 
--------------------------------------------------------------------------------
+
 
 c.BeforeUpdate(function()
     if waitForLoot() then return end
@@ -459,5 +456,3 @@ c.BeforeUpdate(function()
     if waitForCorpseSkin() then return end
     if waitForFindCorpse() then return end
 end)
-
--------------------------------------------------------------------------------

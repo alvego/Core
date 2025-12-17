@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local EasyMenu = EasyMenu
 local Minimap = Minimap
 local GameTooltip = GameTooltip
@@ -16,7 +13,7 @@ local SetCVar = SetCVar
 local GetCVar = GetCVar
 local WrapTextInColorCode = WrapTextInColorCode
 --local ForceQuit = ForceQuit
--------------------------------------------------------------------------------
+
 -- Инициализация
 local minimapDropDown = CreateFrame('Frame', 'CoreMinimapDropDown', UIParent, 'UIDropDownMenuTemplate') -- Фрейм для выпадающего меню
 
@@ -285,4 +282,3 @@ button:EnableMouse(true)
 button:RegisterForDrag('LeftButton')
 button:SetScript('OnDragStart', function(self) self:StartMoving() end)
 button:SetScript('OnDragStop', function(self) self:StopMovingOrSizing() end)
--------------------------------------------------------------------------------

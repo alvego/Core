@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
@@ -22,7 +19,7 @@ local GRAY_FONT_COLOR = GRAY_FONT_COLOR
 local RED_FONT_COLOR = RED_FONT_COLOR
 local GREEN_FONT_COLOR = GREEN_FONT_COLOR
 local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
--------------------------------------------------------------------------------
+
 local frame = CreateFrame('Frame', c.name .. 'WhatHappend', UIParent)
 frame:ClearAllPoints()
 frame:SetPoint("CENTER", UIParent, "TOP", 0, -5)
@@ -32,7 +29,7 @@ frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft'
 frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
 frame.text:SetTextColor(0.8, 0.8, 0.8, 0.8)
 frame.text:SetAllPoints()
--------------------------------------------------------------------------------
+
 -- очистка чата по Ctrl + LeftButton клик на табик
 local FCF_Tab_OnClick = FCF_Tab_OnClick
 _G.FCF_Tab_OnClick = function(self, button)
@@ -44,7 +41,7 @@ _G.FCF_Tab_OnClick = function(self, button)
     return FCF_Tab_OnClick(self, button)
 end
 
--------------------------------------------------------------------------------
+
 -- Функция для получения текущего активного чата
 local function getDebugChatFrame()
     local debugChatFrame, tab
@@ -58,14 +55,14 @@ local function getDebugChatFrame()
     end
     return debugChatFrame, tab
 end
--------------------------------------------------------------------------------
+
 -- очистка чата по началу боя
 -- c.Event('PLAYER_REGEN_DISABLED', function()
 --     local chatFrame, tab = getDebugChatFrame()
 --     if not chatFrame then return end
 --     chatFrame:Clear()
 -- end)
--------------------------------------------------------------------------------
+
 local docked = true
 local function toggleChatVisibility(visible)
     if visible then
@@ -108,7 +105,7 @@ local function toggleChatVisibility(visible)
 end
 c.UpdateDebugState(toggleChatVisibility)
 
--------------------------------------------------------------------------------
+
 -- Функция для получения свободного чат-фрейма
 local function getFreeChatIndex()
     local frame, tab
@@ -123,7 +120,7 @@ local function getFreeChatIndex()
     end
     return nil
 end
--------------------------------------------------------------------------------
+
 -- Настройка чат-фрейма
 local function configureDebugChatFrame(chatFrame)
     -- Настраиваем чат-фрейм
@@ -144,7 +141,7 @@ local function configureDebugChatFrame(chatFrame)
     chatFrame:SetResizable(true)
 end
 
--------------------------------------------------------------------------------
+
 -- Функция для создания вкладки чата
 local function createDebugChatTab()
     -- Проверяем, не существует ли уже вкладка с именем 'Debug'
@@ -161,7 +158,7 @@ local function createDebugChatTab()
 end
 c.Event('PLAYER_LOGIN', createDebugChatTab)
 
--------------------------------------------------------------------------------
+
 local iconSuccess = [[Interface\Icons\ability_vehicle_shellshieldgenerator_green]]
 local iconLog = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_black]]
 local iconError = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_red]]
@@ -176,7 +173,7 @@ local function formatMessage(icon, label, msg)
     return format('%s [%s] %s', formatIcon(icon), label or '...', msg or '???')
 end
 
--------------------------------------------------------------------------------
+
 -- Функция для вывода отладочных сообщений
 local function debugChat(msg, title, icon, r, g, b)
     if msg == nil then return end
@@ -209,7 +206,7 @@ local function debugChat(msg, title, icon, r, g, b)
     )
 end
 
--------------------------------------------------------------------------------
+
 -- Функция для вывода отладочных сообщений  без спама
 function c.Message(msg, title, icon, r, g, b)
     msg = tostring(msg)
@@ -220,7 +217,6 @@ function c.Message(msg, title, icon, r, g, b)
     debugChat(msg, title, icon, r, g, b)
 end
 
--------------------------------------------------------------------------------
 function c.MessageLog(msg, title, icon, r, g, b)
     c.Message(
         msg,
@@ -232,7 +228,6 @@ function c.MessageLog(msg, title, icon, r, g, b)
     )
 end
 
--------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений без частого спама с указанием времени
 local times = 0
 local lastLog = nil
@@ -281,7 +276,6 @@ function c.Log(...)
     end
 end
 
--------------------------------------------------------------------------------
 -- Функция для вывода сообщений об ошибках без спама
 function c.Error(msg, icon)
     if not c.IsChanged('Error', msg) then return end
@@ -296,7 +290,6 @@ function c.Error(msg, icon)
     )
 end
 
--------------------------------------------------------------------------------
 function c.Success(msg, icon)
     if not c.IsChanged('Success', msg) then return end
     debugChat(
@@ -309,7 +302,6 @@ function c.Success(msg, icon)
     )
 end
 
--------------------------------------------------------------------------------
 -- Функция для вывода отладочных сообщений в общий чат
 function c.Chat(msg)
     if msg == nil then return end
@@ -328,7 +320,6 @@ function c.Chat(msg)
     c.TimerStart(key)
 end
 
--------------------------------------------------------------------------------
 -- Функция для вывода сообщений в центре экрана с затуханием (UIErrorsFrame)
 function c.Echo(msg, title, icon, r, g, b) -- Показ сообщения в UIErrorsFrame
     if msg == nil then return end
@@ -363,7 +354,7 @@ function c.EchoError(msg) -- Показ ошибки в UIErrorsFrame
 end
 
 UIErrorsFrame:UnregisterEvent('UI_ERROR_MESSAGE')
--------------------------------------------------------------------------------
+
 function c.LogWhatHappend(msg, skipLogging)
     if not msg then
         c.EchoError('WhatHappend is "' .. tostring(msg) .. '"?!!')
@@ -378,5 +369,3 @@ function c.LogWhatHappend(msg, skipLogging)
     frame:SetWidth(textWidth)
     frame:SetHeight(textHeight)
 end
-
--------------------------------------------------------------------------------

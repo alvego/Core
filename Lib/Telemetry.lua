@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local tostring = tostring
 local tinsert = tinsert
 local wipe = wipe
@@ -12,7 +9,7 @@ local error = error
 local table_concat = table.concat
 local WrapTextInColorCode = WrapTextInColorCode
 
--------------------------------------------------------------------------------
+
 local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
 frame:SetPoint('TOPLEFT', 0, 0)
@@ -27,7 +24,7 @@ texture:SetTexture(0, 0, 0)
 texture:SetAlpha(0.5)
 texture:SetAllPoints(frame)
 
--------------------------------------------------------------------------------
+
 local function updateTelemetryVisibility(visible)
     if visible then
         if not frame:IsVisible() then frame:Show() end
@@ -37,14 +34,13 @@ local function updateTelemetryVisibility(visible)
 end
 c.UpdateDebugState(updateTelemetryVisibility)
 
--------------------------------------------------------------------------------
+
 local list = {}
 function c.Telemetry(func)
     if type(func) ~= 'function' then error('Функция для телеметрии должна возвращать значение', 2) end
     tinsert(list, func)
 end
 
--------------------------------------------------------------------------------
 function c.TelemetryBool(label, value)
     return WrapTextInColorCode(label, value and 'ff00ff00' or 'ff885555')
 end
@@ -52,8 +48,6 @@ end
 function c.TelemetryRedBool(label, value)
     return WrapTextInColorCode(label, value and 'ff558855' or 'ffff0000')
 end
-
--------------------------------------------------------------------------------
 
 local data = {}
 local function createTelemetryMessage()
@@ -67,7 +61,7 @@ local function createTelemetryMessage()
     wipe(data)
     return label
 end
--------------------------------------------------------------------------------
+
 
 local function updateTelemetry()
     local telemetry = createTelemetryMessage()
@@ -80,5 +74,3 @@ local function updateTelemetry()
     end
 end
 c.AfterUpdate(updateTelemetry)
-
--------------------------------------------------------------------------------

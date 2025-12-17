@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitMana = UnitMana
@@ -22,19 +19,17 @@ local UnitClass = UnitClass
 local UnitInRaid = UnitInRaid
 local UnitInParty = UnitInParty
 
--------------------------------------------------------------------------------
+
 function c.UnitHealth100(unit)
     unit = unit or 'player'
     return UnitHealth(unit) * 100 / UnitHealthMax(unit)
 end
 
--------------------------------------------------------------------------------
 function c.UnitMana100(unit)
     unit = unit or 'player'
     return UnitMana(unit) * 100 / UnitManaMax(unit)
 end
 
--------------------------------------------------------------------------------
 function c.UnitLostHP(unit)
     unit = unit or 'player'
     local hp = UnitHealth(unit)
@@ -43,7 +38,6 @@ function c.UnitLostHP(unit)
     return lost
 end
 
--------------------------------------------------------------------------------
 function c.IsInvalidTarget(unit)
     unit = unit or 'target'
     if not UnitExists(unit) then return 'остутствует ' .. unit end
@@ -53,26 +47,22 @@ function c.IsInvalidTarget(unit)
     return false
 end
 
--------------------------------------------------------------------------------
 function c.UnitIsNPC(unit)
     unit = unit or 'target'
     return UnitExists(unit) and not (UnitIsPlayer(unit) or UnitPlayerControlled(unit) or UnitCanAttack('player', unit))
 end
 
--------------------------------------------------------------------------------
 function c.UnitIsPet(unit)
     unit = unit or 'target'
     return UnitExists(unit) and not c.UnitIsNPC(unit) and not UnitIsPlayer(unit) and UnitPlayerControlled(unit)
 end
 
--------------------------------------------------------------------------------
 function c.UnitIsBoss(unit)
     unit = unit or 'target'
     local lvl = UnitLevel(unit)
     return lvl == -1 or lvl > UnitLevel('player') + 3
 end
 
--------------------------------------------------------------------------------
 function c.UnitInGroup(unit)
     return UnitInRaid(unit) or UnitInParty(unit)
 end
@@ -105,7 +95,6 @@ function c.UnitIsTank(unit)
     return false
 end
 
--------------------------------------------------------------------------------
 local immuneList = { 'Божественный щит', 'Ледяная глыба', 'Сдерживание' }
 function c.UnitIsImmune(unit)
     unit = unit or 'target'
@@ -117,7 +106,6 @@ function c.UnitIsImmune(unit)
     return aura and aura or false
 end
 
--------------------------------------------------------------------------------
 local magicList = { 'Отражение заклинания', 'Антимагический панцирь', 'Рунический покров', 'Эффект тотема заземления' }
 function c.UnitIsMagicImmune(unit)
     unit = unit or 'target'
@@ -125,7 +113,6 @@ function c.UnitIsMagicImmune(unit)
     return aura and aura or false
 end
 
--------------------------------------------------------------------------------
 function c.HasTalent(talent)
     local found = false;
     for i = 1, 7 do
@@ -139,7 +126,6 @@ function c.HasTalent(talent)
     return found;
 end
 
--------------------------------------------------------------------------------
 function c.GetCurrentSpecID()
     local maxPoints = 0
     local specID = 0
@@ -159,5 +145,3 @@ function c.GetCurrentSpecID()
 
     return specID
 end
-
--------------------------------------------------------------------------------

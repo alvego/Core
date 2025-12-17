@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local IsControlKeyDown = IsControlKeyDown
 local IsAltKeyDown = IsAltKeyDown
@@ -26,12 +23,12 @@ local wipe = wipe
 local UnitIsAFK = UnitIsAFK
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
--------------------------------------------------------------------------------
+
 local mountAuras = {
     311563, -- Магический пузырь
     32556   -- Полет
 }
--------------------------------------------------------------------------------
+
 local function updateState()
     wipe(c.stateCache)
     local gameFocus = not GetCurrentKeyBoardFocus()
@@ -101,7 +98,7 @@ local function updateState()
 end
 c.BeforeUpdate(updateState, true)
 updateState() -- for init
--------------------------------------------------------------------------------
+
 c.Event('PLAYER_REGEN_DISABLED', function()
     c.TimerStart('targetCombat')
 end)

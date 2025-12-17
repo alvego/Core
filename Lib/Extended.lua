@@ -1,20 +1,17 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local type = type
 local table_concat = table.concat
 local SecondsToTime = SecondsToTime
 local WrapTextInColorCode = WrapTextInColorCode
--------------------------------------------------------------------------------
+
 
 local function isReadyFunc(fn)
     return c.IsLoaded() and type(fn) == 'function'
 end
 
--------------------------------------------------------------------------------
+
 function c.UnitsCount()
     local func = oUnitsCount
     if isReadyFunc(func) then
@@ -23,7 +20,6 @@ function c.UnitsCount()
     return 0
 end
 
--------------------------------------------------------------------------------
 function c.UnitPtr(unit)
     local func = oUnitPtr
     if isReadyFunc(func) then
@@ -32,7 +28,6 @@ function c.UnitPtr(unit)
     return 0
 end
 
--------------------------------------------------------------------------------
 function c.UnitIDByIndex(idx)
     local func = oUnitIDByIndex
     if isReadyFunc(func) then
@@ -41,7 +36,6 @@ function c.UnitIDByIndex(idx)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.ReadUlong(ptr, offset)
     local func = oReadUlong
     if isReadyFunc(func) then
@@ -50,7 +44,6 @@ function c.ReadUlong(ptr, offset)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.ReadInt(ptr, offset)
     local func = oReadInt
     if isReadyFunc(func) then
@@ -59,7 +52,6 @@ function c.ReadInt(ptr, offset)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.ReadFloat(ptr, offset)
     local func = oReadFloat
     if isReadyFunc(func) then
@@ -68,7 +60,6 @@ function c.ReadFloat(ptr, offset)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.ReadByte(ptr, offset)
     local func = oReadByte
     if isReadyFunc(func) then
@@ -77,7 +68,6 @@ function c.ReadByte(ptr, offset)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.ReadString(ptr, offset)
     local func = oReadString
     if isReadyFunc(func) then
@@ -86,7 +76,6 @@ function c.ReadString(ptr, offset)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.UnitBehind(unit)
     local func = oUnitBehind
     if isReadyFunc(func) then
@@ -95,7 +84,6 @@ function c.UnitBehind(unit)
     return true
 end
 
--------------------------------------------------------------------------------
 function c.LookAt(x, y, z)
     local func = oLookAt
     if isReadyFunc(func) then
@@ -103,7 +91,6 @@ function c.LookAt(x, y, z)
     end
 end
 
--------------------------------------------------------------------------------
 function c.LookAtUnit(unit)
     local func = oLookAtUnit
     if isReadyFunc(func) then
@@ -111,7 +98,6 @@ function c.LookAtUnit(unit)
     end
 end
 
--------------------------------------------------------------------------------
 function c.MoveTo(x, y, z)
     local func = oMove
     if isReadyFunc(func) then
@@ -119,7 +105,6 @@ function c.MoveTo(x, y, z)
     end
 end
 
--------------------------------------------------------------------------------
 function c.MoveStop()
     local func = oMoveStop
     if isReadyFunc(func) then
@@ -127,7 +112,6 @@ function c.MoveStop()
     end
 end
 
--------------------------------------------------------------------------------
 function c.UnitInLOS(unit1, unit2)
     local func = oUnitInLOS
     if isReadyFunc(func) then
@@ -136,7 +120,6 @@ function c.UnitInLOS(unit1, unit2)
     return true
 end
 
--------------------------------------------------------------------------------
 function c.UnitClick(unit, use)
     local func = oUnitClick
     if isReadyFunc(func) then
@@ -144,7 +127,6 @@ function c.UnitClick(unit, use)
     end
 end
 
--------------------------------------------------------------------------------
 function c.UnitPosition(unit)
     local func = oUnitPosition
     if isReadyFunc(func) then
@@ -153,7 +135,6 @@ function c.UnitPosition(unit)
     return 0, 0, 0
 end
 
--------------------------------------------------------------------------------
 function c.UnitFacing(unit)
     local func = oUnitFacing
     if isReadyFunc(func) then
@@ -162,7 +143,6 @@ function c.UnitFacing(unit)
     return 0
 end
 
--------------------------------------------------------------------------------
 c.UnitDistance = c.GetCachedFunc(
 ---Вычисляет расстояние между двумя существующими юнитами
 ---@param unit1 string
@@ -182,7 +162,7 @@ c.UnitDistance = c.GetCachedFunc(
         return 0
     end
 )
--------------------------------------------------------------------------------
+
 function c.UnitAuraByID(unit, spellIds, mineOnly)
     local func = oUnitAuraByID
     if isReadyFunc(func) then
@@ -202,7 +182,7 @@ end
 
 c.HasAuraByID = c.GetCachedFunc(c.UnitAuraByID)
 
--------------------------------------------------------------------------------
+
 function c.UnitAuraByIndex(unit, idx)
     local func = oUnitAuraByIndex
     if isReadyFunc(func) then
@@ -213,7 +193,6 @@ function c.UnitAuraByIndex(unit, idx)
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.Script(luaCode)
     local func = oScript
     if isReadyFunc(func) then
@@ -221,7 +200,6 @@ function c.Script(luaCode)
     end
 end
 
--------------------------------------------------------------------------------
 function c.Command(chatCommandLine)
     local func = oCommand
     if isReadyFunc(func) then
@@ -229,7 +207,6 @@ function c.Command(chatCommandLine)
     end
 end
 
--------------------------------------------------------------------------------
 function c.Spell(spell, target)
     local func = oSpell
     if isReadyFunc(func) then
@@ -237,7 +214,6 @@ function c.Spell(spell, target)
     end
 end
 
--------------------------------------------------------------------------------
 -- slot - An action bar slot (number, actionID)
 -- target - A unit to be used as target for the action (string, unitID)
 -- button - Mouse button used to activate the action (string)
@@ -253,7 +229,6 @@ function c.Action(slot, target, button)
     end
 end
 
--------------------------------------------------------------------------------
 local checkTimer = 'CheckExtendedFunc'
 function c.CheckExtendedFunc()
     c.TimerToggle(checkTimer, type(oHelp) ~= 'function')
@@ -262,5 +237,3 @@ function c.CheckExtendedFunc()
             c.icon, 0, 1, 0)
     end
 end
-
--------------------------------------------------------------------------------

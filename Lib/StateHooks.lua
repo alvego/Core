@@ -1,14 +1,11 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local SpellIsTargeting = SpellIsTargeting
--------------------------------------------------------------------------------
+
 st.attack = false
 st.start = false
 c.BeforeUpdate(function()
@@ -50,14 +47,14 @@ c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
         end
     end
 end)
--------------------------------------------------------------------------------
+
 c.Event('ADDON_LOADED', function(event, addonName)
     if addonName ~= c.name then return end
     CoreDB = CoreDB or {}
     c.db = CoreDB
     c.loaded = true
 end)
--------------------------------------------------------------------------------
+
 local function inWorldUpdate(event)
     st.inWorld = event == 'PLAYER_ENTERING_WORLD'
 end

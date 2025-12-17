@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local _G = _G
 local ActionHasRange = ActionHasRange
 local wipe = wipe
@@ -22,7 +19,7 @@ local GetMacroSpell = GetMacroSpell
 local GetItemSpell = GetItemSpell
 local GetPetActionInfo = GetPetActionInfo
 local ConsoleExec = ConsoleExec
--------------------------------------------------------------------------------
+
 function c.GetSlotName(slot)
     local name = nil
     local actiontype, id, subtype, spellId = GetActionInfo(slot)
@@ -38,7 +35,6 @@ function c.GetSlotName(slot)
     return name, actiontype
 end
 
--------------------------------------------------------------------------------
 local actions = {}
 local updateActions = function()
     wipe(actions)
@@ -53,7 +49,7 @@ c.Event('ACTIONBAR_SLOT_CHANGED', updateActions)
 c.Event('PLAYER_ENTERING_WORLD', updateActions)
 
 
--------------------------------------------------------------------------------
+
 local actionsCD = {}
 local function hook_SetCooldown(self, start, duration)
     local parent = self:GetParent()
@@ -63,14 +59,13 @@ local function hook_SetCooldown(self, start, duration)
     actionsCD[name] = start + duration
 end
 hooksecurefunc(getmetatable(ActionButton1Cooldown).__index, 'SetCooldown', hook_SetCooldown)
--------------------------------------------------------------------------------
+
 function c.GetSlotCooldownLeft(slot)
     if not slot then return 0 end
     local cd = actionsCD['BT4Button' .. slot]
     return cd and (cd - GetTime()) or 0
 end
 
--------------------------------------------------------------------------------
 function c.GetActionSpell(slot)
     if not HasAction(slot) then return nil end -- Слот 1-120 пустой
 
@@ -93,7 +88,6 @@ function c.GetActionSpell(slot)
     return spellName
 end
 
--------------------------------------------------------------------------------
 function c.CanUseSlot(slot, unit)
     if type(slot) ~= 'number' or slot == nil or slot == 0 or slot > 120 then
         return false, '!slot ' .. tostring(slot)
@@ -111,7 +105,6 @@ function c.CanUseSlot(slot, unit)
     return true, ''
 end
 
--------------------------------------------------------------------------------
 function c.GetSlot(action, skipError)
     if action == 'none' then
         return
@@ -128,19 +121,16 @@ function c.GetSlot(action, skipError)
     return slot
 end
 
--------------------------------------------------------------------------------
 function c.IsReadyAction(action)
     local slot = c.GetSlot(action)
     return c.GetSlotCooldownLeft(slot) < c.latency
 end
 
--------------------------------------------------------------------------------
 function c.CanUseAction(action, unit)
     local slot = c.GetSlot(action)
     return c.CanUseSlot(slot, unit)
 end
 
--------------------------------------------------------------------------------
 function c.SlotIsPressed(slot)
     if not slot then return false end
     local btn = _G['BT4Button' .. slot]
@@ -148,7 +138,6 @@ function c.SlotIsPressed(slot)
     return btn:GetButtonState() == 'PUSHED'
 end
 
--------------------------------------------------------------------------------
 function c.ButtonIsPressed()
     for i = 1, 120 do -- 12 x 10
         if c.SlotIsPressed(i) then
@@ -158,12 +147,10 @@ function c.ButtonIsPressed()
     return nil
 end
 
--------------------------------------------------------------------------------
 function c.IsActionPressed(action)
     return c.SlotIsPressed(c.GetSlot(action))
 end
 
--------------------------------------------------------------------------------
 local mouseButtons = {
     [1] = 'LeftButton',
     [2] = 'RightButton',
@@ -200,5 +187,3 @@ function c.DoAction(reason, name, target, btnNum)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastAction = name
 end
-
--------------------------------------------------------------------------------

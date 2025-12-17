@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local GetTime = GetTime
 local bit = bit
 local wipe = wipe
@@ -17,9 +14,9 @@ local UnitHealth = UnitHealth
 local math_max = math.max
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
--------------------------------------------------------------------------------
+
 local db = {}
--------------------------------------------------------------------------------
+
 local function needUpdateUnits()
     if st.combatMode then return true end        -- в бою
     if st.autoattack then return true end        -- автоатака
@@ -27,7 +24,7 @@ local function needUpdateUnits()
     if not st.invalidTarget then return true end -- есть валидный таргет
     return false
 end
--------------------------------------------------------------------------------
+
 local function clearUnits()
     -- Не чиcтим если нужно обновлять
     if needUpdateUnits() then return end
@@ -40,7 +37,7 @@ local function clearUnits()
     end
 end
 c.BeforeUpdate(clearUnits)
--------------------------------------------------------------------------------
+
 local function updateUnit(guid, amount)
     -- Берем по гуиду, запоминаем начало боя и суммируем весь входящий в таргет урон, потом делим на время с начала
     local unitInfo = db[guid]
@@ -53,7 +50,7 @@ local function updateUnit(guid, amount)
         unitInfo.amount = unitInfo.amount + amount
     end
 end
--------------------------------------------------------------------------------
+
 local function killUnit(guid)
     local unitInfo = db[guid]
     if unitInfo then
@@ -61,7 +58,7 @@ local function killUnit(guid)
         db[guid] = nil
     end
 end
--------------------------------------------------------------------------------
+
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     -- Какое-то время уже не в бою
@@ -85,7 +82,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
 end
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
--------------------------------------------------------------------------------
+
 function c.UnitTimeToDie(unit)
     unit = unit and unit or 'target'
     local guid = UnitGUID(unit)
@@ -94,5 +91,3 @@ function c.UnitTimeToDie(unit)
     if not unitInfo then return nil end
     return UnitHealth(unit) / (unitInfo.amount / math_max(GetTime() - unitInfo.startTime, 2))
 end
-
--------------------------------------------------------------------------------

@@ -1,9 +1,6 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local NUM_BAG_SLOTS = NUM_BAG_SLOTS
 local GetContainerNumFreeSlots = GetContainerNumFreeSlots
 local GetContainerNumSlots = GetContainerNumSlots
@@ -20,7 +17,7 @@ local ItemRefTooltip = ItemRefTooltip
 local GameTooltip = GameTooltip
 local GetInventoryItemID = GetInventoryItemID
 local tContains = tContains
--------------------------------------------------------------------------------
+
 function c.GetBagsFreeSlots()
     local free = 0
     -- считаем сободное место
@@ -31,7 +28,6 @@ function c.GetBagsFreeSlots()
     return free
 end
 
--------------------------------------------------------------------------------
 function c.EachBagsSlot(fn)
     for bag = 0, NUM_BAG_SLOTS do
         for slot = 1, GetContainerNumSlots(bag) do
@@ -42,7 +38,6 @@ function c.EachBagsSlot(fn)
     return nil
 end
 
--------------------------------------------------------------------------------
 local disabledItemEquipLoc = {
     'INVTYPE_BODY',
     'INVTYPE_TABARD',
@@ -67,7 +62,7 @@ local function getEquippedItemLevel(link)
         return itemLevel, itemLink
     end
 end
--------------------------------------------------------------------------------
+
 local getMinEquippedItemLevel = c.GetCachedFunc(function()
     local minLvL = nil
     for i = 1, 18 do
@@ -86,7 +81,7 @@ local getMinEquippedItemLevel = c.GetCachedFunc(function()
     --c.Log('minItemLevel', minLvL)
     return minLvL or 0
 end)
--------------------------------------------------------------------------------
+
 local function checkItemLevel(itemLevel, itemSellPrice)
     local minItemLevel = getMinEquippedItemLevel()
     if itemLevel < c.Round(minItemLevel * 0.8) then -- 80%
@@ -149,7 +144,7 @@ local itemTipHook = function(self, ...)
 end
 GameTooltip:HookScript('OnTooltipSetItem', itemTipHook)
 ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipHook)
--------------------------------------------------------------------------------
+
 local itemTipTypeHook = function(self, ...)
     local _, link = self:GetItem()
     local _, _, _, _, _, itemType, itemSubType =
@@ -162,7 +157,7 @@ local itemTipTypeHook = function(self, ...)
 end
 GameTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
 ItemRefTooltip:HookScript('OnTooltipSetItem', itemTipTypeHook)
--------------------------------------------------------------------------------
+
 c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'MiddleButton' then return end
     local name, link = GameTooltip:GetItem()
@@ -182,7 +177,7 @@ c.Event('GLOBAL_MOUSE_UP', function(event, button)
     c.MessageLog(format('%s %s', WrapTextInColorCode('добавлено в список хлама', 'ffff0000'), itemLink), 'Хлам',
         itemTexture)
 end)
--------------------------------------------------------------------------------
+
 local junkTimer = 'JunkTimer'
 local junkIcon = [[Interface\Icons\Spell_Mage_ConjuredManaBuns]]
 function c.RemoveJunk()
@@ -218,7 +213,7 @@ c.Event('LOOT_CLOSED', function()
 end
 )
 
--------------------------------------------------------------------------------
+
 local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 c.Event('MERCHANT_SHOW', function()
     ClearCursor()
@@ -257,4 +252,3 @@ c.Event('MERCHANT_SHOW', function()
     end
     c.TimerStart(junkTimer)
 end)
--------------------------------------------------------------------------------

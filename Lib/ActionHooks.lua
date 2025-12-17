@@ -1,18 +1,15 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local type = type
 local error = error
 local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
--------------------------------------------------------------------------------
+
 local userAction = {}
 local function userActionReset()
     if not userAction.slot then return end
@@ -104,7 +101,7 @@ local function hookUseAction(slot, target, button)
 end
 hooksecurefunc('UseAction', hookUseAction)
 
--------------------------------------------------------------------------------
+
 local function updateUserAction()
     if userAction.slot == nil then
         return
@@ -141,4 +138,3 @@ local function updateUserAction()
     c.SkipNextUpdate()
 end
 c.BeforeUpdate(updateUserAction, true)
--------------------------------------------------------------------------------

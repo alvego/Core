@@ -1,12 +1,9 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local GetNetStats = GetNetStats
 local math_max = math.max
--------------------------------------------------------------------------------
+
 local sendTime = nil
 local function updateLagTime(event, ...)
     local unit, spell = select(1, ...)
@@ -25,7 +22,7 @@ c.Event('UNIT_SPELLCAST_SENT', updateLagTime)
 c.Event('UNIT_SPELLCAST_START', updateLagTime)
 c.Event('UNIT_SPELLCAST_SUCCEEDED', updateLagTime)
 c.Event('UNIT_SPELLCAST_FAILED', updateLagTime)
--------------------------------------------------------------------------------
+
 local function updateLatency() -- Время сетевой задержки
     if c.TimerMore('updateLagTime', 15) then
         c.latency = math_max(tonumber((select(3, GetNetStats()) or 0)) / 1000, c.advance)
@@ -33,4 +30,3 @@ local function updateLatency() -- Время сетевой задержки
     end
 end
 c.BeforeUpdate(updateLatency)
--------------------------------------------------------------------------------

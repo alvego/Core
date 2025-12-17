@@ -1,17 +1,14 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local wipe = wipe
 local select = select
 local pairs = pairs
 local next = next
 local db = {}
--------------------------------------------------------------------------------
+
 local function needUpdateDotes()
     if st.combatMode then return true end        -- в бою
     if st.autoattack then return true end        -- автоатака
@@ -20,7 +17,7 @@ local function needUpdateDotes()
     return false
 end
 
--------------------------------------------------------------------------------
+
 local function updateDotes()
     -- Не чичтим если нужно обновлять
     if needUpdateDotes() then return end
@@ -34,7 +31,7 @@ local function updateDotes()
 end
 c.BeforeUpdate(updateDotes)
 
--------------------------------------------------------------------------------
+
 local function addDotedUnit(guid, spell)
     local dotes = db[guid]
     if not dotes then
@@ -44,7 +41,7 @@ local function addDotedUnit(guid, spell)
     dotes[spell] = dotes
 end
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 local function removeDotedUnit(guid, spell)
     local dotes = db[guid]
     if dotes then
@@ -52,7 +49,7 @@ local function removeDotedUnit(guid, spell)
     end
 end
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     -- если есть смысл
@@ -68,7 +65,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
 end
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 function c.DotedUnitCount(spell) -- Count of units with my dote <spell>
     local count = 0
     for _, dotes in pairs(db) do
@@ -77,4 +74,4 @@ function c.DotedUnitCount(spell) -- Count of units with my dote <spell>
     return count
 end
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------

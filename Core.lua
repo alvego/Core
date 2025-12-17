@@ -1,44 +1,53 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
----@class Core
-Core = {}
--------------------------------------------------------------------------------
+Core = {} -- Глобальная переменная для аддона
+---Основа аддона, содержит глобальные переменные и функции
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
 local type = type
 local tostring = tostring
 local error = error
 local setmetatable = setmetatable
 local format = format
--------------------------------------------------------------------------------
-c.name = ...
-c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
-c.db = {}
 
+---Имя аддона
+c.name = ...
+---Путь к иконке аддона
+c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
+---База данных аддона
+c.db = {}
+---
+---Состояние аддона
+---
 ---@class Core.state
 c.state = {}
+---Кэш состояний
 c.stateCache = {}
+---Флаг загрузки аддона (db подгружена)
 c.loaded = false
+---Флаг занятости аддона (время на стыке гкд)
 c.busy = true
--------------------------------------------------------------------------------
+
+---Интервал минимальной сетевой задержки (в секундах)
 c.advance = 0.05
+---Пауза между обновления
 c.updateDelay = 0.25
+---Сетевая задержка
 c.latency = c.advance
+---Id гкд спелла
 c.gcdSpellId = 61304
--------------------------------------------------------------------------------
+
 ---@class Core.flags
-local flags = { -- defaults
-    paused = true,
-    loot = false,
-    move = false,
-    fullLog = false,
-    autoDelJunk = false,
-    autoLook = false,
-    autoMelee = false
+---Флаги аддона (по умолчанию)
+local flags = {          -- defaults
+    paused = true,       -- аддон на паузе
+    loot = false,        -- автоосмотр добычи
+    move = false,        -- движение к цели/добыче
+    fullLog = false,     -- полные логи (выводит закомментированные # сообщения)
+    autoDelJunk = false, -- тихо удаляем хлам при заполнении сумок
+    autoLook = false,    -- всегда держим взгляд на цели
+    autoMelee = false    -- приоритет - цели ближнего боя
 }
 ---@class Core.flags
+---Флаги аддона (связанные с базой данных)
 c.flags = {} -- metatable linked with db
 -- Метатаблица для c.flags
 local flagsMeta = {
@@ -53,14 +62,14 @@ local flagsMeta = {
             return def
         end
         -- Если флага вообще нет, возвращаем nil (или можно добавить error для отладки)
-        c.Error('get: invalid flag - ' .. tostring(key))
+        c.Error('Запрашивает неверный флаг - ' .. tostring(key))
         return nil
     end,
 
     __newindex = function(_, key, value)
         local def = flags[key]
         if def == nil then
-            c.Error('set: invalid flag ' .. tostring(key))
+            c.Error('Задает неверный флаг ' .. tostring(key))
             return
         end
         -- При присвоении сохраняем в базу данных
@@ -69,6 +78,9 @@ local flagsMeta = {
 }
 setmetatable(c.flags, flagsMeta)
 
+---Получает значение флага паузы
+---@param value boolean? Значение для установки флага (если указано)
+---@return boolean
 function c.Paused(value)
     if type(value) == 'boolean' then
         c.flags.paused = value
@@ -79,15 +91,19 @@ function c.Paused(value)
     return c.flags.paused
 end
 
--------------------------------------------------------------------------------
+---Проверяет, загружен ли аддон (загружена db и игрок в мире)
+---@return boolean
 function c.IsLoaded()
     return c.loaded and c.state.inWorld
 end
 
--------------------------------------------------------------------------------
 local stateCacheIndex = 0
+---Кэширует результат работы функции для заданых параметров.
+---Кеш сбрасывается перед следующем обновлении.
+---Кеширует только первый возвращаемый результат.
+---Для `target` аргументов проверяйте перед вызовом на `UnitExists`.
 ---@generic T: function
----@param func T
+---@param func T Функция для кэширования
 ---@return T
 function c.GetCachedFunc(func)
     stateCacheIndex = stateCacheIndex + 1
@@ -102,7 +118,6 @@ function c.GetCachedFunc(func)
     end
 end
 
--------------------------------------------------------------------------------
 --[[
 UIParentLoadAddOn('Blizzard_DebugTools');
 DevTools_Dump(c)
@@ -113,4 +128,3 @@ DevTools_Dump(c)
   /fstack true
   /etrace
 ]]
--------------------------------------------------------------------------------

@@ -1,18 +1,15 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local tinsert = tinsert
 local tContains = tContains
 local type = type
 local error = error
 
--------------------------------------------------------------------------------
+
 -- Инициализация скрытого фрейма для обработки событий
 local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)
--------------------------------------------------------------------------------
+
 -- Список событие -> обработчики
 local eventList = {}
 function c.Event(event, func)
@@ -27,7 +24,6 @@ function c.Event(event, func)
     eventList[event] = funcList
 end
 
--------------------------------------------------------------------------------
 -- Выполняем обработчики соответствующего события
 
 local unfiltredEvents = {
@@ -47,7 +43,7 @@ local function onEvent(self, event, ...)
 end
 frame:SetScript('OnEvent', onEvent)
 
--------------------------------------------------------------------------------
+
 local listNextTick = {}
 function c.NextTick(func)
     if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
@@ -65,7 +61,7 @@ local function callNextTick()
     end
 end
 
--------------------------------------------------------------------------------
+
 local listBeforeUpdate = {}
 function c.BeforeUpdate(func, important)
     if type(func) ~= 'function' then error('Неверный тип аргумента', 2) end
@@ -86,7 +82,7 @@ local function callUpdateList(list)
     end
 end
 
--------------------------------------------------------------------------------
+
 
 local skipNextUpdate = false -- skip next Update
 function c.SkipNextUpdate()  -- пропустить вызов Update() в следующий тик
@@ -98,7 +94,6 @@ function c.ImmediatelyNextUpdate()
     immediatelyNextUpdate = true
 end
 
--------------------------------------------------------------------------------
 local updateFunc = nil
 function c.Update(func)
     if updateFunc then error('Функция для Update уже задана!', 2) end
@@ -106,7 +101,6 @@ function c.Update(func)
     updateFunc = func
 end
 
--------------------------------------------------------------------------------
 -- Выполняем обработчики события OnUpdate
 local timeGap = c.advance
 local immediatelyTimer = 'immediatelyNextUpdate'
@@ -167,4 +161,3 @@ local function onUpdate()
     c.TimerStart(updateTimer) -- Обновляем таймер после вызова (плюс время выполнения)
 end
 frame:SetScript('OnUpdate', onUpdate)
--------------------------------------------------------------------------------

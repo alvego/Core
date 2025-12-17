@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local UnitIsUnit = UnitIsUnit
 local GetPlayerFacing = GetPlayerFacing
 local deg = deg
@@ -13,7 +10,7 @@ local atan2 = atan2
 local WrapTextInColorCode = WrapTextInColorCode
 local SaveView = SaveView
 local SetView = SetView
--------------------------------------------------------------------------------
+
 
 local viewIndex = 5
 -- c.AfterUpdate(function()
@@ -74,7 +71,6 @@ function c.TurnToUnit(target)
     return c.IsTurnToUnit()
 end
 
--------------------------------------------------------------------------------
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
@@ -86,7 +82,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
 end
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
 
--------------------------------------------------------------------------------
+
 local function onUIErrorMessage(event, ...)
     local message = ...
     if message == 'Вы смотрите мимо цели!' then
@@ -95,7 +91,7 @@ local function onUIErrorMessage(event, ...)
 end
 c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 
--------------------------------------------------------------------------------
+
 function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
     if not angle then angle = 90 end
     if not UnitExists(unit) or UnitIsUnit('player', unit) then return true end
@@ -103,7 +99,7 @@ function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
     return yawAngle > -angle and yawAngle < angle
 end
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 function c.PlayerFacingAngleToPoint(x, y)
     if not x or not y then return 0 end
     local facing = GetPlayerFacing()
@@ -113,7 +109,7 @@ function c.PlayerFacingAngleToPoint(x, y)
     return yawAngle
 end
 
-------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 local moveUnit = nil
 local maveMaxDist = nil
 

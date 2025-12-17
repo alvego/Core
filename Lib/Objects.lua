@@ -1,28 +1,25 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 -- Кешируем функции и значения
 local tinsert = tinsert
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 local UnitHealthMax = UnitHealthMax
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
--------------------------------------------------------------------------------
+
 local actual = false
 local units = {}
 local targets = {}
 local objects = {}
--------------------------------------------------------------------------------
+
 c.BeforeUpdate(function()
     if c.TimerMore('resetObjectCache', 1.5) then
         actual = false
         c.TimerStart('resetObjectCache')
     end
 end)
--------------------------------------------------------------------------------
+
 local function updateObject()
     if actual then return end
     wipe(units)
@@ -45,19 +42,17 @@ local function updateObject()
     actual = true
 end
 
--------------------------------------------------------------------------------
+
 function c.GetTargets()
     updateObject()
     return targets
 end
 
--------------------------------------------------------------------------------
 function c.GetUnits()
     updateObject()
     return units
 end
 
--------------------------------------------------------------------------------
 c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     aroundUnit = aroundUnit or 'player'
     local result = 0
@@ -77,7 +72,7 @@ c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
     return result
 end)
 
--------------------------------------------------------------------------------
+
 local function checkSameUnit(uid, unit)
     if not UnitIsUnit(uid, unit) then return end
     return uid
@@ -90,7 +85,7 @@ c.GetUnitID = c.GetCachedFunc(function(unit)
     if count < 1 then return end
     return c.FindValue(units, checkSameUnit, unit)
 end)
--------------------------------------------------------------------------------
+
 local function checkSameGuid(uid, guid)
     --if not UnitExists(uid) then return end
     if UnitGUID(uid) ~= guid then return end

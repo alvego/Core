@@ -1,15 +1,12 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local GetNumSpellTabs = GetNumSpellTabs
 local GetSpellTabInfo = GetSpellTabInfo
 local GetSpellBookItemInfo = GetSpellBookItemInfo
 local GetSpellBookItemName = GetSpellBookItemName
 local IsSpellInRange = IsSpellInRange
--------------------------------------------------------------------------------
+
 local bookSpellIds = {}
 local function refreshBookSpells()
     local bookType = 'spell'
@@ -50,7 +47,7 @@ local function refreshBookSpells()
 end
 c.Event('SPELLS_CHANGED', refreshBookSpells)
 c.Event('PLAYER_ENTERING_WORLD', refreshBookSpells)
--------------------------------------------------------------------------------
+
 function c.IsSpellInRange(spell, unit)
     if next(bookSpellIds) == nil then refreshBookSpells() end
     if spell == nil then return false end
@@ -64,5 +61,3 @@ function c.IsSpellInRange(spell, unit)
     end
     return inRange == 1
 end
-
--------------------------------------------------------------------------------

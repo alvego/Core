@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
@@ -27,9 +24,9 @@ local WrapTextInColorCode = WrapTextInColorCode
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 local C_Item = C_Item
--------------------------------------------------------------------------------
+
 local localDebug = false
--------------------------------------------------------------------------------
+
 local partyUnits = {}
 for i = 0, MAX_PARTY_MEMBERS do
     tinsert(partyUnits, 'party' .. i)
@@ -39,7 +36,7 @@ for i = 0, MAX_RAID_MEMBERS do
     tinsert(raidUnits, 'raid' .. i)
 end
 local playerUnits = { 'player' }
--------------------------------------------------------------------------------
+
 function c.GetGroupUnits()
     if st.raid then
         return raidUnits
@@ -50,11 +47,10 @@ function c.GetGroupUnits()
     return playerUnits
 end
 
--------------------------------------------------------------------------------
 local search         = {}
 local title          = 'Цель'
 local icon           = [[Interface\Icons\Ability_Hunter_SniperShot]]
--------------------------------------------------------------------------------
+
 local prevGUID       = nil
 local lastGUID       = nil
 local manualLastGuid = nil
@@ -239,7 +235,7 @@ local function getGroupTarget() --assist
     end
     return tar
 end
--------------------------------------------------------------------------------
+
 local enemy = {}
 local function initEnemy()
     wipe(enemy)
@@ -295,7 +291,7 @@ local function checkEnemy(uid)
     )
 end
 
--------------------------------------------------------------------------------
+
 local function getEnemyTarget()
     initEnemy()
     local targets = c.GetTargets()
@@ -310,7 +306,7 @@ local function getEnemyTarget()
     return enemy.uid
 end
 
--------------------------------------------------------------------------------
+
 local function searchSelect(tar)
     if not tar then return false end
     c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
@@ -346,7 +342,6 @@ function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     return false
 end
 
--------------------------------------------------------------------------------
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
                                                 sourceGUID, sourceName, sourceFlags,
                                                 destGUID, destName, destFlags, ...)
@@ -363,7 +358,7 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
     c.MessageLog(format('#нас атакует: %s', sourceName), title, icon)
     c.TimerStart('targetCombat') -- повлияет на st.combatMode и выбор цели
 end)
--------------------------------------------------------------------------------
+
 --[[
     ItemID: 37727
     ---

@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local GetSpellLink = GetSpellLink
 local GetSpellTexture = GetSpellTexture
 local WrapTextInColorCode = WrapTextInColorCode
@@ -13,7 +10,7 @@ local errorBuffer = {}
 local wipe = wipe
 local type = type
 local tContains = tContains
--------------------------------------------------------------------------------
+
 local function pushError(message, spell)
     message = message or 'Что-то пошло не так'
     if not spell then
@@ -22,7 +19,7 @@ local function pushError(message, spell)
     end
     errorBuffer[message] = spell
 end
--------------------------------------------------------------------------------
+
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
                                 destFlags, ...)
     if sourceGUID ~= st.playerGUID then return end
@@ -36,7 +33,7 @@ local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceNa
     end
 end
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', onCombatLogEvent)
--------------------------------------------------------------------------------
+
 local failedSpell = nil
 local function onEvent(event, ...)
     local source, spellName = select(1, ...)
@@ -72,7 +69,7 @@ c.Event('UNIT_SPELLCAST_INTERRUPTED', onEvent)
 c.Event('UNIT_SPELLCAST_CHANNEL_START', onEvent)
 c.Event('UNIT_SPELLCAST_CHANNEL_UPDATE', onEvent)
 c.Event('UNIT_SPELLCAST_CHANNEL_STOP', onEvent)
--------------------------------------------------------------------------------
+
 
 local function onUIErrorMessage(event, ...)
     local action = nil
@@ -82,13 +79,13 @@ local function onUIErrorMessage(event, ...)
 end
 c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 
--------------------------------------------------------------------------------
+
 local skipErrors = {
     'Заклинание пока недоступно.',
     'Еще не готово.',
     'Прервано'
 }
--------------------------------------------------------------------------------
+
 local function onErrorUpdate()
     for message, spellName in pairs(errorBuffer) do
         if not tContains(skipErrors, message) then
@@ -104,7 +101,7 @@ local function onErrorUpdate()
     wipe(errorBuffer)
 end
 c.BeforeUpdate(onErrorUpdate, true)
--------------------------------------------------------------------------------
+
 
 function c.IsSpellFailedRecently(spellName)
     return c.TimerLess('FAILED:' .. spellName, 0.5)
@@ -117,4 +114,3 @@ end
 -- if c.TimerLess('Удар грома', 3) then
 --     print('Удар грома был и был менее 3 секунд назад')
 -- end
--------------------------------------------------------------------------------

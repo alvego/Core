@@ -1,29 +1,26 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 local IsFlying = IsFlying
 local IsSwimming = IsSwimming
 local hooksecurefunc = hooksecurefunc
--------------------------------------------------------------------------------
+
 st.moveUp = false
 hooksecurefunc('JumpOrAscendStart', function() st.moveUp = true end);
 hooksecurefunc('AscendStop', function() st.moveUp = false end);
 st.moveDown = false
 hooksecurefunc('SitStandOrDescendStart', function() st.moveDown = true end);
 hooksecurefunc('DescendStop', function() st.moveDown = false end);
--------------------------------------------------------------------------------
+
 st.turnRight = false
 hooksecurefunc('TurnRightStart', function() st.turnRight = true end);
 hooksecurefunc('TurnRightStop', function() st.turnRight = false end);
 st.turnLeft = false
 hooksecurefunc('TurnLeftStart', function() st.turnLeft = true end);
 hooksecurefunc('TurnLeftStop', function() st.turnLeft = false end);
--------------------------------------------------------------------------------
+
 st.autorun = false
 hooksecurefunc('ToggleAutoRun', function() st.autorun = not st.autorun end);
 
@@ -33,14 +30,14 @@ hooksecurefunc('MoveForwardStop', function() st.moveForward = false end);
 st.moveBackward = false
 hooksecurefunc('MoveBackwardStart', function() st.moveBackward = true end);
 hooksecurefunc('MoveBackwardStop', function() st.moveBackward = false end);
--------------------------------------------------------------------------------
+
 st.strafeLeft = false
 hooksecurefunc('StrafeLeftStart', function() st.strafeLeft = true end);
 hooksecurefunc('StrafeLeftStop', function() st.strafeLeft = false end);
 st.strafeRight = false
 hooksecurefunc('StrafeRightStart', function() st.strafeRight = true end);
 hooksecurefunc('StrafeRightStop', function() st.strafeRight = false end);
--------------------------------------------------------------------------------
+
 st.turnOrAction = false -- right mouse
 hooksecurefunc('TurnOrActionStart', function() st.turnOrAction = true end);
 hooksecurefunc('TurnOrActionStop', function() st.turnOrAction = false end);
@@ -48,7 +45,7 @@ hooksecurefunc('TurnOrActionStop', function() st.turnOrAction = false end);
 st.moveAndSteer = false -- right mouse
 hooksecurefunc('MoveAndSteerStart', function() st.moveAndSteer = true end);
 hooksecurefunc('MoveAndSteerStop', function() st.moveAndSteer = false end);
--------------------------------------------------------------------------------
+
 st.jump = false
 st.fly = false
 st.swim = false

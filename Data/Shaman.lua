@@ -1,50 +1,47 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local UnitClass = UnitClass
--------------------------------------------------------------------------------
+
 local className = select(2, UnitClass('player'))
--------------------------------------------------------------------------------
+
 if className ~= 'SHAMAN' then return end
--------------------------------------------------------------------------------
+
 c.PrintLoadClassModuleMessage(className)
--------------------------------------------------------------------------------
+
 ---@class Core.state
 local st = c.state
 --c.updateDelay = 0.25
 local GetTotemInfo = GetTotemInfo
 
--------------------------------------------------------------------------------
+
 c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(10, 'player'))
 end)
--------------------------------------------------------------------------------
+
 local function HasMagmaTotem()
     local haveTotem, name = GetTotemInfo(1)
     return haveTotem and name == 'Тотем магмы VII'
 end
--------------------------------------------------------------------------------
+
 local function updateEnhance()
     local reason, action, unit
-    -------------------------------------------------------------------------------
+
     -- иногда в ротации есть необходимость прерывания своего каста
     reason = '#cast: %s'
     if st.playerCasting then return format(reason, st.playerCasting) end
-    -------------------------------------------------------------------------------
+
     c.TimerToggle('needHeal', st.playerHP100 < (st.group and 50 or 80))
     c.TimerToggle('needMagmaTotem', st.ttd and st.ttd > 20)
     local needMagmaTotem = (c.TimerStarted('needMagmaTotem') and c.TimerMore('needMagmaTotem', 2)) or
-    (not st.invalidTarget and UnitHealthMax('target') > 300000)
+        (not st.invalidTarget and UnitHealthMax('target') > 300000)
     local needHeal = c.TimerStarted('needHeal') and c.TimerMore('needHeal', 2)
     local mana100 = c.UnitMana100('player')
     local aoe = c.GetEnemyCount(10, 'player') > 2
     local _, _, stacks = c.HasMyBuff('Оружие Водоворота')
     local isInstant = stacks > 4
     local dist = st.targetExists and c.UnitDistance('player', 'target') or 999
-    -------------------------------------------------------------------------------
+
     --[[     reason, action, unit = 'Хп упало, дэф', 'Ярость шамана', 'player'
     if st.combatMode and st.playerHP100 < 40 and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
@@ -56,13 +53,13 @@ local function updateEnhance()
         c.DoAction(reason, action, unit)
         return reason
     end
-    -------------------------------------------------------------------------------
+
     reason = c.TryTarget(true, 30, st.attack or st.look)
     -- есть ли причина для отстановки?.
     if reason then return reason end
-    -------------------------------------------------------------------------------
+
     -- Дальше считаем что у нас есть валидная цель
-    -------------------------------------------------------------------------------
+
 
     reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
     if isInstant and not aoe and c.CanGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) then
@@ -144,7 +141,7 @@ local function updateEnhance()
     if st.gcd then return '#gcd' end
     return '#none'
 end
--------------------------------------------------------------------------------
+
 c.Update(function()
     local stopReason = c.GetStopReason()
     if stopReason then
@@ -154,4 +151,3 @@ c.Update(function()
 
     c.LogWhatHappend(updateEnhance())
 end)
--------------------------------------------------------------------------------

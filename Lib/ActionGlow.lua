@@ -1,12 +1,9 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local type = type
 local GetTime = GetTime
--------------------------------------------------------------------------------
+
 local spellAlertIcon = [[Interface\SpellActivationOverlay\IconAlert]]
 local function createCustomGlow(parent)
     local f = CreateFrame("Frame", nil, parent)
@@ -103,7 +100,6 @@ function c.HideActionGlow(slot)
     hideGlow(button)
 end
 
--------------------------------------------------------------------------------
 hooksecurefunc(c, 'Spell', function(spell, ...)
     local slot = c.GetSlot(spell, true)
     if not slot then return end
@@ -114,4 +110,3 @@ hooksecurefunc(c, 'Action', function(slot, ...)
     if type(slot) ~= 'number' or slot <= 0 then return end
     c.ShowActionGlow(slot, 1)
 end)
--------------------------------------------------------------------------------

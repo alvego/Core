@@ -1,14 +1,11 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local UnitBuff = UnitBuff
 local UnitDebuff = UnitDebuff
 local GetTime = GetTime
 local type = type
--------------------------------------------------------------------------------
+
 local function matchBuff(buffName, name, debuffType, spellId)
     if type(buffName) == 'number' then
         return spellId == buffName
@@ -18,7 +15,7 @@ local function matchBuff(buffName, name, debuffType, spellId)
     end
     return c.StrContains(name, buffName)
 end
--------------------------------------------------------------------------------
+
 local function matchBuffs(buffName, name, debuffType, spellId)
     if type(buffName) == 'table' then
         for i = 1, #buffName do
@@ -28,7 +25,7 @@ local function matchBuffs(buffName, name, debuffType, spellId)
     end
     return matchBuff(buffName, name, debuffType, spellId)
 end
--------------------------------------------------------------------------------
+
 function c.HasBuff(buffName, unit, last, my, method)
     unit = unit or 'player'
     if buffName then
@@ -53,20 +50,15 @@ function c.HasBuff(buffName, unit, last, my, method)
     return false, 0, 0, 0
 end
 
--------------------------------------------------------------------------------
 function c.HasMyBuff(buffName, unit, last)
     return c.HasBuff(buffName, unit, last, true)
 end
 
--------------------------------------------------------------------------------
 function c.HasDebuff(buffName, unit, last, my)
     unit = unit or 'target'
     return c.HasBuff(buffName, unit, last, my, UnitDebuff)
 end
 
--------------------------------------------------------------------------------
 function c.HasMyDebuff(buffName, unit, last)
     return c.HasDebuff(buffName, unit, last, true)
 end
-
--------------------------------------------------------------------------------

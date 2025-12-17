@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 local math_random = math.random
--------------------------------------------------------------------------------
+
 function c.UnitNeedKick(unit) -- cбивалка, проверяет название, сбиваемость и время сбивания
     unit = unit or 'target'
     local spell, left, duration, channel, notinterrupt = c.UnitCasting(unit)
@@ -18,5 +15,3 @@ function c.UnitNeedKick(unit) -- cбивалка, проверяет назва�
     if left > kickZone then return false end -- пока нет смысла
     return spell, notinterrupt
 end
-
--------------------------------------------------------------------------------

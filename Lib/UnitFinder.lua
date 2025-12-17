@@ -1,11 +1,8 @@
--------------------------------------------------------------------------------
--- Core by Unknown Coder
--------------------------------------------------------------------------------
 ---@class Core
 local c = Core
 ---@class Core.state
 local st = c.state
--------------------------------------------------------------------------------
+
 -- local GetCVar = GetCVar
 -- local SetCVar = SetCVar
 local SetRaidTarget = SetRaidTarget
@@ -15,7 +12,7 @@ local type = type
 local PlaySound = PlaySound
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local SOUNDKIT = SOUNDKIT
--------------------------------------------------------------------------------
+
 local unitName, unit, dist
 c.ActionHook('tar', function()
     local editBox = ChatEdit_ChooseBoxForSend()

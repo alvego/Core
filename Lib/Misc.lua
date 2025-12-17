@@ -1,9 +1,8 @@
--------------------------------------------------------------------------------
 -- By by Unknown Coder
--------------------------------------------------------------------------------
+
 ---@class Core
 local c = Core
--------------------------------------------------------------------------------
+
 -- Кешируем функции и значения
 local strlower = strlower
 local tostring = tostring;
@@ -24,7 +23,7 @@ local ClearCursor = ClearCursor
 local GetSpellInfo = GetSpellInfo
 local UnitDebuff = UnitDebuff
 local UnitBuff = UnitBuff
--------------------------------------------------------------------------------
+
 function c.StrContains(str, sub)
     if (not str or not sub) then
         return false
@@ -32,7 +31,6 @@ function c.StrContains(str, sub)
     return (strlower(str):find(strlower(sub), 1, true) ~= nil)
 end
 
--------------------------------------------------------------------------------
 local toStrBuffer = {}
 function c.ToStr(...)
     local n = select('#', ...)
@@ -45,7 +43,6 @@ function c.ToStr(...)
     return str
 end
 
--------------------------------------------------------------------------------
 function c.FindValue(values, checkFn, ...)
     for i = 1, #values do
         local value = checkFn(values[i], ...)
@@ -54,14 +51,12 @@ function c.FindValue(values, checkFn, ...)
     return nil
 end
 
--------------------------------------------------------------------------------
 -- Возвращает текущее локальное время в формате hh:mm:ss.
 -- @return (string) Текущее время в секундах, hh:mm:ss.
 function c.GetCurrentTime()
     return date("%H:%M:%S")
 end
 
--------------------------------------------------------------------------------
 local lastValues = {}
 
 -- Проверяет, изменилось ли значение для указанного ключа по сравнению с последним сохранённым.
@@ -77,7 +72,6 @@ function c.IsChanged(key, value)
     return true -- value changed
 end
 
--------------------------------------------------------------------------------
 -- Округляет число до указанного количества десятичных знаков.
 -- @param number (number) Число, которое нужно округлить.
 -- @param decimals (number) Количество десятичных знаков, до которых нужно округлить число.
@@ -89,27 +83,23 @@ function c.Round(number, decimals)
     return math.floor(number * multiplier + 0.5) / multiplier
 end
 
--------------------------------------------------------------------------------
-
 function c.PrintLoadClassModuleMessage(className)
     local name = WrapTextInColorCode(className:sub(1, 1) .. strlower(className:sub(2)),
         RAID_CLASS_COLORS[className].colorStr)
     c.Chat(name)
 end
 
--------------------------------------------------------------------------------
 -- button - Number or name of a mouse button (number,string)
 -- 1 or LeftButton - Primary mouse button
 -- 2 or RightButton - Secondary mouse button
 -- 3 or MiddleButton - Third mouse button (or clickable scroll control)
 -- 4 or Button4 - Fourth mouse button
 -- 5 or Button5 - Fifth mouse button
--------------------------------------------------------------------------------
+
 function c.IsMouse(n)
     return IsMouseButtonDown(n) == 1
 end
 
--------------------------------------------------------------------------------
 function c.Distance(x1, y1, z1, x2, y2, z2)
     if not (x1 and y1 and z1 and x2 and y2 and z2) then return 0 end
     local dx = x1 - x2
@@ -118,7 +108,6 @@ function c.Distance(x1, y1, z1, x2, y2, z2)
     return sqrt(dx * dx + dy * dy + dz * dz)
 end
 
--------------------------------------------------------------------------------
 local creatureColors = { -- Летающее, Магический зверь, Водное под вопросом
     ["Животное"] = "aa228B22", -- лесной зелёный
     ["Дракон"] = "aa8A2BE2", -- фиолетовый
@@ -154,7 +143,6 @@ function c.GetUnitColorHex(unit)
     return creatureColors[ctype] or "aaffffff"
 end
 
--------------------------------------------------------------------------------
 function c.ClearCursor()
     local infoType = GetCursorInfo()
     if infoType then
@@ -164,7 +152,6 @@ function c.ClearCursor()
     end
 end
 
--------------------------------------------------------------------------------
 c.UnitInfo = c.GetCachedFunc(
 ---@param unit string unitId
 ---@return string information all about unit
@@ -191,7 +178,7 @@ c.UnitInfo = c.GetCachedFunc(
     end
 )
 
--------------------------------------------------------------------------------
+
 local function autoButton(btn, btnText)
     if not btn or btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
     if btn:GetText() ~= btnText then return false end
@@ -199,7 +186,7 @@ local function autoButton(btn, btnText)
     btn:Click()
     return true
 end
--------------------------------------------------------------------------------
+
 function c.AutoPopup(messagePart, btnText)
     for i = 1, 4 do
         local popupName = 'StaticPopup' .. i
@@ -217,7 +204,6 @@ function c.AutoPopup(messagePart, btnText)
     return false
 end
 
--------------------------------------------------------------------------------
 function c.PrintTargetAuras() -- for debug
     local target = 'target'
     if not UnitExists(target) then
@@ -254,7 +240,6 @@ function c.PrintTargetAuras() -- for debug
     until false
 end
 
--------------------------------------------------------------------------------
 -- fix overlay error
 local ActionButton_AllOverlayAlphaUpdate = ActionButton_AllOverlayAlphaUpdate
 _G.ActionButton_AllOverlayAlphaUpdate = function(alpha)
