@@ -26,7 +26,7 @@ end
 
 -- Выполняем обработчики соответствующего события
 
-local unfiltredEvents = {
+local initEvents = {
     'ADDON_LOADED',
     'PLAYER_ENTERING_WORLD',
     'PLAYER_LEAVING_WORLD'
@@ -34,7 +34,7 @@ local unfiltredEvents = {
 
 local function onEvent(self, event, ...)
     if eventList[event] ~= nil and
-        (c.IsLoaded() or tContains(unfiltredEvents, event)) then
+        (c.IsLoaded() or tContains(initEvents, event)) then
         local funcList = eventList[event]
         for i = 1, #funcList do
             funcList[i](event, ...)

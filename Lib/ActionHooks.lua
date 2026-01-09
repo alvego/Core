@@ -73,7 +73,7 @@ local function hookUseAction(slot, target, button)
         if not onGcd then return end
         -- было нажатие и сразу пошло гкд, вероятно нажатие его и запустило
         local ownGCD = onGcd and (gcdDuration - gcdLeft) < c.advance
-        -- вероятно спелл и запустил гкд
+        -- вероятно спел и запустил гкд
         if ownGCD then return end
     end
     -- а можно ли нажать?

@@ -30,9 +30,9 @@ bg:SetAllPoints()
 bg:SetVertexColor(1, 1, 1, 0.6) -- Полупрозрачный фон
 -- Иконка кнопки (замените на вашу текстуру, если нужно)
 local icon = button:CreateTexture(nil, 'ARTWORK')
-icon:SetTexture(c.icon)                         -- Пример иконки; замените на свою
+icon:SetTexture(c.icon)                          -- Пример иконки; замените на свою
 icon:SetSize(20, 20)
-icon:SetPoint('CENTER', button, 'CENTER', 0, 0) -- Легкий сдвиг для вида
+icon:SetPoint('CENTER', button, 'CENTER', 1, -1) -- Легкий сдвиг для вида
 
 -- Добавьте это после создания highlight (или в конец создания текстур кнопки)
 local border = button:CreateTexture(nil, 'BORDER')

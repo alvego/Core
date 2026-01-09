@@ -96,7 +96,7 @@ local stopAttackDebuff = {
 function c.TryTarget(tryAssist, maxDistance, inViewfield)
     if st.invalidTarget then
         if st.combatMode and c.SearchTarget(tryAssist, maxDistance or 40, inViewfield) then
-            -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
+            -- не делаем паузы после выбора цели (новый onUpdate начнется незамедлительно)
             c.ImmediatelyNextUpdate()
             -- выходим так как нужно обновить state
             return '#выбирали новую цель, причина: ' .. st.invalidTarget
@@ -105,7 +105,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     end
 
     if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(false, nil, inViewfield) then
-        -- не делаем паузы после выбора цели (новый onUpdate начнеться незамедлительно)
+        -- не делаем паузы после выбора цели (новый onUpdate начнется незамедлительно)
         c.ImmediatelyNextUpdate()
         -- выходим так как нужно обновить state
         return '#выбирали цель для ближнего боя'
@@ -117,7 +117,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
     local stopDebuff = not st.attack and c.HasDebuff(stopAttackDebuff)
     if st.autoattack then
         if stopDebuff then
-            local stopAttackReason = '#не бъем в ' .. stopDebuff
+            local stopAttackReason = '#не бьем в ' .. stopDebuff
             c.Command('/stopattack')
             c.Command('/petstop')
             c.Command('/petfollow')

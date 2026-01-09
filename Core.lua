@@ -4,7 +4,6 @@ Core = {} -- Глобальная переменная для аддона
 local c = Core
 local type = type
 local tostring = tostring
-local error = error
 local setmetatable = setmetatable
 local format = format
 
@@ -32,7 +31,7 @@ c.advance = 0.05
 c.updateDelay = 0.25
 ---Сетевая задержка
 c.latency = c.advance
----Id гкд спелла
+---Id гкд спела
 c.gcdSpellId = 61304
 
 ---@class Core.flags
@@ -98,7 +97,7 @@ function c.IsLoaded()
 end
 
 local stateCacheIndex = 0
----Кэширует результат работы функции для заданых параметров.
+---Кэширует результат работы функции для заданных параметров.
 ---Кеш сбрасывается перед следующем обновлении.
 ---Кеширует только первый возвращаемый результат.
 ---Для `target` аргументов проверяйте перед вызовом на `UnitExists`.
