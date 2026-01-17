@@ -169,7 +169,7 @@ end
 ---@return boolean canUse Можно ли использовать
 ---@return string reason Можно ли использовать
 function c.CanItem(item, unit)
-    if not IsUsableItem(item) then return false end
+    if not IsUsableItem(item) then return false, '!usable item' end
     return c.CanUseAction(item, unit)
 end
 

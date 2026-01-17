@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: Core
-## Notes: Use iLich Lenin Power
+## Notes: Use Serp&Molot Lenin Power
 ## Author: Unknown Coder
 ## Version: 2.0
 ## Dependencies: Bartender4

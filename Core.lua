@@ -10,7 +10,8 @@ local format = format
 ---Имя аддона
 c.name = ...
 ---Путь к иконке аддона
-c.icon = format([[Interface\AddOns\%s\textures\serp_molot_debug.blp]], c.name)
+c.icon = format([[Interface\AddOns\%s\textures\lenin.blp]], c.name)
+c.iconUpdate = format([[Interface\AddOns\%s\textures\serp_molot.blp]], c.name)
 ---База данных аддона
 c.db = {}
 ---

@@ -83,7 +83,7 @@ local function toggleChatVisibility(visible)
                     end
                 end
 
-                -- окрепляем
+                -- открепляем
                 if docked then
                     FCF_UnDockFrame(chatFrame)
                 end
