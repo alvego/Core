@@ -23,8 +23,39 @@ end
 -- UIParentLoadAddOn('Blizzard_DebugTools');
 
 c.ActionHook('test', function()
-    print('Bridge(\'Pulse\'):', Cmd('Pulse'))
-    Cmd('Test')
+    print('Cmd(\'Pulse\'):', Cmd('Pulse'))
+
+    print('target dist:', Cmd('UnitDistance', 'target'))
+
+    local corpse = Cmd('FindCorpse', 5)
+    print('corpse', corpse, type('corpse'))
+    if corpse then
+        print('Лутаем', WithGUID(corpse, UnitName))
+        Cmd('UnitClick', corpse, 1)
+        return
+    end
+    corpse = Cmd('FindCorpse', 8, 1)
+    if corpse then
+        print('Снимаем шкуру', WithGUID(corpse, UnitName))
+        Cmd('UnitClick', corpse, 1)
+        return
+    end
+
+    corpse = Cmd('FindCorpse', 40)
+    if corpse then
+        print('Идем лутать ', WithGUID(corpse, UnitName))
+        Cmd('PlayerMoveTo', corpse);
+        return
+    end
+
+    corpse = Cmd('FindCorpse', 40, 1)
+    if corpse then
+        print('Идем снимать шкуру с ', WithGUID(corpse, UnitName))
+        Cmd('PlayerMoveTo', corpse);
+        return
+    end
+
+    print('Некого лутать/шкурить')
 end)
 
 
