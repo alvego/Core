@@ -20,82 +20,29 @@ function WithGUID(guid, callback)
     return result
 end
 
--- UIParentLoadAddOn('Blizzard_DebugTools');
+local entities = {} -- Создаем таблицу один раз
+UIParentLoadAddOn('Blizzard_DebugTools');
 
 c.ActionHook('test', function()
-    print('Cmd(\'Pulse\'):', Cmd('Pulse'))
+    print('Pulse', Cmd('Pulse'));
 
-    print('target dist:', Cmd('UnitDistance', 'target'))
+    print('--- Test GetEntities ---')
 
-    local corpse = Cmd('FindCorpse', 5)
-    print('corpse', corpse, type('corpse'))
-    if corpse then
-        print('Лутаем', WithGUID(corpse, UnitName))
-        Cmd('UnitClick', corpse, 1)
-        return
-    end
-    corpse = Cmd('FindCorpse', 8, 1)
-    if corpse then
-        print('Снимаем шкуру', WithGUID(corpse, UnitName))
-        Cmd('UnitClick', corpse, 1)
-        return
-    end
+    -- Очистка таблицы перед вызовом (эмуляция table.wipe, если её нет в 3.3.5, используем цикл)
+    wipe(entities);
+    -- Запрос: Юниты в радиусе 30м
+    local count = Cmd('GetEntities', entities, 'units', 30)
+    DevTools_Dump(entities)
+    print('Found units (30m):', count)
 
-    corpse = Cmd('FindCorpse', 40)
-    if corpse then
-        print('Идем лутать ', WithGUID(corpse, UnitName))
-        Cmd('PlayerMoveTo', corpse);
-        return
+    -- Вывод первых 3 результатов
+    for i = 1, math.min(count, 3) do
+        local guid = entities[i]
+        local name = "Unknown"
+        -- Используем наш WithGUID враппер или стандартный способ если есть
+        -- Тут просто выведем GUID для проверки
+        print(i, guid)
     end
 
-    corpse = Cmd('FindCorpse', 40, 1)
-    if corpse then
-        print('Идем снимать шкуру с ', WithGUID(corpse, UnitName))
-        Cmd('PlayerMoveTo', corpse);
-        return
-    end
-
-    print('Некого лутать/шкурить')
-end)
-
-
-c.ActionHook('test2', function()
-    -- print('Bridge:', type(GetBillingTimeRested))
-    -- print('Bridge():', GetBillingTimeRested())
-    --print('Bridge(\'Pulse\'):', Cmd('Pulse'))
-    --print('Player facing:', Cmd('UnitFacing', 'player'), 'position:', Cmd('UnitPosition', 'player'));
-    --Cmd('Test')
-
-    -- if UnitExists('target') then
-    --     print(Cmd('UnitInLoS', "target"));
-    -- end
-
-    -- if st.speed > 0 then
-    --     print('PlayerMoveStop')
-    --     Cmd('PlayerMoveStop')
-    -- else
-    --     if UnitExists('target') then
-    --         Cmd('PlayerFaceAt', Cmd('UnitPosition', 'target'))
-    --     end
-    -- end
-
-    -- print(1, testTable)
-    -- DevTools_Dump(testTable);
-    -- Cmd('FillTable', testTable)
-    -- print(2, testTable)
-    -- DevTools_Dump(testTable);
-    -- print('player', UnitGUID('player'))
-    -- print('target', UnitGUID('target'))
-    -- print('focus', UnitGUID('focus'))
-    -- print('mouseover', UnitGUID('mouseover'))
-
-
-    --print('WithGUID:', WithGUID(UnitGUID('player'), UnitName))
-    --Cmd('UseSpell', 'Смерть и разложение', 'target')
-
-
-    --WithGUID(UnitGUID('mouseover'), function(token) Cmd('UseLua', 'InteractUnit("' .. token .. '")') end)
-
-    --Cmd('UnitClick', 'focus', '1')
-    --Cmd('TargetUnit', UnitGUID('mouseover'))
+    print('----------------------')
 end)
