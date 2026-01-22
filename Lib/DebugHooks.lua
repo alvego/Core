@@ -23,7 +23,8 @@ end
 c.ActionHook('test', function()
     print('Pulse', Cmd('Pulse'));
 
-    print(Cmd('GetUnitInfo', 'target'))
+    Cmd('TargetUnit', 'mouseover');
 
     print('----------------------')
 end)
+-----------------------------------------------------------------

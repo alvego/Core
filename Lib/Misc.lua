@@ -95,7 +95,6 @@ end
 -- 3 or MiddleButton - Third mouse button (or clickable scroll control)
 -- 4 or Button4 - Fourth mouse button
 -- 5 or Button5 - Fifth mouse button
-
 function c.IsMouse(n)
     return IsMouseButtonDown(n) == 1
 end

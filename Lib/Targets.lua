@@ -330,7 +330,7 @@ local function searchSelect(tar)
     c.Command('/target ' .. tar)
     return true
 end
--- if maxDistance == nil then find only melle target
+-- if maxDistance == nil then find only melee target
 function c.SearchTarget(tryAssist, maxDistance, inViewfield)
     initSearch(maxDistance, inViewfield)
     -- assist
@@ -382,7 +382,7 @@ local meleeDist = 5
 c.InMelee = c.GetCachedFunc(
 --- Проверка на дистанцию ближнего боя
 ---@param target string unitID
----@return boolean melee is unit in destatce of melee
+---@return boolean melee is unit in distance of melee
     function(target)
         target = target or 'target'
         if not UnitExists(target) then return false end

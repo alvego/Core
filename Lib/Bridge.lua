@@ -1,0 +1,340 @@
+---@class Core
+local c = Core
+
+---@alias bCmdName "Pulse"
+---|"Test"
+---|"UnitPosition"
+---|"UnitDistance"
+---|"UnitFacing"
+---|"UnitBehind"
+---|"UnitInView"
+---|"UnitInLoS"
+---|"UnitClick"
+---|"UseLua"
+---|"UseMacro"
+---|"UseSpell"
+---|"UseAction"
+---|"UseGUID"
+---|"TargetUnit"
+---|"PlayerMoveTo"
+---|"PlayerMoveStop"
+---|"PlayerLookAt"
+---|"FindObject"
+---|"CheckBobber"
+---|"FindCorpse"
+---|"FindUnits"
+---|"FindExecuteTarget"
+---|"GetEnemyCount"
+---|"InRange"
+---|"InMelee"
+---|"FindTarget"
+---|"GetAura"
+---|"GetAuraByID"
+---|"HasAura
+
+---Command Alias
+---@param name bCmdName имя команды моста
+---@param ... any? зависит от команды
+---@return ... зависит от команды
+local cmd = function(name, ...)
+    ---@diagnostic disable-next-line
+    return GetBillingTimeRested(name, ...)
+end
+
+-- Глобальная обертка (добавь в свой загрузочный скрипт)
+function c.WithGUID(unitGUID, callback)
+    local token = "mouseover"
+    local oldGUID = UnitGUID(token)
+    c.bUseGUID(unitGUID, token)
+    local result = { callback(token) }
+    c.bUseGUID(oldGUID, token)
+    return unpack(result)
+end
+
+-----------------------------------------------------------------
+
+---Состояние: синхронизирован ли мост
+local bConnected = false
+
+---Команда для проверки работоспособности (Heartbeat)
+---Обновляет кэш ObjectManager
+---@return boolean true если мост подключен
+function c.bPulse()
+    local pulse = cmd('Pulse')
+    bConnected = type(pulse) == 'boolean' and pulse
+    return bConnected
+end
+
+---Для тестирования (временно)
+function c.bTest(...)
+    if not bConnected then return end
+    print('Test', cmd('Test', ...))
+end
+
+---Возвращает позицию юнита
+---@param unitID UnitToken Default = 'player' (поддерживает unitGUID)
+---@return number x Default = 0
+---@return number y Default = 0
+---@return number z Default = 0
+function c.bUnitPosition(unitID)
+    if not bConnected then return 0, 0, 0 end
+    return cmd('UnitPosition', unitID)
+end
+
+---Возвращает дистанцию между юнита (Collision Distance).
+---@param unitID1 UnitToken Default = '' (поддерживает unitGUID)
+---@param unitID2 UnitToken Default = 'player' (поддерживает unitGUID)
+---@return number distance Default = 99999
+function c.bUnitDistance(unitID1, unitID2)
+    if not bConnected then return 99999 end
+    return cmd('UnitDistance', unitID1, unitID2)
+end
+
+---Возвращает направление взгляда юнита (в радианах).
+---@param unitID UnitToken Default = 'target' (поддерживает unitGUID)
+---@return number facing Default = 0 [0 .. 2*PI]
+function c.bUnitFacing(unitID)
+    if not bConnected then return 0 end
+    return cmd('UnitFacing', unitID)
+end
+
+---Проверяет, находится ли `player` за спиной у указанного юнита.
+---@param unitID UnitToken Default = 'target' (поддерживает unitGUID)
+---@return boolean isBehind Default = false
+function c.bUnitBehind(unitID)
+    if not bConnected then return false end
+    return cmd('UnitBehind', unitID)
+end
+
+---Проверяет, находится ли юнит в секторе обзора `player`.
+---@param unitID UnitToken Default = 'target' (поддерживает unitGUID)
+---@param angleDegrees number Default = 90 (Угол зрения в градусах)
+---@return boolean isInView Default = false
+function c.bUnitInView(unitID, angleDegrees)
+    if not bConnected then return false end
+    return cmd('UnitInView', unitID, angleDegrees)
+end
+
+---Возвращает правду если unit в прямой видимости player.
+---На линии взгляда (LoS -> Line of Sight) нет препятствий.
+---@param unitID1 UnitToken Default = 'target' (поддерживает unitGUID)
+---@param unitID2 UnitToken Default = 'player' (поддерживает unitGUID)
+---@return boolean isInLoS Default = false
+function c.bUnitInLoS(unitID1, unitID2)
+    if not bConnected then return false end
+    return cmd('UnitInLoS', unitID1, unitID2)
+end
+
+---Выбирает юнита как цель заклинания(AOE) или взаимодействует, если задан второй параметр
+---@param unitID UnitToken Default = 'player' (поддерживает unitGUID)
+---@param interact boolean? Default = false (если задан, то взаимодействует)
+---@return nil
+function c.bUnitClick(unitID, interact)
+    if not bConnected then return end
+    return cmd('UnitClick', unitID, interact)
+end
+
+---Выполняет Lua код (защищенный)
+---@param luaScript string Default = ''
+---@return nil
+function c.bUseLua(luaScript)
+    if not bConnected then return end
+    return cmd('UseLua', luaScript)
+end
+
+---Выполняет строку макроса
+---@param macroLine string Default = ''
+---@return nil
+function c.bUseMacro(macroLine)
+    if not bConnected then return end
+    return cmd('UseMacro', macroLine)
+end
+
+---Каст спела в цель
+---@param spellName string Default = ''
+---@param unitID UnitToken Default = '' (Не поддерживает unitGUID)
+---@return nil
+function c.bUseSpell(spellName, unitID)
+    if not bConnected then return end
+    return cmd('UseSpell', spellName, unitID)
+end
+
+---Используем слот на юнита левой кнопкой мыши
+---@param slot number|string Default = ''
+---@param unitID UnitToken Default = '' (Не поддерживает unitGUID)
+---@return nil
+function c.bUseAction(slot, unitID)
+    if not bConnected then return end
+    return cmd('UseAction', slot, unitID)
+end
+
+---Используем unitGUID на как unitID.
+---Например "0xF130..." как "mouseover".
+---@param unitGUID string? Default = '0x0'
+---@param token? "mouseover"|"focus"|"target" Default = 'mouseover'
+---@return nil
+function c.bUseGUID(unitGUID, token)
+    if not bConnected then return end
+    return cmd('UseGUID', unitGUID, token)
+end
+
+---Выбор в цели
+---@param unitID UnitToken Default = '' (поддерживает unitGUID)
+---@return nil
+function c.bTargetUnit(unitID)
+    if not bConnected then return end
+    return cmd('TargetUnit', unitID)
+end
+
+---Двигаться к точке
+---@param x number Default = 0
+---@param y number Default = 0
+---@param z number Default = 0
+---@return nil
+function c.bPlayerMoveTo(x, y, z)
+    if not bConnected then return end
+    return cmd('PlayerMoveTo', x, y, z)
+end
+
+---Останавливаем движение
+---@return nil
+function c.bPlayerMoveStop()
+    if not bConnected then return end
+    return cmd('PlayerMoveStop')
+end
+
+---Смотри на юнита ("none" для прекращения)
+---@param unitID UnitToken Default = 'none' (поддерживает unitGUID)
+---@return nil
+function c.bPlayerLookAt(unitID)
+    if not bConnected then return end
+    return cmd('PlayerLookAt', unitID)
+end
+
+---Поиск ближайшего GameObject по имени
+---@param partOfName string Default = ''
+---@return string|nil unitGUID
+function c.bFindObject(partOfName)
+    if not bConnected then return end
+    return cmd('FindObject', partOfName)
+end
+
+---Проверить поплавок, true если подсекли.
+---@return boolean isSuccess взаимодействуем c поплавком
+function c.bCheckBobber()
+    if not bConnected then return false end
+    return cmd('CheckBobber')
+end
+
+---Поиск ближайшего подходящего трупа для обыска или снятия шкур
+---@param range? number Default = -1 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param skining? boolean Default = false (`true` подходит для снятия шкур, иначе для обыска)
+---@return string|nil unitGUID
+function c.bFindCorpse(range, skining)
+    if not bConnected then return nil end
+    return cmd('FindCorpse', range, skining)
+end
+
+---Поиск юнитов.
+---Флаги для filterMask:
+---IsAlive = 0,
+---CanAttack = 1,
+---IsInCombat = 2,
+---IsCasting = 4,
+---TargetingMe = 8,
+---NotTargetingMe = 16.
+---@param units table - таблица в которую будут записаны строки `unitGUID` найденных юнитов (используй wipe() перед вызовом!)
+---@param range? number Default = -1 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param filterMask? number Default = 0 - (маска для фильтрации)
+---@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
+---@return number count количество найденных и добавленных в таблицу юнитов
+function c.bFindUnits(units, range, filterMask, minMaxHP)
+    if not bConnected then return 0 end
+    return cmd('FindUnits', range, filterMask, minMaxHP)
+end
+
+---Поиск ближайшего подходящего для добивания юнита (фаза казни)
+---@param range? number Default = 30 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param hpPercent? number Default = 20 фильтр по текущему % hp (hp100 < hpPercent)
+---@return string|nil unitGUID
+function c.bFindExecuteTarget(range, hpPercent)
+    if not bConnected then return nil end
+    return cmd('FindExecuteTarget', range, hpPercent)
+end
+
+---Количество целей в радиусе вокруг unitID (с фильтром по min maxHP)
+---@param range? number Default = 0 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
+---@param unitID? UnitToken Default = 'player' (поддерживает unitGUID)
+---@return number count количество найденных юнитов
+function c.bGetEnemyCount(range, minMaxHP, unitID)
+    if not bConnected then return 0 end
+    return cmd('GetEnemyCount', range, minMaxHP, unitID)
+end
+
+---В радиусе, с учетом коллизий (как спелы)
+---@param unitID? UnitToken Default = 'target' (поддерживает unitGUID)
+---@param range? number Default = 0 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@return boolean isInRange в радиусе
+function c.bInRange(unitID, range)
+    if not bConnected then return false end
+    return cmd('InRange', unitID, range)
+end
+
+---В радиусе ближнего боя
+---@param unitID? UnitToken Default = 'target' (поддерживает unitGUID)
+---@return boolean isInMelee в радиусе
+function c.bInMelee(unitID, range)
+    if not bConnected then return false end
+    return cmd('InMelee', unitID, range)
+end
+
+---Поиск ближайшей подходящей цели
+---@param range? number Default = 0 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param angle? number Default = 0 Угол зрения в градусах, 0 - без ограничений
+---@param unitGUID? string Default = nil фильтр по unitGUID
+---@param forceAttack? boolean Default = false разрешает брать цели не в бою
+---@return string|nil unitGUID подходящая цель
+function c.bFindTarget(range, angle, unitGUID, forceAttack)
+    if not bConnected then return nil end
+    return cmd('FindTarget', range, angle, unitGUID, forceAttack)
+end
+
+---Возвращает информацию об ауре юнита по индексу
+---@param unitID string Default = '' (поддерживает unitGUID)
+---@param index number Default = 0 разрешает брать цели не в бою
+---@return number|nil spellID 0 - пропуск, nil - конец списка
+---@return number|nil count stack количество
+---@return number|nil duration длительность
+---@return number|nil endTime время окончания
+---@return boolean|nil isMine это моя аура
+---@return boolean|nil isDebuff это негативный эффект
+---@return boolean|nil level уровень?
+function c.bGetAura(unitID, index)
+    if not bConnected then return nil end
+    return cmd('GetAura', unitID, index)
+end
+
+---Возвращает информацию об ауре юнита по auraID
+---@param unitID string Default = '' (поддерживает unitGUID)
+---@param auraID number Default = 0 разрешает брать цели не в бою
+---@return number|nil spellID 0 - пропуск, nil - конец списка
+---@return number|nil count stack количество
+---@return number|nil duration длительность
+---@return number|nil endTime время окончания
+---@return boolean|nil isMine это моя аура
+---@return boolean|nil isDebuff это негативный эффект
+---@return boolean|nil level уровень?
+function c.bGetAuraByID(unitID, auraID)
+    if not bConnected then return nil end
+    return cmd('GetAuraByID', unitID, auraID)
+end
+
+---Проверка наличия ауры у юнита по auraID
+---@param unitID string Default = '' (поддерживает unitGUID)
+---@param auraID number Default = 0 разрешает брать цели не в бою
+---@return boolean found
+function c.bHasAura(unitID, auraID)
+    if not bConnected then return false end
+    return cmd('HasAura', unitID, auraID)
+end
