@@ -233,7 +233,7 @@ local checkTimer = 'CheckExtendedFunc'
 function c.CheckExtendedFunc()
     c.TimerToggle(checkTimer, type(oHelp) ~= 'function')
     if c.TimerStarted(checkTimer) and c.TimerMore(checkTimer, 3) then
-        c.Echo(WrapTextInColorCode(SecondsToTime(c.TimerElapsed(checkTimer)), 'ffffff00'), nil,
+        c.Echo(WrapTextInColorCode(SecondsToTime(c.TimerElapsed(checkTimer)), 'ffffff00'), "Синхронизация",
             c.iconUpdate, 0, 1, 0)
     end
 end

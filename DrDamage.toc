@@ -1,13 +1,18 @@
 ## Interface: 30300
-## Title: Core
-## Notes: Use Serp&Molot Lenin Power
-## Author: Unknown Coder
-## Version: 2.0
+## Title: DrDamage
+## Notes: |cff3b78ffVersion|r: |cffff0000Serp&Molot|r. In-game theorycraft. Calculates actual damage/healing based on gear, talents and buffs.
+## Author: Gagorian, Dally1991, Detseuqer, Zarquan, Karzon13, Unknown Coder
+## Version: 5.0.0_release
+## SavedVariables: DrDamageDB
 ## Dependencies: Bartender4
 ## DefaultState: Disabled
-## SavedVariables: CoreDB
+## X-Curse-Packaged-Version: 5.0.0_release
+## X-Curse-Project-Name: DrDamage
+## X-Curse-Project-ID: dr-damage
+## X-Curse-Repository-ID: wow/dr-damage/mainline
+## X-Category: Interface Enhancements
 
-Core.lua
+DrDamage.lua
 
 Lib\Bridge.lua
 Lib\Extended.lua
