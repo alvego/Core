@@ -76,8 +76,8 @@ local function updateState()
     st.targetMelee = st.targetExists and c.bInMelee('target')
     st.targetImmune = st.invalidTarget or c.UnitIsImmune('target')
     st.targetImmuneMagic = st.targetImmune or c.UnitIsMagicImmune('target')
-    st.targetVisible = st.targetExists and c.UnitInLOS('player', 'target')
-    st.targetBehind = st.targetExists and c.UnitBehind('target')
+    st.targetVisible = st.targetExists and c.bUnitInLoS('player', 'target')
+    st.targetBehind = st.targetExists and c.bUnitBehind('target')
 
     if not st.invalidTarget and st.targetCombat then
         c.TimerStart('targetCombat')

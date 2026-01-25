@@ -29,9 +29,9 @@ local SecondsToTime = SecondsToTime
 ---|"InRange"
 ---|"InMelee"
 ---|"FindTarget"
----|"GetAura"
----|"GetAuraByID"
----|"HasAura
+---|"UnitAura"
+---|"UnitAuraByID"
+---|"HasAuraByID
 
 ---Command Alias
 ---@param name bCmdName имя команды моста
@@ -342,9 +342,9 @@ end
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
 ---@return boolean|nil level уровень?
-function c.bGetAura(unitID, index)
+function c.bUnitAura(unitID, index)
     if not bConnected then return nil end
-    return cmd('GetAura', unitID, index)
+    return cmd('UnitAura', unitID, index)
 end
 
 ---Возвращает информацию об ауре юнита по auraID
@@ -357,18 +357,18 @@ end
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
 ---@return boolean|nil level уровень?
-function c.bGetAuraByID(unitID, auraID)
+function c.bUnitAuraByID(unitID, auraID)
     if not bConnected then return nil end
-    return cmd('GetAuraByID', unitID, auraID)
+    return cmd('UnitAuraByID', unitID, auraID)
 end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
 ---@param auraID? number Default = 0 разрешает брать цели не в бою
 ---@return boolean found
-function c.bHasAura(unitID, auraID)
+function c.bHasAuraByID(unitID, auraID)
     if not bConnected then return false end
-    return cmd('HasAura', unitID, auraID)
+    return cmd('HasAuraByID', unitID, auraID)
 end
 
 function c.CheckBridge()

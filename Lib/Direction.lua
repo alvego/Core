@@ -127,7 +127,7 @@ local function moveUpdate()
         or st.playerCasting
         or not moveUnit
         or not UnitExists(moveUnit)
-        or not c.UnitInLOS('player', moveUnit)
+        or not c.bUnitInLoS('player', moveUnit)
     then
         -- print(
         --     c.TelemetryBool('move', st.move),
@@ -135,7 +135,7 @@ local function moveUpdate()
         --     c.TelemetryBool('playerCasting', st.playerCasting),
         --     c.TelemetryBool('!moveUnit', not moveUnit),
         --     c.TelemetryBool('!exists', not UnitExists(moveUnit)),
-        --     c.TelemetryBool('!los', not c.UnitInLOS('player', moveUnit))
+        --     c.TelemetryBool('!los', not c.bUnitInLoS('player', moveUnit))
         -- )
         moveEnd('по проверкам')
         return

@@ -173,7 +173,7 @@ c.UnitInfo = c.GetCachedFunc(
         if ctype then
             name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
         end
-        local d = c.UnitDistance('player', unit)
+        local d = c.bUnitDistance('player', unit)
         if d then
             name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
         end
@@ -221,7 +221,7 @@ function c.PrintTargetAuras() -- for debug
     c.MessageLog('Auras for GUID:' .. guid, unit, nil, 0, 0, 1)
     local idx = 0
     repeat
-        local spellId, count, duration, endTime, isMine, isDebuff = c.bGetAura(target, idx)
+        local spellId, count, duration, endTime, isMine, isDebuff = c.bUnitAura(target, idx)
         if spellId == nil then break end
         if spellId and spellId ~= 0 then
             local name, _, icon = GetSpellInfo(spellId)

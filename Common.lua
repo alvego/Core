@@ -44,7 +44,7 @@ function c.Dismount()
 
     if st.mountAura then
         local auraName = GetSpellInfo(st.mountAura)
-        c.Command('/cancelaura ' .. auraName)
+        c.bUseMacro('/cancelaura ' .. auraName)
         return
     end
 end
@@ -117,16 +117,16 @@ function c.TryTarget(range, angle)
     if st.autoattack then
         if stopDebuff then
             local stopAttackReason = '#не бьем в ' .. stopDebuff
-            c.Command('/stopattack')
-            c.Command('/petstop')
-            c.Command('/petfollow')
+            c.bUseMacro('/stopattack')
+            c.bUseMacro('/petstop')
+            c.bUseMacro('/petfollow')
             return stopAttackReason
         end
     elseif not stopDebuff then
-        c.Command('/startattack [exists, harm, nodead]')
-        c.Command('/petattack [exists, exists, nodead]')
+        c.bUseMacro('/startattack [exists, harm, nodead]')
+        c.bUseMacro('/petattack [exists, exists, nodead]')
     end
-    local dist = c.UnitDistance('target', 'player')
+    local dist = c.bUnitDistance('target', 'player')
     if c.flags.move and not st.targetMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
         (st.targetStill or not UnitIsUnit('target-target', 'player')) then
         c.MoveToUnit('target', 100)
@@ -147,7 +147,7 @@ function c.CanSpell(spell, unit, interval)
     if interval and not c.TimerMore(spell, interval) then return false end
     if c.IsSpellFailedRecently(spell) then return false end
     if not IsUsableSpell(spell) then return false end
-    if unit and not c.UnitInLOS('player', unit) then return false end
+    if unit and not c.bUnitInLoS('player', unit) then return false end
     if type(c.CustomCanSpell) == 'function' and not c.CustomCanSpell(spell, unit) then return false end
     return c.CanUseSpell(spell, unit)
 end

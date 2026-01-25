@@ -169,7 +169,7 @@ local canLoot = c.GetCachedFunc(function(unit)
     if skinList[unit] then return false end
     if (lootFilterList[unit] or 0) >= maxTryCount then return false end
     -- если далеко
-    if c.UnitDistance('player', unit) > lootDist then
+    if c.bUnitDistance('player', unit) > lootDist then
         -- проверим, стоит ли идти?
         -- иногда проверка дает ложное срабатывание
         -- если говорит что можнно лутануть, то 100%, что это верно
@@ -186,8 +186,8 @@ local function checkCorpseForLoot(unit)
     if not UnitIsDeadOrGhost(unit) then return end
     if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then return end
     if UnitIsPlayer(unit) then return end
-    if c.UnitDistance('player', unit) > lootDist then return end -- so far
-    if not canLoot(unit) then return end                         -- can't loot
+    if c.bUnitDistance('player', unit) > lootDist then return end -- so far
+    if not canLoot(unit) then return end                          -- can't loot
     return unit
 end
 
@@ -204,8 +204,8 @@ local function checkCorpseForSkin(unit)
     if not UnitExists(unit) then return end
     if not UnitIsDeadOrGhost(unit) then return end
     if UnitIsPlayer(unit) then return end
-    if c.UnitDistance('player', unit) > skinDist then return end -- so far
-    if not canSkin(unit) then return end                         -- can't skin
+    if c.bUnitDistance('player', unit) > skinDist then return end -- so far
+    if not canSkin(unit) then return end                          -- can't skin
     if skinList[unit] then return end
     -- на нужном расстоянии, но сам спелл говорит обратное
     if not c.IsSpellInRange(skinSpell, unit) then
@@ -229,8 +229,8 @@ local function checkCorpse(unit)
     local loot = not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) and canLoot(unit)
     local skin = allowSkin and not loot and canSkin(unit)
     if not (loot or skin) then return end
-    if not c.UnitInLOS(unit) then return end
-    local dist = c.UnitDistance('player', unit)
+    if not c.bUnitInLoS(unit) then return end
+    local dist = c.bUnitDistance('player', unit)
     if dist < (loot and lootDist or skinDist) or dist > maxDist then return end
     if not _corpse or not _dist or dist < _dist then
         _corpse = unit
@@ -396,7 +396,7 @@ local function waitForFishing()
         if c.ReadByte(ptr, 188) ~= 1 then return end
         c.MessageLog('#подсекаем', fish.spell, fish.icon)
         lootUnit(fish.bobber, UnitName(fish.bobber))
-        c.Command('/stopcasting')
+        c.bUseMacro('/stopcasting')
         fish.bobber = nil
         fish.guid = nil
     end

@@ -134,7 +134,7 @@ c.Event('PLAYER_ENTERING_WORLD', onLoad)
 --local forbearanceId = 25771 -- Воздержанность
 local function inForbearance(unit)
     if unit == nil then unit = "player" end
-    --return (c.TimerLess('Гнев карателя', 30) or c.HasAuraByID(forbearanceId, unit))
+    --return (c.TimerLess('Гнев карателя', 30) or c.bHasAuraByID(forbearanceId, unit))
     return (c.TimerLess('Гнев карателя', 30) or c.HasDebuff('Воздержанность', unit))
 end
 
@@ -150,7 +150,7 @@ local function getAvailableStance(unit)
     local stances = isTank and stanceAuras or stanceAurasDD
     for i = 1, #stances do
         local stance = stances[i]
-        if not c.UnitAuraByID(unit, stance) then
+        if not c.bUnitAuraByID(unit, stance) then
             return stance
         end
     end
@@ -172,14 +172,14 @@ end
 
 c.Telemetry(function()
     if not isLoaded then return end
-    isTank = c.HasAuraByID('player', spell['Праведное неистовство']) and true or false
+    isTank = c.bHasAuraByID('player', spell['Праведное неистовство']) and true or false
     return c.TelemetryRedBool('Tank', isTank)
 end)
 
 
 c.Telemetry(function()
     if not isLoaded then return end
-    return c.TelemetryRedBool('Aura', c.UnitAuraByID('player', stanceDefenceAuras))
+    return c.TelemetryRedBool('Aura', c.bUnitAuraByID('player', stanceDefenceAuras))
 end)
 
 
@@ -187,7 +187,7 @@ c.Telemetry(function()
     if not isLoaded then return end
 
     return c.TelemetryRedBool(
-        format('Dist: %dм.', UnitExists('target') and c.Round(c.UnitDistance('player', 'target')) or 0),
+        format('Dist: %dм.', UnitExists('target') and c.Round(c.bUnitDistance('player', 'target')) or 0),
         c.bInMelee('target')
     )
 end)
@@ -201,7 +201,7 @@ local function checkThreatUnit(unit, action, threatStatus, checkHand) -- unit wi
     if UnitThreatSituation(unit) ~= threatStatus then return end
     if action and not c.IsSpellInRange(action, unit) then return end
     if checkHand and c.HasBuff('Длань', unit) then return end
-    if not c.UnitInLOS('player', unit) then return end
+    if not c.bUnitInLoS('player', unit) then return end
     if UnitExists('focus') and UnitIsUnit('focus', unit) then return end
     if c.UnitIsTank(unit) then return end
     return unit
@@ -217,7 +217,7 @@ local function checkTauntTarget(target, action, checkHand) -- target for taunt
     if UnitAffectingCombat(target) ~= 1 then return end
     if not c.IsSpellInRange(action, target) then return end
     if checkHand and c.HasBuff('Длань', target) then return end
-    if not c.UnitInLOS('player', target) then return end
+    if not c.bUnitInLoS('player', target) then return end
     if not c.FindValue(tankingUnits, checkTankingUnit, target) then return end
     return target
 end
@@ -343,7 +343,7 @@ local function updateProto()
 
     if not st.gcd and (st.start or (not st.attack and st.combatMode)) then
         reason, action, unit = 'Нужно обновить печать', 'Печать повиновения', 'player'
-        if c.CanGcdSpell(action, unit, 10) and not c.UnitAuraByID(unit, sealAuras) then
+        if c.CanGcdSpell(action, unit, 10) and not c.bUnitAuraByID(unit, sealAuras) then
             c.DoAction(reason, action, unit)
             return reason
         end
@@ -352,11 +352,11 @@ local function updateProto()
         reason, action, unit = 'Нужно обновить стойку', isTank and 'Аура благочестия' or 'Аура воздаяния', 'player'
         if c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
             -- Могу прожать стойку
-            local stance = c.UnitAuraByID(unit, stanceAuras, true)
+            local stance = c.bUnitAuraByID(unit, stanceAuras, true)
             if stance then
                 -- на мне ecть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
-                if stance == spell['Аура воина Света'] and not c.HasAuraByID(unit, spell[action]) then
+                if stance == spell['Аура воина Света'] and not c.b(unit, spell[action]) then
                     c.DoAction(reason, action, unit) --  переключаемся в атуальную стойку
                     return reason
                 end
@@ -391,7 +391,7 @@ local function updateProto()
     end
 
 
-    local dist = st.targetExists and c.UnitDistance('player', 'target') or 999
+    local dist = st.targetExists and c.bUnitDistance('player', 'target') or 999
 
     if isTank and st.group and not st.pvp then      -- только в группе
         -- Пуллтайм ротация
@@ -477,13 +477,13 @@ local function updateProto()
     end
 
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
-    if c.CanGcdSpell(action, unit) and not c.HasAuraByID(unit, spell[action]) then
+    if c.CanGcdSpell(action, unit) and not c.bHasAuraByID(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Обновляем поглощение', 'Священный щит', 'player'
-    if c.CanGcdSpell(action, unit, 5) and not c.HasAuraByID(unit, spell[action]) then
+    if c.CanGcdSpell(action, unit, 5) and not c.b(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -567,7 +567,7 @@ c.Update(function()
 
         if stopReason == c.stopReasonMount and not UnitOnTaxi("player") then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
-            if not c.HasAuraByID(unit, spell[action]) and c.CanGcdSpell(action, unit) then
+            if not c.bHasAuraByID(unit, spell[action]) and c.CanGcdSpell(action, unit) then
                 c.DoAction(reason, action, unit)
                 stopReason = reason
             end

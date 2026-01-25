@@ -79,17 +79,17 @@ function c.UnitIsTank(unit)
     end
 
     if class == "WARRIOR" then
-        return c.HasAuraByID(unit, 71) -- Defensive Stance
+        return c.bHasAuraByID(unit, 71) -- Defensive Stance
     end
     if class == "PALADIN" then
-        return c.HasAuraByID(unit, 25780) -- Righteous Fury
+        return c.bHasAuraByID(unit, 25780) -- Righteous Fury
     end
     if class == "DRUID" then
-        return c.HasAuraByID(unit, 5487) or
-            c.HasAuraByID(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
+        return c.bHasAuraByID(unit, 5487) or
+            c.bHasAuraByID(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
     end
     if class == "DEATHKNIGHT" then
-        return c.HasAuraByID(unit, 48263) -- Frost Presence
+        return c.bHasAuraByID(unit, 48263) -- Frost Presence
     end
 
     return false
@@ -124,24 +124,4 @@ function c.HasTalent(talent)
         end
     end
     return found;
-end
-
-function c.GetCurrentSpecID()
-    local maxPoints = 0
-    local specID = 0
-
-    for tab = 1, 3 do
-        local points = 0
-        for i = 1, GetNumTalents(tab) do
-            local _, _, _, _, currentRank = GetTalentInfo(tab, i)
-            points = points + currentRank
-        end
-
-        if points > maxPoints then
-            maxPoints = points
-            specID = tab
-        end
-    end
-
-    return specID
 end

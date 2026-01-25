@@ -52,6 +52,7 @@ c.ActionHook('find', function()
         c.Notify('Начинаем  движение к ' .. objName, icon, 3)
         c.bPlayerMoveTo(objX, objY, objZ)
     end
+    c.Log('Поиск: |', searchName, '|', objectGUID, '|', objName, '|', objX, '|', objY, '|', objZ, '|', objRange, '|')
 end)
 
 
@@ -64,9 +65,10 @@ c.AfterUpdate(function()
     if not objectGUID then return end
     --PlaySound(SOUNDKIT.ALARM_CLOCK_WARNING_3)
     PlaySound(SOUNDKIT.AUCTION_WINDOW_OPEN)
-    c.Notify('Найден "' .. objName .. '" на расстоянии ' .. c.Round(objRange, 1) .. 'м.', icon, 10)
-    c.Message('Найден объект новый объект "' .. objName .. '"', title, icon)
-    c.Message('Нажмите на макрос для того чтоб начать двигаться к "' .. objName .. '"', title, icon)
+    local msg = 'Найден новый объект "' .. objName .. '" на расстоянии ' .. c.Round(objRange, 1) .. 'м.'
+    c.Notify(msg, icon, 10)
+    c.Message(msg, title, icon)
+    c.Message('Нажмите на макрос, для того чтоб начать двигаться к "' .. objName .. '"', title, icon)
     if st.combatMode then return end
     c.bWithGUID(objectGUID, function(token)
         if UnitExists(token) then

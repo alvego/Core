@@ -95,7 +95,7 @@ local function hookUseAction(slot, target)
     elseif inCast then
         -- при повторном нажатии отменим текущий каст
         c.MessageLog('повтор -> стопкаст', name, icon)
-        c.Command('/stopcasting')
+        c.bUseMacro('/stopcasting')
     end
 end
 hooksecurefunc('UseAction', hookUseAction)
