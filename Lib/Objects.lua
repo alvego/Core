@@ -48,28 +48,8 @@ function c.GetTargets()
     return targets
 end
 
-function c.GetUnits()
-    updateObject()
-    return units
-end
-
 c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
-    aroundUnit = aroundUnit or 'player'
-    local result = 0
-    updateObject();
-    local count = #targets
-    if count < 1 then return result end
-    local x, y, z = c.UnitPosition(aroundUnit)
-    for i = 1, count do
-        local unit = targets[i]
-        if UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) and UnitHealthMax(unit) > 25 then
-            local dist = c.Distance(x, y, z, c.UnitPosition(unit))
-            if dist <= range then
-                result = result + 1
-            end
-        end
-    end
-    return result
+    return c.bGetEnemyCount(range, aroundUnit, 20)
 end)
 
 

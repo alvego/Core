@@ -188,7 +188,7 @@ c.Telemetry(function()
 
     return c.TelemetryRedBool(
         format('Dist: %dм.', UnitExists('target') and c.Round(c.UnitDistance('player', 'target')) or 0),
-        c.InMelee('target')
+        c.bInMelee('target')
     )
 end)
 
@@ -399,7 +399,7 @@ local function updateProto()
 
         if isPull then
             reason, action = 'пул', 'Освящение'
-            if st.still and useMana and dist < 8 and c.CanGcdSpell(action) and (c.targetHard or c.GetEnemyCount(8, 'player') > 2) then
+            if st.still and useMana and dist < 8 and c.CanGcdSpell(action) and (st.targetHard or c.GetEnemyCount(8, 'player') > 2) then
                 c.DoAction(reason, action)
                 return reason
             end
@@ -457,7 +457,10 @@ local function updateProto()
         end
     end
 
-    reason = c.TryTarget(not isTank, st.attack and st.look and 100 or 40, st.attack or st.look)
+    reason = c.TryTarget(
+        st.attack and st.look and 100 or 40,
+        st.attack and 15 or (st.look and 30 or 0)
+    )
     -- есть ли причина для отстановки?
     if reason then return reason end
 

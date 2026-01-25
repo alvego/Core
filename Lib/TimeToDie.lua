@@ -21,12 +21,12 @@ local function needUpdateUnits()
     if st.combatMode then return true end        -- в бою
     if st.autoattack then return true end        -- автоатака
     if st.attack then return true end            -- зажата атака
-    if not st.invalidTarget then return true end -- есть валидный таргет
+    if not st.invalidTarget then return true end -- есть валидный target
     return false
 end
 
 local function clearUnits()
-    -- Не чиcтим если нужно обновлять
+    -- Не очищаем если нужно обновлять
     if needUpdateUnits() then return end
     if (next(db) ~= nil) then
         -- Возвращаем все таблицы в пул перед очисткой db
@@ -39,7 +39,7 @@ end
 c.BeforeUpdate(clearUnits)
 
 local function updateUnit(guid, amount)
-    -- Берем по гуиду, запоминаем начало боя и суммируем весь входящий в таргет урон, потом делим на время с начала
+    -- Берем по GUID, запоминаем начало боя и суммируем весь входящий в target урон, потом делим на время с начала
     local unitInfo = db[guid]
     if not unitInfo then
         unitInfo = c.TablePoolAcquire()

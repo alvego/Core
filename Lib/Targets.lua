@@ -6,26 +6,20 @@ local st = c.state
 local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
-local UnitIsUnit = UnitIsUnit
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitGUID = UnitGUID
 local GameTooltip = GameTooltip
 local bit = bit
-local wipe = wipe
-local math_max = math.max
+local format = format
 local IsControlKeyDown = IsControlKeyDown
 local ChatEdit_InsertLink = ChatEdit_InsertLink
-local UnitIsTapped = UnitIsTapped
-local UnitIsTappedByPlayer = UnitIsTappedByPlayer
-local UnitIsPossessed = UnitIsPossessed
-local UnitIsPlayer = UnitIsPlayer
-local IsItemInRange = IsItemInRange
 local WrapTextInColorCode = WrapTextInColorCode
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
-local C_Item = C_Item
-
-local localDebug = false
+local UnitName = UnitName
+local UnitExists = UnitExists
+local ChatEdit_GetActiveWindow = ChatEdit_GetActiveWindow
+local hooksecurefunc = hooksecurefunc
 
 local partyUnits = {}
 for i = 0, MAX_PARTY_MEMBERS do
@@ -47,7 +41,6 @@ function c.GetGroupUnits()
     return playerUnits
 end
 
-local search         = {}
 local title          = 'Цель'
 local icon           = [[Interface\Icons\Ability_Hunter_SniperShot]]
 
@@ -81,7 +74,7 @@ end
 
 c.Event('GLOBAL_MOUSE_UP', function(event, button)
     if button ~= 'LeftButton' and button ~= 'RightButton' then return end
-    mouseUnitName = GameTooltip:GetUnit() or ''
+    mouseUnitName = _G['GameTooltipTextLeft1']:GetText() or '' --GameTooltip:GetUnit()
     if mouseUnitName == '' then return end
     mouseButton = button
     c.NextTick(afterMouseUp)
@@ -136,179 +129,12 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED',
             c.TimerReset('attack')
         end
     end)
-
-local function initSearch(maxDistance, inViewfield)
-    wipe(search)
-    search.maxDistance = maxDistance
-    search.inViewfield = inViewfield
-    search.skipGUID = lastGUID -- skip last target
-    lastGUID = nil             -- but only once
-    local x, y, z = c.UnitPosition('player')
-    search.x = x
-    search.y = y
-    search.z = z
-    search.angle = st.attack and 30 or 90
-end
-
-local enemyInView = c.GetCachedFunc(function(unit)
-    return c.PlayerFacingTarget(unit, search.angle)
-end)
-
-local enemyDistance = c.GetCachedFunc(function(unit)
-    return c.Distance(search.x, search.y, search.z, c.UnitPosition(unit))
-end)
-
-local function isInvalidEnemy(unit)
-    local invalidTarget = c.IsInvalidTarget(unit)
-    if invalidTarget then
-        return invalidTarget
-    end
-    local name = UnitName(unit)
-    if c.StrContains(name, 'тотем') then
-        return c.ToStr('skip: тотем')
-    end
-    local maxHP = UnitHealthMax(unit)
-    if UnitHealthMax(unit) <= 25 then
-        return c.ToStr('skip: maxhp(', maxHP, ') < 25')
-    end
-    -- выбираем другую цель
-    if search.skipGUID and search.skipGUID == UnitGUID(unit) then
-        return 'skip: curr tar'
-    end
-    -- не будет лута
-    if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then
-        return 'skip: tapped'
-    end
-    -- Призванный юнит
-    if UnitIsPossessed(unit) then
-        return 'skip: possessed'
-    end
-    -- Призванный юнит
-    if not c.UnitInLOS('player', unit) then
-        return 'skip: !inLoS'
-    end
-    -- в pvp выбираем только игроков
-    if st.pvp and not UnitIsPlayer(unit) then
-        return 'skip: pvp !player'
-    end
-    -- если надо, то только цели перед лицом
-    if search.inViewfield and not enemyInView(unit) then
-        return 'skip: out of view field'
-    end
-
-    if search.maxDistance then
-        -- слишком далеко
-        if enemyDistance(unit) > search.maxDistance then
-            return c.ToStr('skip: too far')
-        end
-    else -- maxDistance == nil, melee only
-        if not c.InMelee(unit) then
-            return c.ToStr('skip: !melee')
-        end
-    end
-
-    return nil
-end
-
-
-local groupTargets = {}
-local function getGroupTarget() --assist
-    local tar, cnt = nil, 0
-    local units = c.GetGroupUnits()
-    wipe(groupTargets)
-    for i = 1, #units do
-        local t = units[i] .. '-target'
-        if UnitAffectingCombat(t) and not isInvalidEnemy(t) then
-            for _t, _ in pairs(groupTargets) do
-                if UnitIsUnit(t, _t) then
-                    t = _t -- use first added uid
-                    break
-                end
-            end
-            local _c = (groupTargets[t] or 0) + 1 -- count of people who select this target + 1
-            groupTargets[t] = _c
-            if not tar or _c > cnt then
-                tar = t
-                cnt = _c
-            end
-        end
-    end
-    return tar
-end
-
-local enemy = {}
-local function initEnemy()
-    wipe(enemy)
-    enemy.uid = nil
-    enemy.dist = search.maxDistance or 999
-    -- если режиме боя, и не даваим атаку, игнорируем мобов не в бою
-    enemy.combat = st.combatMode and not st.attack
-    enemy.look = false
-    enemy.melee = false
-end
-
-
-local function checkEnemy(uid)
-    local invalidEnemy = isInvalidEnemy(uid)
-    if invalidEnemy then
-        return invalidEnemy
-    end
-    local combat = UnitAffectingCombat(uid)
-    -- уже есть кто-то в бою
-    if enemy.combat and not combat then
-        return 'skip: !combat'
-    end
-    -- автоматически выбераем только цели в бою
-    if not st.attack and not combat then
-        return 'skip: !attack & !combat'
-    end
-
-    local melee = c.InMelee(uid)
-    if enemy.melee and not melee then
-        return format('skip: !melee')
-    end
-
-    local dist = enemyDistance(uid)
-    -- если в мили, растояние уже не существенно
-    if not melee and dist > enemy.dist then -- уже нашел ближе
-        return format('skip: dist(%.1f) > enemy.dist(%.1f)', dist, enemy.dist)
-    end
-
-    local look = enemyInView(uid)
-    if (enemy.melee or not melee) and enemy.look and not look then
-        return 'skip: !look'
-    end
-
-    enemy.uid = uid
-    enemy.combat = combat
-    enemy.dist = dist
-    enemy.look = look
-    enemy.melee = melee
-    return c.ToStr(
-        'success,',
-        'combat:', enemy.combat,
-        'dist:', c.Round(dist)
-    )
-end
-
-
-local function getEnemyTarget()
-    initEnemy()
-    local targets = c.GetTargets()
-    for i = 1, #targets do
-        local uid = targets[i]
-        local info = checkEnemy(uid)
-        if (localDebug and info) then
-            local name = c.UnitInfo(uid)
-            c.MessageLog(format('#checkEnemy: %s, name: %s, uid: %s', info, name, uid), title, icon)
-        end
-    end
-    return enemy.uid
-end
-
-
-local function searchSelect(tar)
-    if not tar then return false end
+function c.SearchTarget(range, angle)
+    local targetGuid = c.bFindTarget(range, angle, lastGUID, st.combatMode, 20)
+    if not targetGuid then return false end
+    c.bTargetUnit(targetGuid)
+    local tar = 'target'
+    if not UnitExists(tar) then return false end
     c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
     c.MessageLog(
         format('#бой: игрок - %s, цель - %s',
@@ -327,19 +153,7 @@ local function searchSelect(tar)
         ),
         title, icon)
     searchLastGuid = UnitGUID(tar)
-    c.Command('/target ' .. tar)
     return true
-end
--- if maxDistance == nil then find only melee target
-function c.SearchTarget(tryAssist, maxDistance, inViewfield)
-    initSearch(maxDistance, inViewfield)
-    -- assist
-    if tryAssist and st.group then
-        if searchSelect(getGroupTarget()) then return true end
-    end
-    -- enemy
-    if searchSelect(getEnemyTarget()) then return true end
-    return false
 end
 
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
@@ -358,40 +172,3 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
     c.MessageLog(format('#нас атакует: %s', sourceName), title, icon)
     c.TimerStart('targetCombat') -- повлияет на st.combatMode и выбор цели
 end)
-
---[[
-    ItemID: 37727
-    ---
-    Ruby Acorn
-    Quest Item
-    Item Level 1
-    Use: Use on the corpse of a fallen Ruby Keeper to return the dragon to the earth.
-    ---
-    Рубиновый желудь
-    Уровень предмета: 1
-    Предмет, необходимый для задания
-    Использование: Примените на тело Рубинового хранителя, чтобы вернуть дракона земле.
-    ]]
-local meleeItemID = 37727
-c.Event('PLAYER_LOGIN', function()
-    if not C_Item.GetItemInfoRaw(meleeItemID) then
-        C_Item.RequestServerCache(meleeItemID)
-    end
-end)
-local meleeDist = 5
-c.InMelee = c.GetCachedFunc(
---- Проверка на дистанцию ближнего боя
----@param target string unitID
----@return boolean melee is unit in distance of melee
-    function(target)
-        target = target or 'target'
-        if not UnitExists(target) then return false end
-        -- Рубиновый желудь (5 ярдов melee)
-        local result = IsItemInRange(meleeItemID, target)
-        if not result or result == -1 then
-            -- fallback to 5yrd check
-            return c.UnitDistance('player', target) < meleeDist
-        end
-        return result == 1
-    end
-)

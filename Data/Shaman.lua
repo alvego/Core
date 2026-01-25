@@ -13,7 +13,7 @@ c.PrintLoadClassModuleMessage(className)
 local st = c.state
 --c.updateDelay = 0.25
 local GetTotemInfo = GetTotemInfo
-
+local UnitHealthMax = UnitHealthMax
 
 c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(10, 'player'))
@@ -54,8 +54,8 @@ local function updateEnhance()
         return reason
     end
 
-    reason = c.TryTarget(true, 30, st.attack or st.look)
-    -- есть ли причина для отстановки?.
+    reason = c.TryTarget(30, st.attack and 15 or (st.look and 30 or 0))
+    -- есть ли причина для остановки?.
     if reason then return reason end
 
     -- Дальше считаем что у нас есть валидная цель
@@ -120,7 +120,7 @@ local function updateEnhance()
         return reason
     end
 
-    reason, action, unit = 'Рассовый спелл', 'Пламя дракона', 'target'
+    reason, action, unit = 'Расовый спелл', 'Пламя дракона', 'target'
     if not st.pvp and c.CanSpell(action) then
         c.DoAction(reason, action)
         return reason

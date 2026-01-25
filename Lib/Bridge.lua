@@ -1,5 +1,6 @@
 ---@class Core
 local c = Core
+local SecondsToTime = SecondsToTime
 
 ---@alias bCmdName "Pulse"
 ---|"Test"
@@ -236,6 +237,11 @@ end
 ---Поиск ближайшего GameObject по имени или части имени
 ---@param partOfName? string Default = '' (по пустой строке искать не будет)
 ---@return string|nil unitGUID
+---@return string|nil unitName
+---@return number|nil x найденого объекта
+---@return number|nil y найденого объекта
+---@return number|nil z игрока
+---@return number|nil range 2d расстояние (горизонтальное)
 function c.bFindObject(partOfName)
     if not bConnected then return end
     return cmd('FindObject', partOfName)
@@ -289,12 +295,12 @@ end
 
 ---Количество целей в радиусе вокруг unitID (с фильтром по min maxHP)
 ---@param range? number Default = 0 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
----@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
 ---@param unitID? UnitToken Default = 'player' (поддерживает unitGUID)
+---@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
 ---@return number count количество найденных юнитов
-function c.bGetEnemyCount(range, minMaxHP, unitID)
+function c.bGetEnemyCount(range, unitID, minMaxHP)
     if not bConnected then return 0 end
-    return cmd('GetEnemyCount', range, minMaxHP, unitID)
+    return cmd('GetEnemyCount', range, unitID, minMaxHP)
 end
 
 ---В радиусе, с учетом коллизий (как спелы)
@@ -363,4 +369,14 @@ end
 function c.bHasAura(unitID, auraID)
     if not bConnected then return false end
     return cmd('HasAura', unitID, auraID)
+end
+
+function c.CheckBridge()
+    local pulse = c.bPulse()
+    c.TimerToggle('bridge', not pulse)
+    if not pulse and c.TimerMore('bridge', 3) then
+        c.Notify(
+            'Ожидаем синхронизацию: ' .. SecondsToTime(c.TimerElapsed('bridge'))
+        )
+    end
 end

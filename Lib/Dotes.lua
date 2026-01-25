@@ -13,7 +13,7 @@ local function needUpdateDotes()
     if st.combatMode then return true end        -- в бою
     if st.autoattack then return true end        -- автоатака
     if st.attack then return true end            -- зажата атака
-    if not st.invalidTarget then return true end -- есть валидный таргет
+    if not st.invalidTarget then return true end -- есть валидный target
     return false
 end
 

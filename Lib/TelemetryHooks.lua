@@ -7,7 +7,6 @@ local format = format
 local GetFramerate = GetFramerate
 local WrapTextInColorCode = WrapTextInColorCode
 local GetAddOnMemoryUsage = GetAddOnMemoryUsage
-local UnitIsPVP = UnitIsPVP
 local UnitIsAFK = UnitIsAFK
 
 c.Telemetry(function()
@@ -24,9 +23,9 @@ c.Telemetry(function()
 end)
 
 
--- c.Telemetry(function()
---     return format('TAR15: %03d', c.GetEnemyCount(15, 'player'))
--- end)
+c.Telemetry(function()
+    return format('TAR15: %03d', c.bGetEnemyCount(15, 20, 'player'))
+end)
 
 
 c.Telemetry(function()
@@ -34,9 +33,9 @@ c.Telemetry(function()
 end)
 
 
--- c.Telemetry(function()
---     return format('Lag: %04dms', c.Round(c.latency * 1000))
--- end)
+c.Telemetry(function()
+    return format('Lag: %04dms', c.Round(c.latency * 1000))
+end)
 
 
 c.Telemetry(function()

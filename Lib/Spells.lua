@@ -14,9 +14,11 @@ local WrapTextInColorCode = WrapTextInColorCode
 local div1000 = 0.001 -- 1 / 1000
 local type = type
 local tostring = tostring
+local format = format
 local SpellHasRange = SpellHasRange
 local GetSpellIDByName = GetSpellIDByName
 local ConsoleExec = ConsoleExec
+local UnitName = UnitName
 
 function c.UnitCasting(unit)
     unit = unit or 'player'
@@ -107,7 +109,7 @@ function c.DoSpell(reason, spell, target)
     c.ClearCursor()
     c.Message(reason, spell, GetSpellTexture(spell))
     ConsoleExec('Sound_EnableSFX 0')
-    c.Spell(spell, target)
+    c.bUseSpell(spell, target)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastSpell = spell
 end

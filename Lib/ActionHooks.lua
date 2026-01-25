@@ -9,6 +9,7 @@ local GetActionTexture = GetActionTexture
 local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
+local hooksecurefunc = hooksecurefunc
 
 local userAction = {}
 local function userActionReset()
@@ -16,18 +17,16 @@ local function userActionReset()
     c.HideActionGlow(userAction.slot)
     userAction.slot = nil
     userAction.target = nil
-    userAction.button = nil
     userAction.name = nil
     userAction.icon = nil
     userAction.spellName = nil
 end
 
-local function userActionSet(slot, target, button, name, icon, spellName)
+local function userActionSet(slot, target, name, icon, spellName)
     userActionReset()
     if not slot then return end
     userAction.slot = slot
     userAction.target = target
-    userAction.button = button
     userAction.name = name
     userAction.icon = icon
     userAction.spellName = spellName
@@ -42,7 +41,7 @@ function c.ActionHook(name, func)
     actionHooks[name] = func
 end
 
-local function hookUseAction(slot, target, button)
+local function hookUseAction(slot, target)
     local name = c.GetSlotName(slot)
     -- похоже пустой слот
     if not name then return end
@@ -54,7 +53,7 @@ local function hookUseAction(slot, target, button)
     local hook = actionHooks[name]
     if hook then
         c.MessageLog('', name, icon) -- hook
-        hook(slot, target, button)
+        hook(slot, target)
         -- если уже есть обработчик, игнорируем
         return
     end
@@ -90,7 +89,7 @@ local function hookUseAction(slot, target, button)
 
     if userAction.slot ~= slot then
         -- будем пытаться нажать следующим
-        userActionSet(slot, target, button, name, icon, spellName)
+        userActionSet(slot, target, name, icon, spellName)
         c.TimerStart(userActionTimer, castLeft or 0)
         c.MessageLog('нажать?', name, icon)
     elseif inCast then
@@ -134,7 +133,7 @@ local function updateUserAction()
         return
     end
     c.Message('жмем!', userAction.name, userAction.icon)
-    c.Action(userAction.slot, userAction.target, userAction.button)
+    c.bUseAction(userAction.slot, userAction.target)
     c.SkipNextUpdate()
 end
 c.BeforeUpdate(updateUserAction, true)

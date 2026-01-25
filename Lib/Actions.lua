@@ -4,21 +4,26 @@ local c = Core
 local st = c.state
 
 local _G = _G
+local GetSpellInfo = GetSpellInfo
+local ActionButton1Cooldown = ActionButton1Cooldown
 local ActionHasRange = ActionHasRange
 local wipe = wipe
 local type = type
 local tostring = tostring
 local GetMacroInfo = GetMacroInfo
 local GetActionInfo = GetActionInfo
-local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local GetCompanionInfo = GetCompanionInfo
 local GetActionTexture = GetActionTexture
 local HasAction = HasAction
 local GetMacroSpell = GetMacroSpell
 local GetItemSpell = GetItemSpell
-local GetPetActionInfo = GetPetActionInfo
 local ConsoleExec = ConsoleExec
+local hooksecurefunc = hooksecurefunc
+local IsUsableAction = IsUsableAction
+local IsActionInRange = IsActionInRange
+local format = format
+local UnitName = UnitName
 
 function c.GetSlotName(slot)
     local name = nil
@@ -82,8 +87,6 @@ function c.GetActionSpell(slot)
         if itemName then
             spellName = GetItemSpell(itemName)
         end
-        -- elseif actionType == 'pet' then
-        --     spellName = GetPetActionInfo(id) -- id как pet slot index
     end
     return spellName
 end
@@ -151,26 +154,14 @@ function c.IsActionPressed(action)
     return c.SlotIsPressed(c.GetSlot(action))
 end
 
-local mouseButtons = {
-    [1] = 'LeftButton',
-    [2] = 'RightButton',
-    [3] = 'MiddleButton',
-    [4] = 'Button4',
-    [5] = 'Button5',
-}
-
-function c.DoAction(reason, name, target, btnNum)
+function c.DoAction(reason, name, target)
     if type(reason) ~= 'string' then
-        c.Error(format('DoAction: reason required! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        c.Error(format('DoAction: reason required! - [%s]', c.ToStr(reason, name, target)))
         return
     end
     if type(name) ~= 'string' then
-        c.Error(format('DoAction: name required! - [%s]', c.ToStr(reason, name, target, btnNum)))
+        c.Error(format('DoAction: name required! - [%s]', c.ToStr(reason, name, target)))
         return
-    end
-    local button = mouseButtons[btnNum]
-    if type(button) ~= 'string' then
-        button = mouseButtons[1]
     end
     local slot = c.GetSlot(name, true)
     if not slot then
@@ -183,7 +174,7 @@ function c.DoAction(reason, name, target, btnNum)
     c.ClearCursor()
     c.Message(reason, name, GetActionTexture(slot), 1, 0.8431, 0) -- permanent gold
     ConsoleExec('Sound_EnableSFX 0')
-    c.Action(slot, target, button)
+    c.bUseAction(slot, target)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastAction = name
 end

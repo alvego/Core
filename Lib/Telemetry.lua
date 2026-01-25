@@ -8,7 +8,8 @@ local type = type
 local error = error
 local table_concat = table.concat
 local WrapTextInColorCode = WrapTextInColorCode
-
+local CreateFrame = CreateFrame
+local UIParent = UIParent
 
 local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()

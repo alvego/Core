@@ -89,13 +89,12 @@ local stopAttackDebuff = {
     -- 'Ментальный крик'
 }
 ---Пытается выбрать новую цель или проверяет текущую
----@param tryAssist boolean? Попробовать ассистить
----@param maxDistance number? Максимальная дистанция
----@param inViewfield boolean? Видимость цели
+---@param range number? Максимальная дистанция (0 - ближний бой)
+---@param angle number? Угол зрения (0 - без ограничений)
 ---@return string? Причина остановки или nil, если всё хорошо
-function c.TryTarget(tryAssist, maxDistance, inViewfield)
+function c.TryTarget(range, angle)
     if st.invalidTarget then
-        if st.combatMode and c.SearchTarget(tryAssist, maxDistance or 40, inViewfield) then
+        if st.combatMode and c.SearchTarget(range or 40, angle) then
             -- не делаем паузы после выбора цели (новый onUpdate начнется незамедлительно)
             c.ImmediatelyNextUpdate()
             -- выходим так как нужно обновить state
@@ -104,7 +103,7 @@ function c.TryTarget(tryAssist, maxDistance, inViewfield)
         return '#' .. st.invalidTarget
     end
 
-    if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(false, nil, inViewfield) then
+    if c.flags.autoMelee and not st.targetMelee and not c.IsManualTarget() and c.SearchTarget(0, angle) then
         -- не делаем паузы после выбора цели (новый onUpdate начнется незамедлительно)
         c.ImmediatelyNextUpdate()
         -- выходим так как нужно обновить state

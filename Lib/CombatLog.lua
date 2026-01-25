@@ -4,7 +4,7 @@ local c = Core
 local InCombatLockdown = InCombatLockdown
 local CombatLogClearEntries = CombatLogClearEntries
 
-c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(...)
+c.Event('COMBAT_LOG_EVENT_UNFILTERED', function()
     c.TimerStart('CombatLog') -- начинаем отсчет с последнего полученного сообщения
 end)
 

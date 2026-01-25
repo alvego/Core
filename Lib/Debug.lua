@@ -6,6 +6,7 @@ local SetCVar = SetCVar
 local tinsert = tinsert
 local type = type
 local error = error
+local hooksecurefunc = hooksecurefunc
 local debug = nil
 
 SetCVar('Sound_EnableErrorSpeech', '0');
@@ -33,11 +34,9 @@ local function updateDebugState()
 end
 c.Event('PLAYER_ENTERING_WORLD', updateDebugState)
 
-local function updateDebugStateHook(key, value)
-    if key ~= 'scriptErrors' then return end
-    updateDebugState()
-end
-hooksecurefunc('SetCVar', updateDebugStateHook)
+hooksecurefunc('SetCVar', function(key)
+    if key == 'scriptErrors' then updateDebugState() end
+end)
 
 function c.DebugHook(funcName)
     hooksecurefunc(funcName, function(...)

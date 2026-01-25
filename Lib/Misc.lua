@@ -10,6 +10,7 @@ local select = select
 local table_concat = table.concat
 local wipe = wipe
 local date = date
+local format = format
 local WrapTextInColorCode = WrapTextInColorCode
 local UnitClass = UnitClass
 local UnitCreatureType = UnitCreatureType
@@ -21,8 +22,14 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local GetCursorInfo = GetCursorInfo
 local ClearCursor = ClearCursor
 local GetSpellInfo = GetSpellInfo
+local GetSpellLink = GetSpellLink
 local UnitDebuff = UnitDebuff
 local UnitBuff = UnitBuff
+local UnitExists = UnitExists
+local UnitName = UnitName
+local UnitLevel = UnitLevel
+local UnitGUID = UnitGUID
+local ActionButton_AllOverlayAlphaUpdate = ActionButton_AllOverlayAlphaUpdate
 
 function c.StrContains(str, sub)
     if (not str or not sub) then
@@ -214,7 +221,7 @@ function c.PrintTargetAuras() -- for debug
     c.MessageLog('Auras for GUID:' .. guid, unit, nil, 0, 0, 1)
     local idx = 0
     repeat
-        local spellId, count, duration, endTime, isMine, isDebuff = c.UnitAuraByIndex(target, idx)
+        local spellId, count, duration, endTime, isMine, isDebuff = c.bGetAura(target, idx)
         if spellId == nil then break end
         if spellId and spellId ~= 0 then
             local name, _, icon = GetSpellInfo(spellId)
@@ -240,7 +247,6 @@ function c.PrintTargetAuras() -- for debug
 end
 
 -- fix overlay error
-local ActionButton_AllOverlayAlphaUpdate = ActionButton_AllOverlayAlphaUpdate
 _G.ActionButton_AllOverlayAlphaUpdate = function(alpha)
     if type(alpha) ~= 'number' then alpha = 0 end
     ActionButton_AllOverlayAlphaUpdate(alpha)

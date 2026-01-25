@@ -193,47 +193,9 @@ function c.UnitAuraByIndex(unit, idx)
     return nil
 end
 
-function c.Script(luaCode)
-    local func = oScript
-    if isReadyFunc(func) then
-        func(luaCode)
-    end
-end
-
 function c.Command(chatCommandLine)
     local func = oCommand
     if isReadyFunc(func) then
         func(chatCommandLine)
-    end
-end
-
-function c.Spell(spell, target)
-    local func = oSpell
-    if isReadyFunc(func) then
-        func(spell, target)
-    end
-end
-
--- slot - An action bar slot (number, actionID)
--- target - A unit to be used as target for the action (string, unitID)
--- button - Mouse button used to activate the action (string)
---  Button4 - Fourth mouse button
---  Button5 - Fifth mouse button
---  LeftButton - Left mouse button (also used when the action is activated via keyboard)
---  MiddleButton - Third mouse button (typically middle button / scroll wheel)
---  RightButton - Right mouse button
-function c.Action(slot, target, button)
-    local func = oAction
-    if isReadyFunc(func) then
-        func(slot, target, button)
-    end
-end
-
-local checkTimer = 'CheckExtendedFunc'
-function c.CheckExtendedFunc()
-    c.TimerToggle(checkTimer, type(oHelp) ~= 'function')
-    if c.TimerStarted(checkTimer) and c.TimerMore(checkTimer, 3) then
-        c.Echo(WrapTextInColorCode(SecondsToTime(c.TimerElapsed(checkTimer)), 'ffffff00'), "Синхронизация",
-            c.iconUpdate, 0, 1, 0)
     end
 end

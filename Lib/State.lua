@@ -23,6 +23,7 @@ local wipe = wipe
 local UnitIsAFK = UnitIsAFK
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
+local UnitHealthMax = UnitHealthMax
 
 local mountAuras = {
     311563, -- Магический пузырь
@@ -72,7 +73,7 @@ local function updateState()
     c.TimerToggle('needMoreDamage', st.ttd and st.ttd > 20) -- таймер идет пока ttd > 20
     st.needMoreDamage = c.TimerStarted('needMoreDamage') and c.TimerMore('needMoreDamage', 3)
     st.targetHard = st.bossTarget or st.targetPlayer or (UnitHealthMax('target') > UnitHealthMax('player') * 3)
-    st.targetMelee = st.targetExists and c.InMelee('target')
+    st.targetMelee = st.targetExists and c.bInMelee('target')
     st.targetImmune = st.invalidTarget or c.UnitIsImmune('target')
     st.targetImmuneMagic = st.targetImmune or c.UnitIsMagicImmune('target')
     st.targetVisible = st.targetExists and c.UnitInLOS('player', 'target')

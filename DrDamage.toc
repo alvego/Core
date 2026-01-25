@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: DrDamage
-## Notes: |cff3b78ffVersion|r: |cffff0000Serp&Molot|r. In-game theorycraft. Calculates actual damage/healing based on gear, talents and buffs.
+## Notes: In-game theorycraft. Calculates actual damage/healing based on gear, talents and buffs.         |cff3b78ffVersion|r: |cffff0000Serp&Molot|r.
 ## Author: Gagorian, Dally1991, Detseuqer, Zarquan, Karzon13, Unknown Coder
 ## Version: 5.0.0_release
 ## SavedVariables: DrDamageDB
@@ -12,7 +12,7 @@
 ## X-Curse-Repository-ID: wow/dr-damage/mainline
 ## X-Category: Interface Enhancements
 
-DrDamage.lua
+Core.lua
 
 Lib\Bridge.lua
 Lib\Extended.lua
@@ -22,6 +22,7 @@ Lib\Misc.lua
 Lib\Events.lua
 Lib\Debug.lua
 Lib\Chat.lua
+Lib\Notify.lua
 Lib\Telemetry.lua
 Lib\TelemetryHooks.lua
 Lib\Minimap.lua

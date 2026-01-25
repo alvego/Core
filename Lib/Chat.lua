@@ -1,6 +1,6 @@
 ---@class Core
 local c = Core
-
+local UIErrorsFrame = UIErrorsFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local ChatFrame_RemoveAllMessageGroups = ChatFrame_RemoveAllMessageGroups
@@ -19,19 +19,9 @@ local GRAY_FONT_COLOR = GRAY_FONT_COLOR
 local RED_FONT_COLOR = RED_FONT_COLOR
 local GREEN_FONT_COLOR = GREEN_FONT_COLOR
 local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
-
-local frame = CreateFrame('Frame', c.name .. 'WhatHappend', UIParent)
-frame:ClearAllPoints()
-frame:SetPoint("CENTER", UIParent, "TOP", 0, -5)
-frame:SetHeight(10)
-frame:SetWidth(10)
-frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
-frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный шрифт
-frame.text:SetTextColor(0.8, 0.8, 0.8, 0.8)
-frame.text:SetAllPoints()
+local FCF_Tab_OnClick = FCF_Tab_OnClick
 
 -- очистка чата по Ctrl + LeftButton клик на табик
-local FCF_Tab_OnClick = FCF_Tab_OnClick
 _G.FCF_Tab_OnClick = function(self, button)
     local chatFrame = _G["ChatFrame" .. self:GetID()];
     if (IsControlKeyDown() == 1 and button == "LeftButton") then
@@ -56,20 +46,8 @@ local function getDebugChatFrame()
     return debugChatFrame, tab
 end
 
--- очистка чата по началу боя
--- c.Event('PLAYER_REGEN_DISABLED', function()
---     local chatFrame, tab = getDebugChatFrame()
---     if not chatFrame then return end
---     chatFrame:Clear()
--- end)
-
 local docked = true
 local function toggleChatVisibility(visible)
-    if visible then
-        if not frame:IsVisible() then frame:Show() end
-    else
-        if frame:IsVisible() then frame:Hide() end
-    end
     local chatFrame, tab = getDebugChatFrame()
     if chatFrame then
         if tab:IsShown() then
@@ -147,7 +125,6 @@ local function createDebugChatTab()
     -- Проверяем, не существует ли уже вкладка с именем 'Debug'
     local chatFrame = getDebugChatFrame()
     if chatFrame then return end -- уже есть
-
     -- Находим свободный чат-фрейм, который не используется
     chatFrame = getFreeChatIndex()
     if not chatFrame then
@@ -157,7 +134,6 @@ local function createDebugChatTab()
     configureDebugChatFrame(chatFrame)
 end
 c.Event('PLAYER_LOGIN', createDebugChatTab)
-
 
 local iconSuccess = [[Interface\Icons\ability_vehicle_shellshieldgenerator_green]]
 local iconLog = [[Interface\Icons\ability_vehicle_shellshieldgenerator_s_black]]
@@ -173,11 +149,11 @@ local function formatMessage(icon, label, msg)
     return format('%s [%s] %s', formatIcon(icon), label or '...', msg or '???')
 end
 
-
 -- Функция для вывода отладочных сообщений
 local function debugChat(msg, title, icon, r, g, b)
     if msg == nil then return end
     local isCommented = string.sub(msg, 1, 1) == '#'
+    if isCommented then msg = string.sub(msg, 2) end
     if not c.flags.fullLog and isCommented then
         return -- игнорируем комментарии
     end
@@ -185,7 +161,7 @@ local function debugChat(msg, title, icon, r, g, b)
     g = g or YELLOW_FONT_COLOR.g
     b = b or YELLOW_FONT_COLOR.b
     if isCommented then
-        msg = WrapTextInColorCode('# ', 'ff333333') .. msg:sub(2)
+        msg,
         r = math_max(r - 0.1, 0)
         g = math_max(g - 0.1, 0)
         b = math_max(b - 0.1, 0)
@@ -205,7 +181,6 @@ local function debugChat(msg, title, icon, r, g, b)
         b
     )
 end
-
 
 -- Функция для вывода отладочных сообщений  без спама
 function c.Message(msg, title, icon, r, g, b)
@@ -362,10 +337,4 @@ function c.LogWhatHappend(msg, skipLogging)
     end
     if not c.IsChanged('WhatHappend', msg) then return end
     if not skipLogging then c.MessageLog(msg) end
-    if string.sub(msg, 1, 1) == '#' then msg = string.sub(msg, 2) end
-    frame.text:SetText(format('|T%s:16:16:0:0|t %s', c.icon, msg))
-    local textWidth = frame.text:GetStringWidth() -- Получаем ширину текста
-    local textHeight = frame.text:GetStringHeight()
-    frame:SetWidth(textWidth)
-    frame:SetHeight(textHeight)
 end

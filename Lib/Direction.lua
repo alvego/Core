@@ -8,18 +8,12 @@ local GetPlayerFacing = GetPlayerFacing
 local deg = deg
 local atan2 = atan2
 local WrapTextInColorCode = WrapTextInColorCode
-local SaveView = SaveView
 local SetView = SetView
+local UnitExists = UnitExists
+local format = format
 
 
 local viewIndex = 5
--- c.AfterUpdate(function()
---     if st.look and c.TimerMore('SaveView', 1) then
---         c.Log('#SaveView (move and look)')
---         c.TimerStart('SaveView')
---         SaveView(viewIndex)
---     end
--- end)
 
 function c.SyncCam(reason)
     if c.TimerMore('SetView', 5) and not st.look then
@@ -41,18 +35,16 @@ local function turnUpdate()
         st.playerCasting or
         c.PlayerFacingTarget(turnUnit, 30) then
         if turnUnit then
-            if turnUnit ~= 'target' then
-                c.SyncCam('turnUpdate')
-            end
             turnUnit = nil
             if c.TimerStarted('TurnToUnit') then
                 c.TimerReset('TurnToUnit')
+                c.bPlayerLookAt()
             end
         end
         return
     end
     if c.TimerLess('TurnToUnit', 0.3) then return end
-    c.LookAtUnit(UnitIsUnit(turnUnit, 'target') and 'target' or turnUnit)
+    c.bPlayerLookAt(turnUnit)
     --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
@@ -95,15 +87,15 @@ c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
     if not angle then angle = 90 end
     if not UnitExists(unit) or UnitIsUnit('player', unit) then return true end
-    local yawAngle = c.PlayerFacingAngleToPoint(c.UnitPosition(unit))
+    local yawAngle = c.PlayerFacingAngleToPoint(c.bUnitPosition(unit))
     return yawAngle > -angle and yawAngle < angle
 end
 
 -----------------------------------
 function c.PlayerFacingAngleToPoint(x, y)
     if not x or not y then return 0 end
-    local facing = GetPlayerFacing()
-    local x0, y0 = c.UnitPosition('player')
+    local facing = GetPlayerFacing() or 0
+    local x0, y0 = c.bUnitPosition('player')
     local yawAngle = atan2(y0 - y, x0 - x) - deg(facing) - 180
     if yawAngle < 0 then yawAngle = yawAngle + 360 end
     return yawAngle
@@ -111,16 +103,16 @@ end
 
 -----------------------------------
 local moveUnit = nil
-local maveMaxDist = nil
+local moveMaxDist = nil
 
 local function moveEnd(cond)
     moveUnit = nil
-    maveMaxDist = nil
+    moveMaxDist = nil
     c.TimerReset('PlayerMove')
     c.Log('#пришли', WrapTextInColorCode(cond, 'ff333333'))
     if st.speed > 0 and not st.move and not st.playerCasting then
         c.Log('#тормозим')
-        c.MoveStop()
+        c.bPlayerMoveStop()
     end
     c.SyncCam('moveEnd')
 end
@@ -149,8 +141,8 @@ local function moveUpdate()
         return
     end
 
-    local px, py, pz = c.UnitPosition('player')
-    local tx, ty, tz = c.UnitPosition(moveUnit)
+    local px, py, pz = c.bUnitPosition('player')
+    local tx, ty, tz = c.bUnitPosition(moveUnit)
     local dx, dy, dz = px - tx, py - ty, pz - tz
     local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
     local d = st.combatMode and 4 or 2 -- нет смысла подходить ближе
@@ -158,7 +150,7 @@ local function moveUpdate()
         moveEnd(format('дист. < %dм.', d))
         return
     end
-    if maveMaxDist and dist > maveMaxDist then
+    if moveMaxDist and dist > moveMaxDist then
         moveEnd(format('дист. > %dм.', d))
         return
     end
@@ -186,7 +178,7 @@ local function moveUpdate()
     end
     -- идем
     --c.Log('#идем к ', c.UnitInfo(moveUnit))
-    c.MoveTo(x, y, z)
+    c.bPlayerMoveTo(x, y, z)
     c.TimerStart('PlayerMove')
 end
 c.BeforeUpdate(moveUpdate, true)
@@ -198,7 +190,7 @@ end
 function c.MoveToUnit(target, maxDist)
     local unit = moveUnit
     moveUnit = c.GetUnitID(target)
-    maveMaxDist = maxDist
+    moveMaxDist = maxDist
     if moveUnit and unit ~= moveUnit then
         c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
     end

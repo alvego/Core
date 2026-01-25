@@ -17,10 +17,13 @@ local ItemRefTooltip = ItemRefTooltip
 local GameTooltip = GameTooltip
 local GetInventoryItemID = GetInventoryItemID
 local tContains = tContains
+local GetItemInfo = GetItemInfo
+local UnitLevel = UnitLevel
+local format = format
 
 function c.GetBagsFreeSlots()
     local free = 0
-    -- считаем сободное место
+    -- считаем свободное место
     for bag = 0, NUM_BAG_SLOTS do
         local n = GetContainerNumFreeSlots(bag);
         if n then free = free + n end
@@ -213,7 +216,6 @@ c.Event('LOOT_CLOSED', function()
 end
 )
 
-
 local lootIcon = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
 c.Event('MERCHANT_SHOW', function()
     ClearCursor()
@@ -222,7 +224,7 @@ c.Event('MERCHANT_SHOW', function()
     local free = c.GetBagsFreeSlots()
     c.EachBagsSlot(function(bag, slot)
         local icon, count, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
-        if icon and not locked ~= 1 then --and lootable ~= 1
+        if icon and not locked ~= 1 then
             local isTrash, sellPrice = isJunk(link)
             --c.MessageLog(c.ToStr(link, isTrash), 'Очистка', icon)
             if isTrash then

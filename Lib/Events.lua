@@ -28,6 +28,7 @@ end
 
 local initEvents = {
     'ADDON_LOADED',
+    'PLAYER_LOGIN',
     'PLAYER_ENTERING_WORLD',
     'PLAYER_LEAVING_WORLD'
 }
@@ -140,7 +141,7 @@ local function onUpdate()
 
     if not c.IsLoaded() then return end
 
-    c.CheckExtendedFunc()
+    c.CheckBridge()
     ----------------------------------------------------------------
     callUpdateList(listBeforeUpdate)
     ----------------------------------------------------------------
