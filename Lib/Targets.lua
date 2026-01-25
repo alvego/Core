@@ -172,3 +172,7 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
     c.MessageLog(format('#нас атакует: %s', sourceName), title, icon)
     c.TimerStart('targetCombat') -- повлияет на st.combatMode и выбор цели
 end)
+
+c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
+    return c.bGetEnemyCount(range, aroundUnit, 20)
+end)

@@ -6,6 +6,7 @@ local GetCVar               = GetCVar
 local UnitExists            = UnitExists
 local UnitIsDeadOrGhost     = UnitIsDeadOrGhost
 local UnitIsPlayer          = UnitIsPlayer
+local UnitName              = UnitName
 local UnitIsTapped          = UnitIsTapped
 local UnitIsTappedByPlayer  = UnitIsTappedByPlayer
 local GetSpellInfo          = GetSpellInfo
@@ -383,7 +384,7 @@ local function waitForFishing()
     c.TimerStart(fish.spell)
 
     if not fish.bobber and fish.guid then
-        fish.bobber = c.GetObjectIdByGUID(fish.guid)
+        --TODO: fish.bobber = c.GetObjectIdByGUID(fish.guid)
         if fish.bobber then
             c.MessageLog('#нашли поплавок', fish.spell, fish.icon)
             fish.guid = nil

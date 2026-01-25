@@ -1,6 +1,7 @@
 ---@class Core
 local c = Core
 local SecondsToTime = SecondsToTime
+local UnitGUID = UnitGUID
 
 ---@alias bCmdName "Pulse"
 ---|"Test"
@@ -24,6 +25,7 @@ local SecondsToTime = SecondsToTime
 ---|"CheckBobber"
 ---|"FindCorpse"
 ---|"FindUnits"
+---|"FindUnit"
 ---|"FindExecuteTarget"
 ---|"GetEnemyCount"
 ---|"InRange"
@@ -31,6 +33,7 @@ local SecondsToTime = SecondsToTime
 ---|"FindTarget"
 ---|"UnitAura"
 ---|"UnitAuraByID"
+---|"HasAura
 ---|"HasAuraByID
 
 ---Command Alias
@@ -39,21 +42,7 @@ local SecondsToTime = SecondsToTime
 ---@return ... зависит от команды
 local cmd = function(name, ...)
     ---@diagnostic disable-next-line
-    return GetBillingTimeRested(name, ...)
-end
-
----Тяжелая (table unpack) обертка с подменой `mouseover`
----@param unitGUID string|nil нужный GUID
----@param callback function функция обработчик `mouseover` - принимает `token` = `"mouseover"`) первым агрументом.
----@param ... any? будет проброшено в `callback` после `token`
----@return ... результат работы callback
-function c.bWithGUIDargs(unitGUID, callback, ...)
-    local token = "mouseover"
-    local oldGUID = UnitGUID(token)
-    c.bUseGUID(unitGUID, token)
-    local result = { callback(token, ...) }
-    c.bUseGUID(oldGUID, token)
-    return unpack(result)
+    return GetBillingTimeRested(name, ...) -- luacheck: ignore
 end
 
 ---Легкая обертка с подменой `mouseover`
@@ -63,10 +52,13 @@ end
 ---@return any? result первый возвращаемый результат работы callback
 function c.bWithGUID(unitGUID, callback, ...)
     local token = "mouseover"
-    local oldGUID = UnitGUID(token)
+    local tokenGUID = UnitGUID(token)
+    if unitGUID == tokenGUID then
+        return callback(token, ...)
+    end
     c.bUseGUID(unitGUID, token)
     local result = callback(token, ...)
-    c.bUseGUID(oldGUID, token)
+    c.bUseGUID(tokenGUID, token)
     return result
 end
 
@@ -265,14 +257,15 @@ function c.bFindCorpse(range, skining, minMaxHP)
 end
 
 ---Поиск юнитов.
----Флаги для filterMask:
+---filterMask:
 ---IsAlive = 0,
 ---CanAttack = 1,
 ---IsInCombat = 2,
 ---IsCasting = 4,
 ---TargetingMe = 8,
 ---NotTargetingMe = 16.
----InLoS = 32.
+---NotTappedByOther = 32.
+---InLoS = 64.
 ---@param units table - таблица в которую будут записаны строки `unitGUID` найденных юнитов (используй wipe() перед вызовом!)
 ---@param range? number Default = -1 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
 ---@param filterMask? number Default = 0 - (маска для фильтрации)
@@ -281,6 +274,25 @@ end
 function c.bFindUnits(units, range, filterMask, minMaxHP)
     if not bConnected then return 0 end
     return cmd('FindUnits', units, range, filterMask, minMaxHP)
+end
+
+---Поиск юнита.
+---filterMask:
+---IsAlive = 0,
+---CanAttack = 1,
+---IsInCombat = 2,
+---IsCasting = 4,
+---TargetingMe = 8,
+---NotTargetingMe = 16.
+---NotTappedByOther = 32.
+---InLoS = 64.
+---@param range? number Default = -1 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
+---@param filterMask? number Default = 0 - (маска для фильтрации)
+---@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
+---@return string|nil unitGUID
+function c.bFindUnit(range, filterMask, minMaxHP)
+    if not bConnected then return nil end
+    return cmd('FindUnit', range, filterMask, minMaxHP)
 end
 
 ---Поиск ближайшего подходящего для добивания юнита (фаза казни)
@@ -349,7 +361,7 @@ end
 
 ---Возвращает информацию об ауре юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraID? number Default = 0 разрешает брать цели не в бою
+---@param auraID? number Default = 0 ищет по auraID
 ---@return number|nil spellID 0 - пропуск, nil - конец списка
 ---@return number|nil count stack количество
 ---@return number|nil duration длительность
@@ -364,7 +376,16 @@ end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraID? number Default = 0 разрешает брать цели не в бою
+---@param partOfName? string Default = '' ищет по части имени
+---@return boolean found
+function c.bHasAura(unitID, partOfName)
+    if not bConnected then return false end
+    return cmd('HasAura', unitID, partOfName)
+end
+
+---Проверка наличия ауры у юнита по auraID
+---@param unitID? string Default = '' (поддерживает unitGUID)
+---@param auraID? number Default = 0 ищет по auraID
 ---@return boolean found
 function c.bHasAuraByID(unitID, auraID)
     if not bConnected then return false end

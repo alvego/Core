@@ -178,3 +178,11 @@ function c.DoAction(reason, name, target)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastAction = name
 end
+
+function c.DoActionWithGUID(reason, name, unitGUID)
+    if not unitGUID then return false end
+    c.bWithGUID(unitGUID, function(token)
+        c.DoAction(reason, name, token)
+    end)
+    return true
+end

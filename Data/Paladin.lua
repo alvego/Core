@@ -22,13 +22,14 @@ local UnitExists = UnitExists
 local UnitOnTaxi = UnitOnTaxi
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
-local UnitIsPlayer = UnitIsPlayer
+local UnitGUID = UnitGUID
 local UnitIsTapped = UnitIsTapped
 local UnitIsTappedByPlayer = UnitIsTappedByPlayer
 local tContains = tContains
 local format = format
 local tostring = tostring
 local tinsert = tinsert
+local wipe = wipe
 
 local isLoaded = false
 local cleanseTypes = { 'Magic', 'Disease', 'Poison' }
@@ -221,14 +222,20 @@ local function checkTauntTarget(target, action, checkHand) -- target for taunt
     if not c.FindValue(tankingUnits, checkTankingUnit, target) then return end
     return target
 end
-local function getTauntTarget(action, checkHand)
+
+local tauntGUIDs = {}
+local function getTauntGUID(action, checkHand)
     wipe(tankingUnits)
     local units = c.GetGroupUnits()
     for i = 1, #units do
         local unit = checkThreatUnit(units[i], nil, 3)
         if unit then tinsert(tankingUnits, unit) end
     end
-    return c.FindValue(c.GetTargets(), checkTauntTarget, action, checkHand)
+
+    wipe(tauntGUIDs)
+    --CanAttack|IsInCombat|NotTargetingMe|InLoS
+    c.bFindUnits(tauntGUIDs, 40, 83, 20)
+    return c.FindUnitGUID(tauntGUIDs, checkTauntTarget, action, checkHand)
 end
 
 local function checkCastTarget(target, action) -- unit for taunt
@@ -240,46 +247,39 @@ local function checkCastTarget(target, action) -- unit for taunt
     return target
 end
 
-local function checkFinishTarget(target, action)
-    if not UnitCanAttack('player', target) then return end
-    if not UnitAffectingCombat(target) then return end
-    if UnitIsTapped(target) and not UnitIsTappedByPlayer(target) then return end
-    if not (c.UnitHealth100(target) < 19.9) then return end
-    if not c.CanGcdSpell(action, target) then return end
-    return target
-end
 
-
-local mouseoverUid = nil
+local mouseoverGUID = nil --TODO: Check Usage
 local mouseoverTimer = 'mouseoverTimer'
 c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
     if button ~= "MiddleButton" then return end
     local unit = 'mouseover'
 
     if not UnitExists(unit) then return end
-    mouseoverUid = c.GetUnitID(unit)
+    mouseoverGUID = UnitGUID(unit)
     c.TimerStart(mouseoverTimer)
 end)
 
 local function tryMouseTaunt()
-    if not mouseoverUid then return end
-    if c.TimerMore(mouseoverTimer, 2) then return end
-    if not c.IsSpellNotUsed(tauntSpells, 0.5) then return end
-    local reason, action, unit = 'Танунт по мышке', 'Длань возмездия', mouseoverUid
-    if not UnitExists(unit) or UnitIsDeadOrGhost(unit) then return end
+    if not mouseoverGUID then return end
+    return c.bWithGUID(mouseoverGUID, function(mouseover)
+        if c.TimerMore(mouseoverTimer, 2) then return end
+        if not c.IsSpellNotUsed(tauntSpells, 0.5) then return end
+        local reason, action, unit = 'Танунт по мышке', 'Длань возмездия', mouseover
+        if not UnitExists(unit) or UnitIsDeadOrGhost(unit) then return end
 
-    if UnitCanAttack('player', unit) and c.CanSpell(action, unit) and not c.HasBuff('Длань', unit) and (UnitThreatSituation('player', unit) ~= 3) then
-        c.DoAction(reason, action, unit)
-        mouseoverUid = nil
-        return reason
-    end
+        if UnitCanAttack('player', unit) and c.CanSpell(action, unit) and not c.HasBuff('Длань', unit) and (UnitThreatSituation('player', unit) ~= 3) then
+            c.DoAction(reason, action, unit)
+            mouseoverGUID = nil
+            return reason
+        end
 
-    reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', mouseoverUid
-    if c.UnitInGroup(unit) and c.CanSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
-        c.DoAction(reason, action, unit)
-        mouseoverUid = nil
-        return reason
-    end
+        reason, action, unit = 'Снятие агро по мышке', 'Праведная защита', mouseover
+        if c.UnitInGroup(unit) and c.CanSpell(action, unit) and (UnitThreatSituation(unit) == 3) then
+            c.DoAction(reason, action, unit)
+            mouseoverGUID = nil
+            return reason
+        end
+    end)
 end
 
 
@@ -303,9 +303,9 @@ local function updateProto()
     local mana100 = c.UnitMana100('player')
     local useMana = st.attack or (mana100 > 50)
 
-    -- автовключание если в группе и есть отметка что танк
+    -- автовключение если в группе и есть отметка что танк
     local roleTank, roleHeal, roleDD = UnitGroupRolesAssigned("player")
-    reason, action, unit = 'Влючаем баф для танкования', 'Праведное неистовство', 'player'
+    reason, action, unit = 'Включаем баф для танкования', 'Праведное неистовство', 'player'
     if not isTank and roleTank and c.CanGcdSpell(action, unit, 5) then
         c.DoAction(reason, action, unit)
         return reason
@@ -416,10 +416,9 @@ local function updateProto()
 
             reason, action, unit = 'Таунт', 'Длань возмездия', 'target'
             if c.CanSpell(action) then
-                unit = getTauntTarget(action, true)
-                if unit then
-                    c.DoAction(reason, action, unit) -- мговенка
-                    return reason                    -- не частим
+                -- мгновенка
+                if c.DoActionWithGUID(reason, action, getTauntGUID(action, true)) then
+                    return reason -- не частим
                 end
             end
 
@@ -435,9 +434,7 @@ local function updateProto()
 
             reason, action, unit = 'Повышаем агро используя Сало', 'Щит мстителя', 'target'
             if useMana and not st.gcd and c.CanSpell(action) then
-                unit = getTauntTarget(action, false)
-                if unit then
-                    c.DoAction(reason, action, unit)
+                if c.DoActionWithGUID(reason, action, getTauntGUID(action, false)) then
                     return reason -- не частим
                 end
             end
@@ -507,18 +504,15 @@ local function updateProto()
 
     reason, action, unit = 'Добивание', 'Молот гнева', 'target'
     if useMana and not st.gcd and c.CanSpell(action) then
-        unit = c.FindValue(c.GetTargets(), checkFinishTarget, action)
-        if unit then
-            c.DoAction(reason, action, unit)
+        if c.DoActionWithGUID(reason, action, c.bFindExecuteTarget(30, 19.9, 20)) then
             return reason -- не частим
         end
     end
 
     reason, action, unit = 'Сало на троих', 'Щит мстителя', 'target'
     if useMana and c.CanGcdSpell(action) then
-        unit = c.FindValue(c.GetTargets(), checkCastTarget, action)
-        if unit then
-            c.DoAction(reason, action, unit)
+        --CanAttack|IsInCombat|IsCasting|NotTappedByOther|InLoS
+        if c.DoActionWithGUID(reason, action, c.bFindUnit(30, 103, 20)) then
             return reason -- не частим
         end
     end

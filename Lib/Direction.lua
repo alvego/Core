@@ -10,6 +10,7 @@ local atan2 = atan2
 local WrapTextInColorCode = WrapTextInColorCode
 local SetView = SetView
 local UnitExists = UnitExists
+local UnitGUID = UnitGUID
 local format = format
 
 
@@ -23,19 +24,19 @@ function c.SyncCam(reason)
     end
 end
 
-local turnUnit = nil
+local turnGUID = nil
 
 local function turnUpdate()
     -- не поворачиваемся
     if c.Paused() or
-        not turnUnit or
-        not UnitExists(turnUnit) or
+        not turnGUID or
+        not c.bWithGUID(turnGUID, UnitExists) or
         st.move or
         st.look or
         st.playerCasting or
-        c.PlayerFacingTarget(turnUnit, 30) then
-        if turnUnit then
-            turnUnit = nil
+        c.bUnitInView(turnGUID, 30) then
+        if turnGUID then
+            turnGUID = nil
             if c.TimerStarted('TurnToUnit') then
                 c.TimerReset('TurnToUnit')
                 c.bPlayerLookAt()
@@ -44,21 +45,21 @@ local function turnUpdate()
         return
     end
     if c.TimerLess('TurnToUnit', 0.3) then return end
-    c.bPlayerLookAt(turnUnit)
+    c.bPlayerLookAt(turnGUID)
     --c.Log('turnUpdate', turnUnit)
     c.TimerStart('TurnToUnit')
 end
 c.BeforeUpdate(turnUpdate, true)
 
 function c.IsTurnToUnit()
-    return turnUnit ~= nil -- поворачиваемся
+    return turnGUID ~= nil -- поворачиваемся
 end
 
 function c.TurnToUnit(target)
     if not target then
         target = 'target'
     end
-    turnUnit = target
+    turnGUID = UnitGUID(target)
     turnUpdate()
     return c.IsTurnToUnit()
 end
@@ -83,30 +84,12 @@ local function onUIErrorMessage(event, ...)
 end
 c.Event('UI_ERROR_MESSAGE', onUIErrorMessage)
 
-
-function c.PlayerFacingTarget(unit, angle) -- angle 1 .. 90, default 90
-    if not angle then angle = 90 end
-    if not UnitExists(unit) or UnitIsUnit('player', unit) then return true end
-    local yawAngle = c.PlayerFacingAngleToPoint(c.bUnitPosition(unit))
-    return yawAngle > -angle and yawAngle < angle
-end
-
 -----------------------------------
-function c.PlayerFacingAngleToPoint(x, y)
-    if not x or not y then return 0 end
-    local facing = GetPlayerFacing() or 0
-    local x0, y0 = c.bUnitPosition('player')
-    local yawAngle = atan2(y0 - y, x0 - x) - deg(facing) - 180
-    if yawAngle < 0 then yawAngle = yawAngle + 360 end
-    return yawAngle
-end
-
------------------------------------
-local moveUnit = nil
+local moveGUID = nil
 local moveMaxDist = nil
 
 local function moveEnd(cond)
-    moveUnit = nil
+    moveGUID = nil
     moveMaxDist = nil
     c.TimerReset('PlayerMove')
     c.Log('#пришли', WrapTextInColorCode(cond, 'ff333333'))
@@ -118,31 +101,23 @@ local function moveEnd(cond)
 end
 local function moveUpdate()
     -- не идем
-    if not moveUnit then return end
+    if not moveGUID then return end
 
     if c.Paused()
         or not c.flags.move
         or st.move
         or st.look
         or st.playerCasting
-        or not moveUnit
-        or not UnitExists(moveUnit)
-        or not c.bUnitInLoS('player', moveUnit)
+        or not moveGUID
+        or not c.bWithGUID(moveGUID, UnitExists)
+        or not c.bUnitInLoS('player', moveGUID)
     then
-        -- print(
-        --     c.TelemetryBool('move', st.move),
-        --     c.TelemetryBool('look', st.look),
-        --     c.TelemetryBool('playerCasting', st.playerCasting),
-        --     c.TelemetryBool('!moveUnit', not moveUnit),
-        --     c.TelemetryBool('!exists', not UnitExists(moveUnit)),
-        --     c.TelemetryBool('!los', not c.bUnitInLoS('player', moveUnit))
-        -- )
         moveEnd('по проверкам')
         return
     end
 
     local px, py, pz = c.bUnitPosition('player')
-    local tx, ty, tz = c.bUnitPosition(moveUnit)
+    local tx, ty, tz = c.bUnitPosition(moveGUID)
     local dx, dy, dz = px - tx, py - ty, pz - tz
     local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
     local d = st.combatMode and 4 or 2 -- нет смысла подходить ближе
@@ -172,7 +147,7 @@ local function moveUpdate()
 
     if c.TimerLess('PlayerMove', 0.5) then return end
     -- поворачиваемся
-    if c.TurnToUnit(moveUnit) then
+    if c.TurnToUnit(moveGUID) then
         --c.Log('#поворачиваем к ', c.UnitInfo(moveUnit))
         return
     end
@@ -184,15 +159,15 @@ end
 c.BeforeUpdate(moveUpdate, true)
 
 function c.IsMoveUnit()
-    return moveUnit ~= nil
+    return moveGUID ~= nil
 end
 
 function c.MoveToUnit(target, maxDist)
-    local unit = moveUnit
-    moveUnit = c.GetUnitID(target)
+    local unitGUID = moveGUID
+    moveGUID = UnitGUID(target)
     moveMaxDist = maxDist
-    if moveUnit and unit ~= moveUnit then
-        c.Log('#нужно подойти к ', c.UnitInfo(moveUnit))
+    if moveGUID and unitGUID ~= moveGUID then
+        c.Log('#нужно подойти к ', c.UnitInfo(target))
     end
     -- идем
     moveUpdate()

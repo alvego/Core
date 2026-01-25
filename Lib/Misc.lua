@@ -58,6 +58,22 @@ function c.FindValue(values, checkFn, ...)
     return nil
 end
 
+function c.FindUnitGUID(unitGUIDs, checkFn, ...)
+    local token = 'mouseover'         -- Будем подменять его на наш GUID
+    local tokenGUID = UnitGUID(token) -- Запомню исходный GUID
+    for i = 1, #unitGUIDs do          -- Цикл по всем unitGUIDs
+        local unitGUID = unitGUIDs[i] -- берем unitGUID для проверки
+        c.bUseGUID(unitGUID, token)   -- подменяем token на unitGUID
+        local result = checkFn(token, ...)
+        if result ~= nil then
+            c.bUseGUID(tokenGUID, token) -- Восстановлю исходный GUID
+            return unitGUID
+        end
+    end
+    c.bUseGUID(tokenGUID, token) -- Восстановлю исходный GUID
+    return nil
+end
+
 -- Возвращает текущее локальное время в формате hh:mm:ss.
 -- @return (string) Текущее время в секундах, hh:mm:ss.
 function c.GetCurrentTime()

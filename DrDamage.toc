@@ -15,7 +15,6 @@
 Core.lua
 
 Lib\Bridge.lua
-Lib\Extended.lua
 Lib\TablePool.lua
 Lib\Timers.lua
 Lib\Misc.lua
@@ -39,7 +38,6 @@ Lib\SpellRange.lua
 Lib\SpellKick.lua
 Lib\Auras.lua
 Lib\Dotes.lua
-Lib\Objects.lua
 Lib\Targets.lua
 Lib\Direction.lua
 Lib\Bags.lua
