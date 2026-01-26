@@ -12,7 +12,7 @@ frame:SetPoint("CENTER", UIParent, "TOP", 0, -20)
 frame:SetHeight(1)
 frame:SetWidth(1)
 frame.text = frame:CreateFontString(nil, 'BACKGROUND', 'GameFontNormalSmallLeft')
-frame.text:SetFont([[Fonts\ARIALN.TTF]], 16) -- Альтернативный шрифт
+frame.text:SetFont([[Fonts\ARIALN.TTF]], 24) -- Альтернативный шрифт
 frame.text:SetTextColor(ORANGE_FONT_COLOR.r, ORANGE_FONT_COLOR.g, ORANGE_FONT_COLOR.b, ORANGE_FONT_COLOR.a)
 frame.text:SetAllPoints()
 

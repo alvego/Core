@@ -2,11 +2,11 @@
 ## Title: DrDamage
 ## Notes: In-game theorycraft. Calculates actual damage/healing based on gear, talents and buffs.         |cff3b78ffVersion|r: |cffff0000Serp&Molot|r.
 ## Author: Gagorian, Dally1991, Detseuqer, Zarquan, Karzon13, Unknown Coder
-## Version: 5.0.0_release
+## Version: 1.7.8_release
 ## SavedVariables: DrDamageDB
 ## Dependencies: Bartender4
 ## DefaultState: Disabled
-## X-Curse-Packaged-Version: 5.0.0_release
+## X-Curse-Packaged-Version: 1.7.8_release
 ## X-Curse-Project-Name: DrDamage
 ## X-Curse-Project-ID: dr-damage
 ## X-Curse-Repository-ID: wow/dr-damage/mainline

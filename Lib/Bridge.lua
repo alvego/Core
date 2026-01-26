@@ -23,6 +23,8 @@ local UnitGUID = UnitGUID
 ---|"PlayerMoveStop"
 ---|"PlayerLookAt"
 ---|"FindObject"
+---|"ObjectExists"
+---|"ObjectInfo"
 ---|"CheckBobber"
 ---|"FindCorpse"
 ---|"FindUnits"
@@ -234,10 +236,31 @@ end
 ---@return number|nil x найденого объекта
 ---@return number|nil y найденого объекта
 ---@return number|nil z игрока
----@return number|nil range 2d расстояние (горизонтальное)
+---@return number|nil range расстояние
 function c.bFindObject(partOfName)
     if not bConnected then return end
     return cmd('FindObject', partOfName)
+end
+
+---Поиск ближайшего GameObject по имени или части имени
+---@param unitID? UnitToken Default = 'none' (поддерживает unitGUID)
+---@return boolean exists in ObjectManager cache
+function c.bObjectExists(unitID)
+    if not bConnected then return false end
+    return cmd('ObjectExists', unitID)
+end
+
+---Поиск ближайшего GameObject по имени или части имени
+---@param unitID? UnitToken Default = 'none' (поддерживает unitGUID)
+---@return string|nil unitGUID
+---@return string|nil unitName
+---@return number|nil x найденого объекта
+---@return number|nil y найденого объекта
+---@return number|nil z игрока
+---@return number|nil range расстояние
+function c.bObjectInfo(unitID)
+    if not bConnected then return end
+    return cmd('ObjectInfo', unitID)
 end
 
 ---Проверить поплавок, true если подсекли.
@@ -362,7 +385,7 @@ end
 
 ---Возвращает информацию об ауре юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraID? number|table Default = 0 ищет по auraID или по таблице auraIDs
+---@param auraIDs? number|table Default = 0 ищет по auraID или по таблице auraIDs
 ---@param mineOnly? boolean Default = false ищет только мои
 ---@return number|nil spellID 0 - пропуск, nil - конец списка
 ---@return number|nil count stack количество
@@ -371,9 +394,9 @@ end
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
 ---@return boolean|nil level уровень кастера?
-function c.bUnitAuraByID(unitID, auraID, mineOnly)
+function c.bUnitAuraByID(unitID, auraIDs, mineOnly)
     if not bConnected then return nil end
-    return cmd('UnitAuraByID', unitID, auraID, mineOnly)
+    return cmd('UnitAuraByID', unitID, auraIDs, mineOnly)
 end
 
 ---Проверка наличия ауры у юнита по auraID
@@ -388,12 +411,12 @@ end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraID? number Default = 0 ищет по auraID
+---@param auraIDs? number|table Default = 0 ищет по auraID
 ---@param mineOnly? boolean Default = false ищет только мои
 ---@return boolean found
-function c.bHasAuraByID(unitID, auraID, mineOnly)
+function c.bHasAuraByID(unitID, auraIDs, mineOnly)
     if not bConnected then return false end
-    return cmd('HasAuraByID', unitID, auraID, mineOnly)
+    return cmd('HasAuraByID', unitID, auraIDs, mineOnly)
 end
 
 function c.CheckBridge()

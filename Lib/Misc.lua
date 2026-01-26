@@ -153,16 +153,16 @@ function c.GetUnitColorHex(unit)
 
     local _, class = UnitClass(unit)
     if class and RAID_CLASS_COLORS[class] then
-        local c = RAID_CLASS_COLORS[class]
+        local col = RAID_CLASS_COLORS[class]
         return string.format("ff%02x%02x%02x",
-            math.floor(c.r * 255),
-            math.floor(c.g * 255),
-            math.floor(c.b * 255))
+            math.floor(col.r * 255),
+            math.floor(col.g * 255),
+            math.floor(col.b * 255))
     end
 
     -- Fallback: цвет по типу существа
-    local ctype = UnitCreatureType(unit)
-    return creatureColors[ctype] or "aaffffff"
+    local cType = UnitCreatureType(unit)
+    return creatureColors[cType] or "aaffffff"
 end
 
 function c.ClearCursor()
@@ -185,9 +185,9 @@ c.UnitInfo = c.GetCachedFunc(
         local level = UnitLevel(unit)
         if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
         if UnitIsUnit(unit, 'player') then return name end
-        local ctype = UnitCreatureType(unit)
-        if ctype then
-            name = name .. WrapTextInColorCode(strlower(ctype), creatureColors[ctype] or 'aaffffff')
+        local cType = UnitCreatureType(unit)
+        if cType then
+            name = name .. WrapTextInColorCode(strlower(cType), creatureColors[cType] or 'aaffffff')
         end
         local d = c.bUnitDistance('player', unit)
         if d then
@@ -237,6 +237,7 @@ function c.PrintTargetAuras() -- for debug
     c.MessageLog('Auras for GUID:' .. guid, unit, nil, 0, 0, 1)
     local idx = 0
     repeat
+        -- luacheck: ignore
         local spellId, count, duration, endTime, isMine, isDebuff = c.bUnitAura(target, idx)
         if spellId == nil then break end
         if spellId and spellId ~= 0 then
@@ -249,9 +250,10 @@ function c.PrintTargetAuras() -- for debug
 
                 c.MessageLog(
                     format(
-                        '%s %s',
+                        '%s %s %s',
                         link or name,
-                        WrapTextInColorCode('UI', findInUI and 'ff00ff00' or 'ff000000')
+                        WrapTextInColorCode('UI', findInUI and 'ff00ff00' or 'ff000000'),
+                        WrapTextInColorCode('player', isMine and 'ff00ff00' or 'ff000000')
                     ),
                     WrapTextInColorCode(spellId, isDebuff and 'ffff0000' or 'ff00ff00'),
                     icon, 1, 1, 1

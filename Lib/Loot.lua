@@ -1,5 +1,9 @@
-local c                     = Core
-local st                    = c.state
+---@class Core
+local c  = Core -- luacheck: ignore
+---@class Core.state
+local st = c.state
+
+
 -- luacheck: push ignore
 local GetLootMethod         = GetLootMethod
 local GetSpellInfo          = GetSpellInfo ---@diagnostic disable-line
@@ -24,16 +28,17 @@ local CreateFrame           = CreateFrame
 local format                = format
 local WrapTextInColorCode   = WrapTextInColorCode
 -- luacheck: pop
+
 local lootTimer             = 'lootTimer'
 local lootDist              = 0
 local lootTitle             = 'Обыск'
 local lootIcon              = [[Interface\Icons\Ability_Racial_PackHobgoblin]]
-local lootTarget            = nil
+local lootTargetGUID        = nil
 
 local skinTimer             = 'skinTimer';
 local skinDist              = 5
 local allowSkin             = false
-local skinTarget            = nil
+local skinTargetGUID        = nil
 local skinSpell             = 'Снятие шкур'
 local skinIcon              = nil
 
@@ -44,29 +49,29 @@ c.Event('PLAYER_ENTERING_WORLD', function()
     end
 end)
 
-
 local function isLooting()
-    -- нет цели лута, не лутаем
-    if not lootTarget then return false end
-    -- есть цель и время ожидания не истекло, лутаем
+    -- нет цели обыска, не обыскиваем
+    if not lootTargetGUID then return false end
+    -- есть цель и время ожидания не истекло, обыскиваем
     if c.TimerLess(lootTimer, 0.5) then return true end
-    -- время ожидания окна лута истекло, сбрасываем цель, не луитаем
-    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(lootTarget)), lootTitle,
+    -- время ожидания LootFrame истекло, сбрасываем цель, не обыскиваем
+    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(lootTargetGUID)), lootTitle,
         lootIcon)
-    lootTarget = nil
+    lootTargetGUID = nil
     return false
 end
 
 
 c.Event('LOOT_OPENED', function()
-    if lootTarget then
-        -- успешно полутали цель, у нее есть лут
+    if lootTargetGUID then
+        -- успешно обыскали цель, с нее есть добыча
         c.MessageLog(
             format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'),
-                IsFishingLoot() and UnitName(lootTarget) or c.UnitInfo(lootTarget)), lootTitle,
+                IsFishingLoot() and UnitName(lootTargetGUID) or c.UnitInfo(lootTargetGUID)), lootTitle,
             lootIcon)
 
         for i = 1, GetNumLootItems() do
+            -- luacheck: ignore
             local texture, item, quantity, quality, locked = GetLootSlotInfo(i)
             local link = GetLootSlotLink(i) or item
             local count = (type(quantity) == 'number' and quantity > 1) and
@@ -74,44 +79,45 @@ c.Event('LOOT_OPENED', function()
             c.MessageLog('#добыча ' .. link .. count, lootTitle, texture)
         end
         -- сбрасываем цель
-        lootTarget = nil
+        lootTargetGUID = nil
     end
 end)
 
 local function isSkinning()
     -- нет цели, свободны
-    if not skinTarget then return false end
+    if not skinTargetGUID then return false end
     -- есть цель и время ожидания не истекло, в процессе
     if c.TimerLess(skinTimer, 2) then return true end
     -- время ожидания спела истекло, сбрасываем цель, свободны
-    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача по времени', 'FF773A3A'), c.UnitInfo(skinTarget)),
+    c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача по времени', 'FF773A3A'), c.UnitInfo(skinTargetGUID)),
         skinSpell,
         skinIcon)
-    skinTarget = nil
+    skinTargetGUID = nil
     return false
 end
 
 local function onEvent(event, ...)
     local source, spellName = select(1, ...)
-    if not skinTarget then return end
+    if not skinTargetGUID then return end
     if source ~= 'player' then return end
     if spellName ~= skinSpell then return end
     if event == 'UNIT_SPELLCAST_SUCCEEDED' then
-        c.MessageLog(format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'), c.UnitInfo(skinTarget)), skinSpell,
+        c.MessageLog(format('#%s: %s', WrapTextInColorCode('успех', 'FF3F773A'), c.UnitInfo(skinTargetGUID)), skinSpell,
             skinIcon)
-        lootTarget = skinTarget
+        lootTargetGUID = skinTargetGUID
         c.TimerStart(lootTimer)
     else
-        c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(skinTarget)),
+        c.MessageLog(format('#%s: %s', WrapTextInColorCode('неудача', 'FF773A3A'), c.UnitInfo(skinTargetGUID)),
             skinSpell,
             skinIcon)
     end
-    skinTarget = nil
+    skinTargetGUID = nil
 end
 c.Event('UNIT_SPELLCAST_FAILED', onEvent)
 c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
 
-local hasSkinTooltip = c.GetCachedFunc(function(unit)
+function c.CanSkinning(unit)
+    if not allowSkin then return false end
     local tooltipName = 'SkinCheckTooltip'
     local tooltip = _G[tooltipName] or
         CreateFrame('GameTooltip', tooltipName, UIParent, 'GameTooltipTemplate')
@@ -124,6 +130,7 @@ local hasSkinTooltip = c.GetCachedFunc(function(unit)
         local textName = tooltipName .. 'TextLeft' .. i
         local tipText = _G[textName]:GetText()
         if tipText and string.find(tipText, 'Можно снять шкуру') then
+            -- luacheck: ignore
             local r, g, b = _G[textName]:GetTextColor()
             -- Красный текст: g ~0.1-0.2; белый/желтый/зеленый: g > 0.5
             -- Возвращаем true, если НЕ красный (уровень профессии ок)
@@ -131,7 +138,7 @@ local hasSkinTooltip = c.GetCachedFunc(function(unit)
         end
     end
     return false
-end)
+end
 
 local function waitForLoot()
     -- core лут отключен, стоп
@@ -155,11 +162,11 @@ local function waitForLoot()
         if st.group and (GetLootMethod() ~= 'freeforall') then return true end
         -- LootFrame висит
         local IsLootLag = c.TimerStarted('LootFrame') and c.TimerMore('LootFrame', 0.5)
-        -- если окно лута подвисло
+        -- если окно добычи подвисло
         if IsLootLag then
-            c.MessageLog('#подвисло окно лута', lootTitle, lootIcon)
+            c.MessageLog('#подвисло окно добычи', lootTitle, lootIcon)
             for i = 1, GetNumLootItems() do
-                -- тогда лутаем вручную
+                -- тогда обыскиваем вручную
                 if not select(5, GetLootSlotInfo(i)) then LootSlot(i) end
             end
             CloseLoot() -- закрываем LootFrame
@@ -244,12 +251,12 @@ local function waitForFishing()
 end
 
 local function waitForCorpseLoot()
-    -- ищем кого можно лутануть
-    local corpse = c.bFindCorpse()
-    if not corpse then return false end
-    c.Message(c.UnitInfo(corpse), lootTitle, lootIcon)
-    c.UnitClick(corpse, true)
-    lootTarget = corpse
+    -- ищем кого можно обыскать
+    local corpseGUID = c.bFindCorpse(lootDist, false, 20)
+    if not corpseGUID then return false end
+    c.Message(c.UnitInfo(corpseGUID), lootTitle, lootIcon)
+    c.bUnitClick(corpseGUID, true)
+    lootTargetGUID = corpseGUID
     c.TimerStart(lootTimer)
     return true
 end
@@ -258,31 +265,30 @@ local function waitForCorpseSkin()
     if not st.still then return false end
     if not allowSkin then return false end
     -- ищем кого можно освежевать
-    local corpse = c.bFindCorpse()
-    if not corpse then return false end
-    c.DoActionWithGUID('Свежуем', skinSpell, corpse)
-    skinTarget = corpse
+    local corpseGUID = c.bFindCorpse(skinDist, true, 20)
+    if not corpseGUID then return false end
+    if not c.bWithGUID(corpseGUID, c.CanSkinning) then return false end -- TODO: тут будет сбой, если уровень профессии не достаточен
+    c.DoActionWithGUID('Свежуем', skinSpell, corpseGUID)
+    skinTargetGUID = corpseGUID
     c.TimerStart(skinTimer)
     return true
 end
 
-local lastCorpse = nil
+local lastCorpseGUID = nil
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 1) then return true end
     if not c.flags.move or st.move then return false end
     if st.playerCasting then return false end
     if st.look then return false end
-    if lastCorpse and UnitExists(lastCorpse) then return false end
+    if lastCorpseGUID and c.bObjectExists(lastCorpseGUID) then return false end
     -- ищем ближайший полезный труп
-    local corpse = c.bFindCorpse()
-    if corpse and c.MoveToUnit(corpse) then
-        c.MessageLog('#идем к ' .. c.UnitInfo(corpse), 'Loot', lootIcon)
+    local corpseGUID = c.bFindCorpse(40, false, 20) or c.bFindCorpse(40, true, 20)
+    if corpseGUID and c.MoveToUnit(corpseGUID) then
+        c.MessageLog('#идем к ' .. c.bWithGUID(corpseGUID, c.UnitInfo), 'Loot', lootIcon)
         c.TimerStart('waitForFindCorpse')
-        lastCorpse = corpse
+        lastCorpseGUID = corpseGUID
     end
 end
-
-
 
 c.BeforeUpdate(function()
     if waitForLoot() then return end

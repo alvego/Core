@@ -30,7 +30,7 @@ local function turnUpdate()
     -- не поворачиваемся
     if c.Paused() or
         not turnGUID or
-        not c.bWithGUID(turnGUID, UnitExists) or
+        not c.bObjectExists(turnGUID) or
         st.move or
         st.look or
         st.playerCasting or
@@ -109,7 +109,7 @@ local function moveUpdate()
         or st.look
         or st.playerCasting
         or not moveGUID
-        or not c.bWithGUID(moveGUID, UnitExists)
+        or not c.bObjectExists(moveGUID)
         or not c.bUnitInLoS('player', moveGUID)
     then
         moveEnd('по проверкам')
