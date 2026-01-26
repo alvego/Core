@@ -284,7 +284,7 @@ local function waitForFindCorpse()
     -- ищем ближайший полезный труп
     local corpseGUID = c.bFindCorpse(40, false, 20) or c.bFindCorpse(40, true, 20)
     if corpseGUID and c.MoveToUnit(corpseGUID) then
-        c.MessageLog('#идем к ' .. c.bWithGUID(corpseGUID, c.UnitInfo), 'Loot', lootIcon)
+        c.MessageLog('#идем к ' .. c.UnitInfo(corpseGUID), 'Loot', lootIcon)
         c.TimerStart('waitForFindCorpse')
         lastCorpseGUID = corpseGUID
     end

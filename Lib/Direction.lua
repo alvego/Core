@@ -3,14 +3,8 @@ local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
 -- luacheck: push ignore
-local UnitIsUnit = UnitIsUnit
-local GetPlayerFacing = GetPlayerFacing
-local deg = deg
-local atan2 = atan2
 local WrapTextInColorCode = WrapTextInColorCode
 local SetView = SetView
-local UnitExists = UnitExists
-local UnitGUID = UnitGUID
 local format = format
 -- luacheck: pop
 
@@ -59,7 +53,7 @@ function c.TurnToUnit(target)
     if not target then
         target = 'target'
     end
-    turnGUID = UnitGUID(target)
+    turnGUID = c.bObjectInfo(target)
     turnUpdate()
     return c.IsTurnToUnit()
 end
@@ -164,7 +158,7 @@ end
 
 function c.MoveToUnit(target, maxDist)
     local unitGUID = moveGUID
-    moveGUID = UnitGUID(target)
+    moveGUID = c.bObjectInfo(target)
     moveMaxDist = maxDist
     if moveGUID and unitGUID ~= moveGUID then
         c.Log('#нужно подойти к ', c.UnitInfo(target))

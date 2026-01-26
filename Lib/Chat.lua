@@ -162,7 +162,6 @@ local function debugChat(msg, title, icon, r, g, b)
     g = g or YELLOW_FONT_COLOR.g
     b = b or YELLOW_FONT_COLOR.b
     if isCommented then
-        msg,
         r = math_max(r - 0.1, 0)
         g = math_max(g - 0.1, 0)
         b = math_max(b - 0.1, 0)
@@ -225,9 +224,8 @@ local function chatLogMsg(log)
 end
 function c.Log(...)
     local log = c.ToStr(...)
-
     if c.IsChanged('Log', log) then
-        -- выводим прошлоее сообщение если накопилось
+        -- выводим прошлое сообщение если накопилось
         if lastLog and times > 0 then
             chatLogMsg(lastLog)
         end

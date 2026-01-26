@@ -3,7 +3,7 @@
 ## Notes: In-game theorycraft. Calculates actual damage/healing based on gear, talents and buffs.         |cff3b78ffVersion|r: |cffff0000Serp&Molot|r.
 ## Author: Gagorian, Dally1991, Detseuqer, Zarquan, Karzon13, Unknown Coder
 ## Version: 1.7.8_release
-## SavedVariables: DrDamageDB
+## SavedVariables: CoreDB
 ## Dependencies: Bartender4
 ## DefaultState: Disabled
 ## X-Curse-Packaged-Version: 1.7.8_release

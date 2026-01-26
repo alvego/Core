@@ -459,7 +459,7 @@ local function updateProto()
         st.attack and st.look and 100 or 40,
         st.attack and 15 or (st.look and 30 or 0)
     )
-    -- есть ли причина для отстановки?
+    -- есть ли причина для остановки?
     if reason then return reason end
 
 
@@ -559,7 +559,6 @@ c.Update(function()
     local stopReason = c.GetStopReason()
     if stopReason then
         -- только для палладина, врубаем коня на маунте
-
         if stopReason == c.stopReasonMount and not UnitOnTaxi("player") then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
             if not c.bHasAuraByID(unit, spell[action]) and c.CanGcdSpell(action, unit) then
@@ -567,10 +566,8 @@ c.Update(function()
                 stopReason = reason
             end
         end
-
         c.LogWhatHappend(stopReason)
         return
     end
-
     c.LogWhatHappend(updateProto())
 end)

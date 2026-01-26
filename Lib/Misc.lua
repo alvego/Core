@@ -174,31 +174,36 @@ function c.ClearCursor()
     end
 end
 
-c.UnitInfo = c.GetCachedFunc(
+local unitInfo = function(unit, token)
+    if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
+    local name = UnitName(unit)
+    if not name then return WrapTextInColorCode('!name', 'aaff0000') end
+    name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
+    local level = UnitLevel(unit)
+    if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
+    if UnitIsUnit(unit, 'player') then return name end
+    local cType = UnitCreatureType(unit)
+    if cType then
+        name = name .. WrapTextInColorCode(strlower(cType), creatureColors[cType] or 'aaffffff')
+    end
+    local d = c.bUnitDistance('player', unit)
+    if d then
+        name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
+    end
+    if UnitIsDeadOrGhost(unit) then
+        name = name .. WrapTextInColorCode('труп', 'ff333333')
+    end
+    return name .. '(' .. token .. ')'
+end
 ---@param unit string unitId
 ---@return string information all about unit
-    function(unit)
-        if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
-        local name = UnitName(unit)
-        if not name then return WrapTextInColorCode('!name', 'aaff0000') end
-        name = WrapTextInColorCode(name, c.GetUnitColorHex(unit))
-        local level = UnitLevel(unit)
-        if level then name = name .. WrapTextInColorCode('[' .. level .. ']', 'FF0D7EC0') end
-        if UnitIsUnit(unit, 'player') then return name end
-        local cType = UnitCreatureType(unit)
-        if cType then
-            name = name .. WrapTextInColorCode(strlower(cType), creatureColors[cType] or 'aaffffff')
-        end
-        local d = c.bUnitDistance('player', unit)
-        if d then
-            name = name .. WrapTextInColorCode('(' .. c.Round(d) .. 'м)', 'FF308F9B')
-        end
-        if UnitIsDeadOrGhost(unit) then
-            name = name .. WrapTextInColorCode('труп', 'ff333333')
-        end
-        return name
+local getUnitInfo = function(unit)
+    if not UnitExists(unit) and c.bObjectExists(unit) then
+        return c.bWithGUID(unit, unitInfo, unit)
     end
-)
+    return unitInfo(unit, unit)
+end
+c.UnitInfo = c.GetCachedFunc(getUnitInfo)
 
 
 local function autoButton(btn, btnText)
