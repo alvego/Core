@@ -1,10 +1,11 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local format = format
 local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
 local CreateFrame = CreateFrame
 local UIParent = UIParent
-
+-- luacheck: pop
 local frame = CreateFrame('Frame', c.name .. 'Notify', UIParent)
 frame:ClearAllPoints()
 frame:SetPoint("CENTER", UIParent, "TOP", 0, -20)

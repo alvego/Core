@@ -1,9 +1,10 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
 
 local _G = _G
+-- luacheck: push ignore
 local GetSpellInfo = GetSpellInfo
 local ActionButton1Cooldown = ActionButton1Cooldown
 local ActionHasRange = ActionHasRange
@@ -24,7 +25,7 @@ local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
 local format = format
 local UnitName = UnitName
-
+-- luacheck: pop
 function c.GetSlotName(slot)
     local name = nil
     local actiontype, id, subtype, spellId = GetActionInfo(slot)

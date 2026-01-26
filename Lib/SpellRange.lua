@@ -1,12 +1,12 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local GetNumSpellTabs = GetNumSpellTabs
 local GetSpellTabInfo = GetSpellTabInfo
 local GetSpellBookItemInfo = GetSpellBookItemInfo
 local GetSpellBookItemName = GetSpellBookItemName
 local IsSpellInRange = IsSpellInRange
-
+-- luacheck: pop
 local bookSpellIds = {}
 local function refreshBookSpells()
     local bookType = 'spell'

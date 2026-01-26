@@ -1,11 +1,11 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local SpellIsTargeting = SpellIsTargeting
-
+-- luacheck: pop
 st.attack = false
 st.start = false
 c.BeforeUpdate(function()

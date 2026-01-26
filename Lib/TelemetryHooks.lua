@@ -1,14 +1,14 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local format = format
 local GetFramerate = GetFramerate
 local WrapTextInColorCode = WrapTextInColorCode
 local GetAddOnMemoryUsage = GetAddOnMemoryUsage
 local UnitIsAFK = UnitIsAFK
-
+-- luacheck: pop
 c.Telemetry(function()
     if UnitIsAFK('player') == 1 then
         return WrapTextInColorCode(c.name, 'ffffbb00')

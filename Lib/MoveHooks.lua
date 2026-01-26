@@ -1,12 +1,12 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local IsFlying = IsFlying
 local IsSwimming = IsSwimming
 local hooksecurefunc = hooksecurefunc
-
+-- luacheck: pop
 st.moveUp = false
 hooksecurefunc('JumpOrAscendStart', function() st.moveUp = true end);
 hooksecurefunc('AscendStop', function() st.moveUp = false end);

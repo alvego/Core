@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local tinsert = tinsert
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
 local MAX_RAID_MEMBERS = MAX_RAID_MEMBERS
@@ -20,7 +20,7 @@ local UnitName = UnitName
 local UnitExists = UnitExists
 local ChatEdit_GetActiveWindow = ChatEdit_GetActiveWindow
 local hooksecurefunc = hooksecurefunc
-
+-- luacheck: pop
 local partyUnits = {}
 for i = 0, MAX_PARTY_MEMBERS do
     tinsert(partyUnits, 'party' .. i)

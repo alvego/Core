@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local GetTime = GetTime
@@ -19,7 +19,7 @@ local SpellHasRange = SpellHasRange
 local GetSpellIDByName = GetSpellIDByName
 local ConsoleExec = ConsoleExec
 local UnitName = UnitName
-
+-- luacheck: pop
 function c.UnitCasting(unit)
     unit = unit or 'player'
     local channel = false

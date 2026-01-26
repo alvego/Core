@@ -1,11 +1,14 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
+local CreateFrame = CreateFrame
+local UIParent = UIParent
 local tinsert = tinsert
 local tContains = tContains
 local type = type
 local error = error
-
+local wipe = wipe
+-- luacheck: pop
 
 -- Инициализация скрытого фрейма для обработки событий
 local frame = CreateFrame('Frame', c.name .. 'Events', UIParent)

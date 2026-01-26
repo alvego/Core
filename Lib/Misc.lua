@@ -1,8 +1,8 @@
 -- By by Unknown Coder
 
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 -- Кешируем функции и значения
 local strlower = strlower
 local tostring = tostring;
@@ -30,7 +30,7 @@ local UnitName = UnitName
 local UnitLevel = UnitLevel
 local UnitGUID = UnitGUID
 local ActionButton_AllOverlayAlphaUpdate = ActionButton_AllOverlayAlphaUpdate
-
+-- luacheck: pop
 function c.StrContains(str, sub)
     if (not str or not sub) then
         return false

@@ -1,5 +1,6 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local UIErrorsFrame = UIErrorsFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
@@ -20,7 +21,7 @@ local RED_FONT_COLOR = RED_FONT_COLOR
 local GREEN_FONT_COLOR = GREEN_FONT_COLOR
 local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
 local FCF_Tab_OnClick = FCF_Tab_OnClick
-
+-- luacheck: pop
 -- очистка чата по Ctrl + LeftButton клик на табик
 _G.FCF_Tab_OnClick = function(self, button)
     local chatFrame = _G["ChatFrame" .. self:GetID()];

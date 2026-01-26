@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local UnitIsUnit = UnitIsUnit
 local GetPlayerFacing = GetPlayerFacing
 local deg = deg
@@ -12,7 +12,7 @@ local SetView = SetView
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local format = format
-
+-- luacheck: pop
 
 local viewIndex = 5
 

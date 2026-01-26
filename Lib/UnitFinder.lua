@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 -- local GetCVar = GetCVar
 -- local SetCVar = SetCVar
 local strtrim = strtrim
@@ -13,6 +13,7 @@ local type = type
 local PlaySound = PlaySound
 local UnitExists = UnitExists
 local SOUNDKIT = SOUNDKIT
+-- luacheck: pop
 local title = 'Поиск'
 local icon = [[Interface\Icons\Ability_Hunter_SniperShot]]
 local searchName, objectGUID, objName, objX, objY, objZ, objRange

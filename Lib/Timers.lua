@@ -1,7 +1,8 @@
 ---@class Core
-local c = Core
-
+local c = Core                -- luacheck: ignore
+-- luacheck: push ignore
 local GetTime = GetTime       -- Возвращает время работы системы в секундах с точностью до миллисекунды.
+-- luacheck: pop
 local timers = {}             -- одна переменная на все таймеры
 
 function c.TimerStarted(name) -- Проверяет запущен ли таймер

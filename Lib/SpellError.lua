@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local GetSpellLink = GetSpellLink
 local GetSpellTexture = GetSpellTexture
 local WrapTextInColorCode = WrapTextInColorCode
@@ -10,7 +10,7 @@ local errorBuffer = {}
 local wipe = wipe
 local type = type
 local tContains = tContains
-
+-- luacheck: pop
 local function pushError(message, spell)
     message = message or 'Что-то пошло не так'
     if not spell then

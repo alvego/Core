@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local type = type
 local error = error
 local GetActionTexture = GetActionTexture
@@ -10,7 +10,7 @@ local ActionHasRange = ActionHasRange
 local IsUsableAction = IsUsableAction
 local IsActionInRange = IsActionInRange
 local hooksecurefunc = hooksecurefunc
-
+-- luacheck: pop
 local userAction = {}
 local function userActionReset()
     if not userAction.slot then return end

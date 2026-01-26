@@ -1,11 +1,11 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local UnitBuff = UnitBuff
 local UnitDebuff = UnitDebuff
 local GetTime = GetTime
 local type = type
-
+-- luacheck: pop
 local function matchBuff(buffName, name, debuffType, spellId)
     if type(buffName) == 'number' then
         return spellId == buffName

@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local GetCurrentKeyBoardFocus = GetCurrentKeyBoardFocus
 local IsControlKeyDown = IsControlKeyDown
 local IsAltKeyDown = IsAltKeyDown
@@ -24,7 +24,7 @@ local UnitIsAFK = UnitIsAFK
 local IsMounted = IsMounted
 local CanExitVehicle = CanExitVehicle
 local UnitHealthMax = UnitHealthMax
-
+-- luacheck: pop
 local mountAuras = {
     311563, -- Магический пузырь
     32556   -- Полет
@@ -39,7 +39,7 @@ local function updateState()
     st.look = IsMouselooking()
     st.mount = IsMounted()
     st.vehicle = CanExitVehicle()
-    st.mountAura = c.UnitAuraByID('player', mountAuras)
+    st.mountAura = c.bUnitAuraByID('player', mountAuras)
     st.mounted = st.mount or st.vehicle or st.mountAura
     st.playerGUID = UnitGUID('player')
     st.pressedButton = c.ButtonIsPressed()

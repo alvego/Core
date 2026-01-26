@@ -1,6 +1,6 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local tostring = tostring
 local tinsert = tinsert
 local wipe = wipe
@@ -10,7 +10,7 @@ local table_concat = table.concat
 local WrapTextInColorCode = WrapTextInColorCode
 local CreateFrame = CreateFrame
 local UIParent = UIParent
-
+-- luacheck: pop
 local frame = CreateFrame('Frame', c.name .. 'Telemetry', UIParent)
 frame:ClearAllPoints()
 frame:SetPoint('TOPLEFT', 0, 0)

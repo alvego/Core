@@ -1,11 +1,11 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local type = type
 local GetTime = GetTime
 local hooksecurefunc = hooksecurefunc
 local CreateFrame = CreateFrame
-
+-- luacheck: pop
 local spellAlertIcon = [[Interface\SpellActivationOverlay\IconAlert]]
 local function createCustomGlow(parent)
     local f = CreateFrame("Frame", nil, parent)

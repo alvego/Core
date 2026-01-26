@@ -1,9 +1,9 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local tostring = tostring
 local format = format
-
+-- luacheck: pop
 c.SpellStore = {}
 function c.SpellStoreAdd(spellName)
     if not spellName then

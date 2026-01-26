@@ -1,6 +1,6 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local GetCVar = GetCVar
 local SetCVar = SetCVar
 local tinsert = tinsert
@@ -8,7 +8,7 @@ local type = type
 local error = error
 local hooksecurefunc = hooksecurefunc
 local debug = nil
-
+-- luacheck: pop
 SetCVar('Sound_EnableErrorSpeech', '0');
 
 function c.Debug()

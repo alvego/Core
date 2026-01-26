@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local UnitClass = UnitClass
-
+-- luacheck: pop
 local className = select(2, UnitClass('player'))
 
 if className ~= 'SHAMAN' then return end
@@ -12,9 +12,11 @@ c.PrintLoadClassModuleMessage(className)
 ---@class Core.state
 local st = c.state
 --c.updateDelay = 0.25
+-- luacheck: push ignore
 local GetTotemInfo = GetTotemInfo
 local UnitHealthMax = UnitHealthMax
-
+local format = format
+-- luacheck: pop
 c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(10, 'player'))
 end)

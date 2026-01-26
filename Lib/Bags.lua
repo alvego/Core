@@ -1,6 +1,6 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local NUM_BAG_SLOTS = NUM_BAG_SLOTS
 local GetContainerNumFreeSlots = GetContainerNumFreeSlots
 local GetContainerNumSlots = GetContainerNumSlots
@@ -20,7 +20,7 @@ local tContains = tContains
 local GetItemInfo = GetItemInfo
 local UnitLevel = UnitLevel
 local format = format
-
+-- luacheck: pop
 function c.GetBagsFreeSlots()
     local free = 0
     -- считаем свободное место

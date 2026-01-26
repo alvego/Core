@@ -1,9 +1,9 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local InCombatLockdown = InCombatLockdown
 local CombatLogClearEntries = CombatLogClearEntries
-
+-- luacheck: pop
 c.Event('COMBAT_LOG_EVENT_UNFILTERED', function()
     c.TimerStart('CombatLog') -- начинаем отсчет с последнего полученного сообщения
 end)

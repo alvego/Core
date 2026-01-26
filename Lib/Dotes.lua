@@ -1,12 +1,13 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local wipe = wipe
 local select = select
 local pairs = pairs
 local next = next
+-- luacheck: pop
 local db = {}
 
 local function needUpdateDotes()

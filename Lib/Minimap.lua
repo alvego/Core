@@ -1,6 +1,6 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local EasyMenu = EasyMenu
 local Minimap = Minimap
 local GameTooltip = GameTooltip
@@ -13,7 +13,7 @@ local SetCVar = SetCVar
 local GetCVar = GetCVar
 local WrapTextInColorCode = WrapTextInColorCode
 --local ForceQuit = ForceQuit
-
+-- luacheck: pop
 -- Инициализация
 local minimapDropDown = CreateFrame('Frame', 'CoreMinimapDropDown', UIParent, 'UIDropDownMenuTemplate') -- Фрейм для выпадающего меню
 

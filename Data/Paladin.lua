@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local UnitClass = UnitClass
-
+-- luacheck: pop
 local className = select(2, UnitClass('player'))
 
 if className ~= 'PALADIN' then return end
@@ -13,6 +13,7 @@ c.PrintLoadClassModuleMessage(className)
 local st = c.state
 local spell = c.SpellStore
 local addSpell = c.SpellStoreAdd
+-- luacheck: push ignore
 local UnitCreatureType = UnitCreatureType
 local UnitThreatSituation = UnitThreatSituation
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
@@ -30,7 +31,7 @@ local format = format
 local tostring = tostring
 local tinsert = tinsert
 local wipe = wipe
-
+-- luacheck: pop
 local isLoaded = false
 local cleanseTypes = { 'Magic', 'Disease', 'Poison' }
 local sealAuras, stanceAuras, stanceAurasDD, stanceDefenceAuras, blessingAuras, tauntSpells
@@ -354,10 +355,10 @@ local function updateProto()
             -- Могу прожать стойку
             local stance = c.bUnitAuraByID(unit, stanceAuras, true)
             if stance then
-                -- на мне ecть моя стойка (аура палладина)
+                -- на мне есть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
                 if stance == spell['Аура воина Света'] and not c.b(unit, spell[action]) then
-                    c.DoAction(reason, action, unit) --  переключаемся в атуальную стойку
+                    c.DoAction(reason, action, unit) --  переключаемся в актуальную стойку
                     return reason
                 end
             else

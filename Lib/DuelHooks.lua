@@ -1,8 +1,9 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
+-- luacheck: pop
 local hooksecurefunc = hooksecurefunc
 
 local function startDuel()

@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local SpellIsTargeting = SpellIsTargeting
 local GetSpellInfo = GetSpellInfo
 local Dismount = Dismount
@@ -12,9 +12,9 @@ local IsUsableSpell = IsUsableSpell
 local IsCurrentSpell = IsCurrentSpell
 local UnitIsUnit = UnitIsUnit
 local type = type
+-- luacheck: pop
 
-
----Строка причины остановки из-за еды
+---Строка причины остановки из-за транспорта
 c.stopReasonMount = '#mount'
 ---Строка причины остановки из-за еды
 c.stopReasonEat = '#eat'

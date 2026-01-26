@@ -1,8 +1,9 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore -- luacheck: ignore
+-- luacheck: push ignore
 local SecondsToTime = SecondsToTime
 local UnitGUID = UnitGUID
-
+-- luacheck: pop
 ---@alias bCmdName "Pulse"
 ---|"Test"
 ---|"UnitPosition"
@@ -353,7 +354,7 @@ end
 ---@return number|nil endTime время окончания
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
----@return boolean|nil level уровень?
+---@return boolean|nil level уровень кастера?
 function c.bUnitAura(unitID, index)
     if not bConnected then return nil end
     return cmd('UnitAura', unitID, index)
@@ -361,35 +362,38 @@ end
 
 ---Возвращает информацию об ауре юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraID? number Default = 0 ищет по auraID
+---@param auraID? number|table Default = 0 ищет по auraID или по таблице auraIDs
+---@param mineOnly? boolean Default = false ищет только мои
 ---@return number|nil spellID 0 - пропуск, nil - конец списка
 ---@return number|nil count stack количество
 ---@return number|nil duration длительность
 ---@return number|nil endTime время окончания
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
----@return boolean|nil level уровень?
-function c.bUnitAuraByID(unitID, auraID)
+---@return boolean|nil level уровень кастера?
+function c.bUnitAuraByID(unitID, auraID, mineOnly)
     if not bConnected then return nil end
-    return cmd('UnitAuraByID', unitID, auraID)
+    return cmd('UnitAuraByID', unitID, auraID, mineOnly)
 end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
 ---@param partOfName? string Default = '' ищет по части имени
+---@param mineOnly? boolean Default = false ищет только мои
 ---@return boolean found
-function c.bHasAura(unitID, partOfName)
+function c.bHasAura(unitID, partOfName, mineOnly)
     if not bConnected then return false end
-    return cmd('HasAura', unitID, partOfName)
+    return cmd('HasAura', unitID, partOfName, mineOnly)
 end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
 ---@param auraID? number Default = 0 ищет по auraID
+---@param mineOnly? boolean Default = false ищет только мои
 ---@return boolean found
-function c.bHasAuraByID(unitID, auraID)
+function c.bHasAuraByID(unitID, auraID, mineOnly)
     if not bConnected then return false end
-    return cmd('HasAuraByID', unitID, auraID)
+    return cmd('HasAuraByID', unitID, auraID, mineOnly)
 end
 
 function c.CheckBridge()

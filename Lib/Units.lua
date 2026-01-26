@@ -1,6 +1,6 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitMana = UnitMana
@@ -18,7 +18,7 @@ local GetActiveSpecGroup = GetActiveSpecGroup
 local UnitClass = UnitClass
 local UnitInRaid = UnitInRaid
 local UnitInParty = UnitInParty
-
+-- luacheck: pop
 
 function c.UnitHealth100(unit)
     unit = unit or 'player'

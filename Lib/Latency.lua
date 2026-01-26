@@ -1,9 +1,10 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local GetNetStats = GetNetStats
+local GetTime = GetTime
 local math_max = math.max
-
+-- luacheck: pop
 local sendTime = nil
 local function updateLagTime(event, ...)
     local unit, spell = select(1, ...)

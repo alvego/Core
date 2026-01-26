@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local math_random = math.random
-
+-- luacheck: pop
 function c.UnitNeedKick(unit) -- cбивалка, проверяет название, сбиваемость и время сбивания
     unit = unit or 'target'
     local spell, left, duration, channel, notinterrupt = c.UnitCasting(unit)

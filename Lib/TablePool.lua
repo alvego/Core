@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
-
+local c = Core -- luacheck: ignore
+-- luacheck: push ignore
 local wipe = wipe
-
+-- luacheck: pop
 local pool = {} -- Общий пул для всех таблиц
 
 -- Получить таблицу из пула

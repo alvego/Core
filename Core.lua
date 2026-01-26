@@ -1,7 +1,7 @@
 Core = {} -- Глобальная переменная для аддона
 ---Основа аддона, содержит глобальные переменные и функции
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 local type = type
 local tostring = tostring
 local setmetatable = setmetatable

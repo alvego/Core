@@ -1,8 +1,8 @@
 ---@class Core
-local c = Core
+local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
-
+-- luacheck: push ignore
 local GetTime = GetTime
 local bit = bit
 local wipe = wipe
@@ -14,7 +14,7 @@ local UnitHealth = UnitHealth
 local math_max = math.max
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
-
+-- luacheck: pop
 local db = {}
 
 local function needUpdateUnits()
