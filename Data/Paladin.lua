@@ -357,7 +357,7 @@ local function updateProto()
             if stance then
                 -- на мне есть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
-                if stance == spell['Аура воина Света'] and not c.b(unit, spell[action]) then
+                if stance == spell['Аура воина Света'] and not c.bHasAuraByID(unit, spell[action]) then
                     c.DoAction(reason, action, unit) --  переключаемся в актуальную стойку
                     return reason
                 end
@@ -481,12 +481,12 @@ local function updateProto()
     end
 
     reason, action, unit = 'Обновляем поглощение', 'Священный щит', 'player'
-    if c.CanGcdSpell(action, unit, 5) and not c.b(unit, spell[action]) then
+    if c.CanGcdSpell(action, unit, 5) and not c.bHasAuraByID(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
-    reason, action, unit = 'Нужнен баф на блокирование', 'Щит небес', 'player'
+    reason, action, unit = 'Нужен баф на блокирование', 'Щит небес', 'player'
     if not st.gcd and dist < 10 and useMana and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
