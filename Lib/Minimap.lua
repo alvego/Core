@@ -1,7 +1,7 @@
 ---@class Core
 local c = Core -- luacheck: ignore
 -- luacheck: push ignore
-local EasyMenu = EasyMenu
+local EasyMenu = EasyMenu ---@diagnostic disable-line
 local Minimap = Minimap
 local GameTooltip = GameTooltip
 local PlaySound = PlaySound

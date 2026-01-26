@@ -4,11 +4,11 @@ local c = Core -- luacheck: ignore
 local st = c.state
 -- luacheck: push ignore
 local SpellIsTargeting = SpellIsTargeting
-local GetSpellInfo = GetSpellInfo
+local GetSpellInfo = GetSpellInfo ---@diagnostic disable-line
 local Dismount = Dismount
 local VehicleExit = VehicleExit
 local IsUsableItem = IsUsableItem
-local IsUsableSpell = IsUsableSpell
+local IsUsableSpell = IsUsableSpell ---@diagnostic disable-line
 local IsCurrentSpell = IsCurrentSpell
 local UnitIsUnit = UnitIsUnit
 local type = type

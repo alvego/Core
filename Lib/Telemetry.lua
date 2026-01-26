@@ -21,7 +21,7 @@ frame.text:SetFont([[Fonts\ARIALN.TTF]], 10) -- Альтернативный ш�
 frame.text:SetAllPoints()
 local texture = frame:CreateTexture('Texture', 'BACKGROUND')
 texture:SetBlendMode('DISABLE')
-texture:SetTexture(0, 0, 0)
+texture:SetTexture(0, 0, 0) ---@diagnostic disable-line
 texture:SetAlpha(0.5)
 texture:SetAllPoints(frame)
 

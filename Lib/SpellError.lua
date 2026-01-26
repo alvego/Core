@@ -4,7 +4,7 @@ local c = Core -- luacheck: ignore
 local st = c.state
 -- luacheck: push ignore
 local GetSpellLink = GetSpellLink
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = GetSpellTexture ---@diagnostic disable-line
 local WrapTextInColorCode = WrapTextInColorCode
 local errorBuffer = {}
 local wipe = wipe

@@ -2,9 +2,9 @@ local c                     = Core
 local st                    = c.state
 -- luacheck: push ignore
 local GetLootMethod         = GetLootMethod
-local GetSpellInfo          = GetSpellInfo
-local GetSpellTexture       = GetSpellTexture
-local IsUsableSpell         = IsUsableSpell
+local GetSpellInfo          = GetSpellInfo ---@diagnostic disable-line
+local GetSpellTexture       = GetSpellTexture ---@diagnostic disable-line
+local IsUsableSpell         = IsUsableSpell ---@diagnostic disable-line
 local GetSpellLink          = GetSpellLink
 local LootFrame             = LootFrame
 local UIParent              = UIParent

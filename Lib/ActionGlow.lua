@@ -102,13 +102,13 @@ function c.HideActionGlow(slot)
     hideGlow(button)
 end
 
-hooksecurefunc(c, 'bUseSpell', function(spell, ...)
+hooksecurefunc(c, 'bUseSpell', function(spell)
     local slot = c.GetSlot(spell, true)
     if not slot then return end
     c.ShowActionGlow(slot, 1)
 end)
 
-hooksecurefunc(c, 'bUseAction', function(slot, ...)
+hooksecurefunc(c, 'bUseAction', function(slot)
     if type(slot) ~= 'number' or slot <= 0 then return end
     c.ShowActionGlow(slot, 1)
 end)

@@ -3,9 +3,8 @@ local c = Core -- luacheck: ignore
 ---@class Core.state
 local st = c.state
 -- luacheck: push ignore
--- luacheck: pop
 local hooksecurefunc = hooksecurefunc
-
+-- luacheck: pop
 local function startDuel()
     st.duel = false
 end

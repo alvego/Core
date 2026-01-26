@@ -1,10 +1,10 @@
 ---@class Core
 local c = Core -- luacheck: ignore
 -- luacheck: push ignore
-local GetNumSpellTabs = GetNumSpellTabs
-local GetSpellTabInfo = GetSpellTabInfo
+local GetNumSpellTabs = GetNumSpellTabs ---@diagnostic disable-line
+local GetSpellTabInfo = GetSpellTabInfo ---@diagnostic disable-line
 local GetSpellBookItemInfo = GetSpellBookItemInfo
-local GetSpellBookItemName = GetSpellBookItemName
+local GetSpellBookItemName = GetSpellBookItemName ---@diagnostic disable-line
 local IsSpellInRange = IsSpellInRange
 -- luacheck: pop
 local bookSpellIds = {}
