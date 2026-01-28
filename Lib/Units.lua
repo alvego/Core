@@ -78,17 +78,17 @@ function c.UnitIsTank(unit)
     end
 
     if class == "WARRIOR" then
-        return c.bHasAuraByID(unit, 71) -- Defensive Stance
+        return c.bHasAura(unit, 71) -- Defensive Stance
     end
     if class == "PALADIN" then
-        return c.bHasAuraByID(unit, 25780) -- Righteous Fury
+        return c.bHasAura(unit, 25780) -- Righteous Fury
     end
     if class == "DRUID" then
-        return c.bHasAuraByID(unit, 5487) or
-            c.bHasAuraByID(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
+        return c.bHasAura(unit, 5487) or
+            c.bHasAura(unit, 9634) -- Bear Form (или 9634 для Dire Bear, но в 3.3.5a обычно 5487)
     end
     if class == "DEATHKNIGHT" then
-        return c.bHasAuraByID(unit, 48263) -- Frost Presence
+        return c.bHasAura(unit, 48263) -- Frost Presence
     end
 
     return false

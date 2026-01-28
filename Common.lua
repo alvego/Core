@@ -44,7 +44,7 @@ function c.Dismount()
 
     if st.mountAura then
         local auraName = GetSpellInfo(st.mountAura)
-        c.bUseMacro('/cancelaura ' .. auraName)
+        if auraName then c.bUseMacro('/cancelaura ' .. auraName) end
         return
     end
 end

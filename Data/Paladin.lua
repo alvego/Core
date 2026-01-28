@@ -152,7 +152,7 @@ local function getAvailableStance(unit)
     local stances = isTank and stanceAuras or stanceAurasDD
     for i = 1, #stances do
         local stance = stances[i]
-        if not c.bUnitAuraByID(unit, stance) then
+        if not c.bGetAura(unit, stance) then
             return stance
         end
     end
@@ -174,14 +174,14 @@ end
 
 c.Telemetry(function()
     if not isLoaded then return end
-    isTank = c.bHasAuraByID('player', spell['Праведное неистовство']) and true or false
+    isTank = c.bHasAura('player', spell['Праведное неистовство']) and true or false
     return c.TelemetryRedBool('Tank', isTank)
 end)
 
 
 c.Telemetry(function()
     if not isLoaded then return end
-    return c.TelemetryRedBool('Aura', c.bUnitAuraByID('player', stanceDefenceAuras))
+    return c.TelemetryRedBool('Aura', c.bGetAura('player', stanceDefenceAuras))
 end)
 
 
@@ -344,7 +344,7 @@ local function updateProto()
 
     if not st.gcd and (st.start or (not st.attack and st.combatMode)) then
         reason, action, unit = 'Нужно обновить печать', 'Печать повиновения', 'player'
-        if c.CanGcdSpell(action, unit, 10) and not c.bUnitAuraByID(unit, sealAuras) then
+        if c.CanGcdSpell(action, unit, 10) and not c.bGetAura(unit, sealAuras) then
             c.DoAction(reason, action, unit)
             return reason
         end
@@ -353,11 +353,11 @@ local function updateProto()
         reason, action, unit = 'Нужно обновить стойку', isTank and 'Аура благочестия' or 'Аура воздаяния', 'player'
         if c.CanGcdSpell(action, unit) and c.IsSpellNotUsed(stanceAuras, 15) then
             -- Могу прожать стойку
-            local stance = c.bUnitAuraByID(unit, stanceAuras, true)
+            local stance = c.bGetAura(unit, stanceAuras, true)
             if stance then
                 -- на мне есть моя стойка (аура палладина)
                 -- но она не атуальна, чужой атуальной нет
-                if stance == spell['Аура воина Света'] and not c.bHasAuraByID(unit, spell[action]) then
+                if stance == spell['Аура воина Света'] and not c.bHasAura(unit, spell[action]) then
                     c.DoAction(reason, action, unit) --  переключаемся в актуальную стойку
                     return reason
                 end
@@ -475,13 +475,13 @@ local function updateProto()
     end
 
     reason, action, unit = 'Обновляем баф на ману', 'Святая клятва', 'player'
-    if c.CanGcdSpell(action, unit) and not c.bHasAuraByID(unit, spell[action]) then
+    if c.CanGcdSpell(action, unit) and not c.bHasAura(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Обновляем поглощение', 'Священный щит', 'player'
-    if c.CanGcdSpell(action, unit, 5) and not c.bHasAuraByID(unit, spell[action]) then
+    if c.CanGcdSpell(action, unit, 5) and not c.bHasAura(unit, spell[action]) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -561,7 +561,7 @@ c.Update(function()
         -- только для палладина, врубаем коня на маунте
         if stopReason == c.stopReasonMount and not UnitOnTaxi("player") then
             local reason, action, unit = 'Врубаем ускорение на транспорте', 'Аура воина Света', 'player'
-            if not c.bHasAuraByID(unit, spell[action]) and c.CanGcdSpell(action, unit) then
+            if not c.bHasAura(unit, spell[action]) and c.CanGcdSpell(action, unit) then
                 c.DoAction(reason, action, unit)
                 stopReason = reason
             end

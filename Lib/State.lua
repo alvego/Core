@@ -39,7 +39,7 @@ local function updateState()
     st.look = IsMouselooking()
     st.mount = IsMounted()
     st.vehicle = CanExitVehicle()
-    st.mountAura = c.bUnitAuraByID('player', mountAuras)
+    st.mountAura = c.bGetAura('player', mountAuras)
     st.mounted = st.mount or st.vehicle or st.mountAura
     st.playerGUID = UnitGUID('player')
     st.pressedButton = c.ButtonIsPressed()

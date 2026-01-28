@@ -35,9 +35,8 @@ local UnitGUID = UnitGUID
 ---|"InMelee"
 ---|"FindTarget"
 ---|"UnitAura"
----|"UnitAuraByID"
+---|"GetAura"
 ---|"HasAura
----|"HasAuraByID
 
 ---Command Alias
 ---@param name bCmdName имя команды моста
@@ -385,7 +384,7 @@ end
 
 ---Возвращает информацию об ауре юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraIDs? number|table Default = 0 ищет по auraID или по таблице auraIDs
+---@param auraFilter? number|string|table Default = 0 ищет по auraID|partOfName или по таблице c auraID|partOfName
 ---@param mineOnly? boolean Default = false ищет только мои
 ---@return number|nil spellID 0 - пропуск, nil - конец списка
 ---@return number|nil count stack количество
@@ -394,29 +393,19 @@ end
 ---@return boolean|nil isMine это моя аура
 ---@return boolean|nil isDebuff это негативный эффект
 ---@return boolean|nil level уровень кастера?
-function c.bUnitAuraByID(unitID, auraIDs, mineOnly)
+function c.bGetAura(unitID, auraFilter, mineOnly)
     if not bConnected then return nil end
-    return cmd('UnitAuraByID', unitID, auraIDs, mineOnly)
+    return cmd('GetAura', unitID, auraFilter, mineOnly)
 end
 
 ---Проверка наличия ауры у юнита по auraID
 ---@param unitID? string Default = '' (поддерживает unitGUID)
----@param partOfName? string Default = '' ищет по части имени
+---@param auraFilter? number|string|table Default = 0 ищет по auraID|partOfName или по таблице c auraID|partOfName
 ---@param mineOnly? boolean Default = false ищет только мои
 ---@return boolean found
-function c.bHasAura(unitID, partOfName, mineOnly)
+function c.bHasAura(unitID, auraFilter, mineOnly)
     if not bConnected then return false end
-    return cmd('HasAura', unitID, partOfName, mineOnly)
-end
-
----Проверка наличия ауры у юнита по auraID
----@param unitID? string Default = '' (поддерживает unitGUID)
----@param auraIDs? number|table Default = 0 ищет по auraID
----@param mineOnly? boolean Default = false ищет только мои
----@return boolean found
-function c.bHasAuraByID(unitID, auraIDs, mineOnly)
-    if not bConnected then return false end
-    return cmd('HasAuraByID', unitID, auraIDs, mineOnly)
+    return cmd('HasAura', unitID, auraFilter, mineOnly)
 end
 
 function c.CheckBridge()
