@@ -28,7 +28,6 @@ local eatAuras = {
     'Питье'
 }
 
-
 ---Снимает езду/транспорт/ауру
 function c.Dismount()
     if not st.mounted then return end
@@ -127,12 +126,12 @@ function c.TryTarget(range, angle)
         c.bUseMacro('/petattack [exists, exists, nodead]')
     end
     local dist = c.bUnitDistance('target', 'player')
-    if c.flags.move and not st.targetMelee and (dist < 25 or st.attack) and not c.IsTurnToUnit() and
+    if c.flags.move and not st.targetMelee and (dist < 25 or st.attack) and
         (st.targetStill or not UnitIsUnit('target-target', 'player')) then
-        c.MoveToUnit('target', 100)
+        c.bMoveTo('target')
     end
     if c.flags.autoLook and st.targetMelee and st.combatMode and st.still then
-        c.TurnToUnit('target')
+        c.bLookAt('target')
     end
     return nil
 end
@@ -210,3 +209,23 @@ function c.IsSpellNotUsed(spell, interval)
     end
     return true
 end
+
+c.Event('COMBAT_LOG_EVENT_UNFILTERED',
+    function(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
+             destFlags, ...)
+        if subEvent == 'SPELL_CAST_FAILED' and sourceGUID == st.playerGUID then
+            local message = select(4, ...)
+            if message == 'Цель должна быть перед вами.' then
+                c.bLookAt('target')
+            end
+        end
+    end
+)
+
+c.Event('UI_ERROR_MESSAGE', function(event, ...)
+    local message = ...
+    if message == 'Вы смотрите мимо цели!' then
+        c.bLookAt('target')
+    end
+end
+)

@@ -22,7 +22,7 @@ c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
             c.TimerStart('start')
             c.TimerReset('attack')
         else
-            c.TurnToUnit('target')
+            c.bLookAt('target')
             c.TimerStart('attack')
             c.TimerReset('start')
             c.bUseMacro('/startattack [exists, harm, nodead]')

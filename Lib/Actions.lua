@@ -5,7 +5,7 @@ local st = c.state
 
 local _G = _G
 -- luacheck: push ignore
-local GetSpellInfo = GetSpellInfo
+local GetSpellInfo = GetSpellInfo ---@diagnostic disable-line
 local ActionButton1Cooldown = ActionButton1Cooldown
 local ActionHasRange = ActionHasRange
 local wipe = wipe

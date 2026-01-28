@@ -17,12 +17,10 @@ local UnitGUID = UnitGUID
 ---|"UseAction"
 ---|"UseGUID"
 ---|"TargetUnit"
----|"PlayerMoveTo"
----|"PlayerMoveStop"
----|"PlayerLookAt"
+---|"MoveTo"
+---|"LookAt"
 ---|"FindObject"
 ---|"ObjectExists"
----|"ObjectInfo"
 ---|"CheckBobber"
 ---|"FindCorpse"
 ---|"FindUnits"
@@ -185,38 +183,26 @@ function c.bTargetUnit(unitID)
     return cmd('TargetUnit', unitID)
 end
 
----Двигаться к точке (0, 0, 0 - не валидная точка)
----@param x? number Default = 0
----@param y? number Default = 0
----@param z? number Default = 0
----@return nil
-function c.bPlayerMoveTo(x, y, z)
-    if not bConnected then return end
-    return cmd('PlayerMoveTo', x, y, z)
-end
-
----Останавливаем движение
----@return nil
-function c.bPlayerMoveStop()
-    if not bConnected then return end
-    return cmd('PlayerMoveStop')
-end
-
----Смотри на юнита ("none" для прекращения)
+---Иди на юнита
 ---@param unitID? UnitToken Default = 'none' (поддерживает unitGUID)
 ---@return nil
-function c.bPlayerLookAt(unitID)
+function c.bMoveTo(unitID)
     if not bConnected then return end
-    return cmd('PlayerLookAt', unitID)
+    return cmd('MoveTo', unitID)
+end
+
+---Смотри на юнита
+---@param unitID? UnitToken Default = 'none' (поддерживает unitGUID)
+---@return nil
+function c.bLookAt(unitID)
+    if not bConnected then return end
+    return cmd('LookAt', unitID)
 end
 
 ---Поиск ближайшего GameObject по имени или части имени
 ---@param partOfName? string Default = '' (по пустой строке искать не будет)
 ---@return string|nil unitGUID
 ---@return string|nil unitName
----@return number|nil x найденого объекта
----@return number|nil y найденого объекта
----@return number|nil z игрока
 ---@return number|nil range расстояние
 function c.bFindObject(partOfName)
     if not bConnected then return end
@@ -229,19 +215,6 @@ end
 function c.bObjectExists(unitID)
     if not bConnected then return false end
     return cmd('ObjectExists', unitID)
-end
-
----Поиск ближайшего GameObject по имени или части имени
----@param unitID? UnitToken Default = 'none' (поддерживает unitGUID)
----@return string|nil unitGUID
----@return string|nil unitName
----@return number|nil x найденого объекта
----@return number|nil y найденого объекта
----@return number|nil z игрока
----@return number|nil range расстояние
-function c.bObjectInfo(unitID)
-    if not bConnected then return end
-    return cmd('ObjectInfo', unitID)
 end
 
 ---Проверить поплавок, true если подсекли.

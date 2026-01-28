@@ -16,7 +16,7 @@ local SOUNDKIT = SOUNDKIT
 -- luacheck: pop
 local title = 'Поиск'
 local icon = [[Interface\Icons\Ability_Hunter_SniperShot]]
-local searchName, objectGUID, objName, objX, objY, objZ, objRange
+local searchName, objectGUID, objName, objRange
 
 c.ActionHook('find', function()
     local editBox = ChatEdit_ChooseBoxForSend()
@@ -49,11 +49,11 @@ c.ActionHook('find', function()
             c.Message("Для начала поиска введите в чате имя объекта (можно часть)", title, icon)
         end
     end
-    if objectGUID and objX and objY and objZ then
+    if objectGUID then
         c.Notify('Начинаем  движение к ' .. objName, icon, 3)
-        c.bPlayerMoveTo(objX, objY, objZ)
+        c.bMoveTo(objectGUID)
     end
-    c.Log('Поиск: |', searchName, '|', objectGUID, '|', objName, '|', objX, '|', objY, '|', objZ, '|', objRange, '|')
+    c.Log('Поиск:', searchName, 'GUID:', objectGUID, 'Name:', objName, 'Range:', objRange)
 end)
 
 
@@ -61,10 +61,9 @@ c.AfterUpdate(function()
     if not searchName then return end
     if c.TimerLess('LookUnit', 1) then return end
     c.TimerStart('LookUnit')
-    objectGUID, objName, objX, objY, objZ, objRange = c.bFindObject(searchName)
+    objectGUID, objName, objRange = c.bFindObject(searchName)
     if not c.IsChanged('bFindObject', objectGUID) then return end
     if not objectGUID then return end
-    --PlaySound(SOUNDKIT.ALARM_CLOCK_WARNING_3)
     PlaySound(SOUNDKIT.AUCTION_WINDOW_OPEN)
     local msg = 'Найден новый объект "' .. objName .. '" на расстоянии ' .. c.Round(objRange, 1) .. 'м.'
     c.Notify(msg, icon, 10)

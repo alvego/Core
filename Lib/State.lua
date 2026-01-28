@@ -89,7 +89,7 @@ local function updateState()
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
     c.TimerToggle('falling', st.falling)
-    c.TimerToggle('still', st.speed == 0 and not st.falling and not st.move and not c.IsMoveUnit())
+    c.TimerToggle('still', st.speed == 0 and not st.falling and not st.move)
     st.still = c.TimerStarted('still') and c.TimerMore('still', 0.5)
     st.afk = UnitIsAFK('player') == 1 and c.TimerStarted('still') and c.TimerMore('still', 60)
     st.targetSpeed = GetUnitSpeed('target') or 0

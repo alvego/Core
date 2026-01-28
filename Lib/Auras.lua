@@ -1,8 +1,8 @@
 ---@class Core
 local c = Core -- luacheck: ignore
 -- luacheck: push ignore
-local UnitBuff = UnitBuff
-local UnitDebuff = UnitDebuff
+local UnitBuff = UnitBuff ---@diagnostic disable-line
+local UnitDebuff = UnitDebuff ---@diagnostic disable-line
 local GetTime = GetTime
 local type = type
 -- luacheck: pop

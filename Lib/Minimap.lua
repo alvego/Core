@@ -6,12 +6,14 @@ local Minimap = Minimap
 local GameTooltip = GameTooltip
 local PlaySound = PlaySound
 local tinsert = tinsert
-local type = type
-local error = error
+local format = format
+local wipe = wipe
 local ReloadUI = ReloadUI
 local SetCVar = SetCVar
 local GetCVar = GetCVar
 local WrapTextInColorCode = WrapTextInColorCode
+local CreateFrame = CreateFrame
+local UIParent = UIParent
 --local ForceQuit = ForceQuit
 -- luacheck: pop
 -- Инициализация
@@ -75,7 +77,7 @@ local flagFunc = function(btn)
   if not flag then return end
   c.flags[flag] = not c.flags[flag] -- toggle flag
 end
-local debugFunc = function(btn)
+local debugFunc = function()
   SetCVar('scriptErrors', GetCVar('scriptErrors') == '1' and 0 or 1)
 end
 
@@ -130,7 +132,7 @@ local menu = {
       isNotRadio = true
     },
     {
-      text = 'Aвтоудаление хлама',
+      text = 'Авто-удаление хлама',
       value = 'autoDelJunk',
       icon = delJunkIcon,
       func = flagFunc,
@@ -218,7 +220,7 @@ local updateJunkMenu = function(junkMenu)
   end
   -- заголовок
   local item = c.TablePoolAcquire()
-  item.text = 'Cписок хлама (junk list)'
+  item.text = 'Список хлама (junk list)'
   item.isTitle = true
   item.notCheckable = true -- Без чекбоксов
   tinsert(junkMenu, item)

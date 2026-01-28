@@ -39,7 +39,6 @@ Lib\SpellKick.lua
 Lib\Auras.lua
 Lib\Dotes.lua
 Lib\Targets.lua
-Lib\Direction.lua
 Lib\Bags.lua
 Lib\Loot.lua
 Lib\State.lua
