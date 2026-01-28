@@ -8,12 +8,10 @@ local UnitGUID = UnitGUID
 ---|"Test"
 ---|"UnitPosition"
 ---|"UnitDistance"
----|"UnitFacing"
 ---|"UnitBehind"
 ---|"UnitInView"
 ---|"UnitInLoS"
 ---|"UnitClick"
----|"UseLua"
 ---|"UseMacro"
 ---|"UseSpell"
 ---|"UseAction"
@@ -77,7 +75,7 @@ end
 ---Следует вызывать единожды в начале общего `onUpdate`
 ---@return boolean isConnected `true` если мост подключен
 function c.bPulse()
-    local pulse = cmd('Pulse')
+    local pulse = cmd('Pulse', c.Paused(), c.flags.move, c.flags.loot)
     bConnected = type(pulse) == 'boolean' and pulse
     return bConnected
 end
@@ -105,14 +103,6 @@ end
 function c.bUnitDistance(unitID1, unitID2)
     if not bConnected then return 99999 end
     return cmd('UnitDistance', unitID1, unitID2)
-end
-
----Возвращает направление взгляда юнита (в радианах).
----@param unitID? UnitToken Default = 'target' (поддерживает unitGUID)
----@return number facing Default = 0 [0 .. 2*PI]
-function c.bUnitFacing(unitID)
-    if not bConnected then return 0 end
-    return cmd('UnitFacing', unitID)
 end
 
 ---Проверяет, находится ли `player` за спиной у указанного юнита.
@@ -149,14 +139,6 @@ end
 function c.bUnitClick(unitID, interact)
     if not bConnected then return end
     return cmd('UnitClick', unitID, interact)
-end
-
----Выполняет Lua код (защищенный)
----@param luaScript? string Default = ''
----@return nil
-function c.bUseLua(luaScript)
-    if not bConnected then return end
-    return cmd('UseLua', luaScript)
 end
 
 ---Выполняет строку макроса
