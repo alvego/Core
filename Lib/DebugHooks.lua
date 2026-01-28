@@ -7,6 +7,6 @@ local st = c.state;
 -- luacheck: pop
 c.ActionHook('test', function()
     print('----------------------')
-    print('test', c.bTest())
-    print('st.look', st.look)
+    --print('bLookAt', c.bLookAt('target'))
+    print('bMoveTo', c.bMoveTo('target'))
 end)

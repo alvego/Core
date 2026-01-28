@@ -193,7 +193,7 @@ local unitInfo = function(unit, token)
     if UnitIsDeadOrGhost(unit) then
         name = name .. WrapTextInColorCode('труп', 'ff333333')
     end
-    return name .. '(' .. token .. ')'
+    return name .. '(' .. (token or unit) .. ')'
 end
 ---@param unit string unitId
 ---@return string information all about unit
@@ -201,7 +201,7 @@ local getUnitInfo = function(unit)
     if not UnitExists(unit) and c.bObjectExists(unit) then
         return c.bWithGUID(unit, unitInfo, unit)
     end
-    return unitInfo(unit, unit)
+    return unitInfo(unit)
 end
 c.UnitInfo = c.GetCachedFunc(getUnitInfo)
 
