@@ -6,7 +6,6 @@ local UnitGUID = UnitGUID
 -- luacheck: pop
 ---@alias bCmdName "Pulse"
 ---|"Test"
----|"UnitPosition"
 ---|"UnitDistance"
 ---|"UnitBehind"
 ---|"UnitInView"
@@ -82,16 +81,6 @@ end
 function c.bTest(...)
     if not bConnected then return end
     return cmd('Test', ...)
-end
-
----Возвращает позицию юнита
----@param unitID? UnitToken Default = 'player' (поддерживает unitGUID)
----@return number x Default = 0
----@return number y Default = 0
----@return number z Default = 0
-function c.bUnitPosition(unitID)
-    if not bConnected then return 0, 0, 0 end
-    return cmd('UnitPosition', unitID)
 end
 
 ---Возвращает дистанцию между юнита (Collision Distance).
