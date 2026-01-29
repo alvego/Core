@@ -239,17 +239,7 @@ local function getTauntGUID(action, checkHand)
     return c.FindUnitGUID(tauntGUIDs, checkTauntTarget, action, checkHand)
 end
 
-local function checkCastTarget(target, action) -- unit for taunt
-    if not UnitCanAttack('player', target) then return end
-    if not UnitAffectingCombat(target) then return end
-    if UnitIsTapped(target) and not UnitIsTappedByPlayer(target) then return end
-    if not c.UnitCasting(target) then return end
-    if not c.CanGcdSpell(action, target) then return end
-    return target
-end
-
-
-local mouseoverGUID = nil --TODO: Check Usage
+local mouseoverGUID = nil
 local mouseoverTimer = 'mouseoverTimer'
 c.Event('GLOBAL_MOUSE_DOWN', function(event, button)
     if button ~= "MiddleButton" then return end

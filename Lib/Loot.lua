@@ -116,6 +116,7 @@ end
 c.Event('UNIT_SPELLCAST_FAILED', onEvent)
 c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
 
+
 function c.CanSkinning(unit)
     if not allowSkin then return false end
     local tooltipName = 'SkinCheckTooltip'
