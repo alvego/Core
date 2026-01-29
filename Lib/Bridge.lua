@@ -73,7 +73,7 @@ end
 ---Следует вызывать единожды в начале общего `onUpdate`
 ---@return boolean isConnected `true` если мост подключен
 function c.bPulse()
-    local pulse = cmd('Pulse', c.Paused(), c.flags.move, c.flags.loot)
+    local pulse = cmd('Pulse')
     bConnected = type(pulse) == 'boolean' and pulse
     return bConnected
 end

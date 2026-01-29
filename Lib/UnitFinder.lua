@@ -53,7 +53,7 @@ c.ActionHook('find', function()
         c.Notify('Начинаем  движение к ' .. objName, icon, 3)
         c.bMoveTo(objectGUID)
     end
-    c.Log('Поиск:', searchName, 'GUID:', objectGUID, 'Name:', objName, 'Range:', objRange)
+    --c.Log('Поиск:', searchName, 'GUID:', objectGUID, 'Name:', objName, 'Range:', objRange)
 end)
 
 

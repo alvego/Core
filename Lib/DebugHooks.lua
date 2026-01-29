@@ -8,5 +8,6 @@ local st = c.state;
 c.ActionHook('test', function()
     print('----------------------')
     --print('bLookAt', c.bLookAt('target'))
-    print('bMoveTo', c.bMoveTo('target'))
+    --print('bMoveTo', c.bMoveTo('target'))
+    print(c.bFindObject('ящ'))
 end)
