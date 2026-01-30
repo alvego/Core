@@ -59,13 +59,13 @@ end)
 
 c.AfterUpdate(function()
     if not searchName then return end
-    if c.TimerLess('LookUnit', 1) then return end
-    c.TimerStart('LookUnit')
+    if c.TimerLess('Finder', 1) then return end
+    c.TimerStart('Finder')
     objectGUID, objName, objRange = c.bFindObject(searchName)
     if not c.IsChanged('bFindObject', objectGUID) then return end
     if not objectGUID then return end
     PlaySound(SOUNDKIT.AUCTION_WINDOW_OPEN)
-    local msg = 'Найден новый объект "' .. objName .. '" на расстоянии ' .. c.Round(objRange, 1) .. 'м.'
+    local msg = 'Найден "' .. objName .. '" --> ' .. c.Round(objRange, 1) .. 'м.'
     c.Notify(msg, icon, 10)
     c.Message(msg, title, icon)
     c.Message('Нажмите на макрос, для того чтоб начать двигаться к "' .. objName .. '"', title, icon)

@@ -6,9 +6,13 @@ local st = c.state
 
 -- luacheck: push ignore
 local GetLootMethod         = GetLootMethod
-local GetSpellInfo          = GetSpellInfo ---@diagnostic disable-line
-local GetSpellTexture       = GetSpellTexture ---@diagnostic disable-line
-local IsUsableSpell         = IsUsableSpell ---@diagnostic disable-line
+---@diagnostic disable
+local GetSpellInfo          = GetSpellInfo
+local GetSpellTexture       = GetSpellTexture
+local IsUsableSpell         = IsUsableSpell
+local GetNumSkillLines      = GetNumSkillLines
+local GetSkillLineInfo      = GetSkillLineInfo
+---@diagnostic enable
 local GetSpellLink          = GetSpellLink
 local LootFrame             = LootFrame
 local UIParent              = UIParent
@@ -115,31 +119,6 @@ local function onEvent(event, ...)
 end
 c.Event('UNIT_SPELLCAST_FAILED', onEvent)
 c.Event('UNIT_SPELLCAST_SUCCEEDED', onEvent)
-
-
-function c.CanSkinning(unit)
-    if not allowSkin then return false end
-    local tooltipName = 'SkinCheckTooltip'
-    local tooltip = _G[tooltipName] or
-        CreateFrame('GameTooltip', tooltipName, UIParent, 'GameTooltipTemplate')
-    -- Проверка подсказки: наличие текста 'Можно снять шкуру' и что он не красный (уровень профессии достаточен)
-    tooltip:ClearLines()
-    tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-    tooltip:SetUnit(unit)
-    local numLines = tooltip:NumLines()
-    for i = 1, numLines do
-        local textName = tooltipName .. 'TextLeft' .. i
-        local tipText = _G[textName]:GetText()
-        if tipText and string.find(tipText, 'Можно снять шкуру') then
-            -- luacheck: ignore
-            local r, g, b = _G[textName]:GetTextColor()
-            -- Красный текст: g ~0.1-0.2; белый/желтый/зеленый: g > 0.5
-            -- Возвращаем true, если НЕ красный (уровень профессии ок)
-            return g > 0.5
-        end
-    end
-    return false
-end
 
 local function waitForLoot()
     -- core лут отключен, стоп
@@ -253,7 +232,7 @@ end
 
 local function waitForCorpseLoot()
     -- ищем кого можно обыскать
-    local corpseGUID = c.bFindCorpse(lootDist, false, 20)
+    local corpseGUID = c.bFindCorpse(lootDist, false)
     if not corpseGUID then return false end
     c.Message(c.UnitInfo(corpseGUID), lootTitle, lootIcon)
     c.bUnitClick(corpseGUID, true)
@@ -262,13 +241,32 @@ local function waitForCorpseLoot()
     return true
 end
 
+
+local getSkinningMaxLevel = c.GetCachedFunc(function()
+    if not allowSkin then return 0 end
+    -- Перебираем навыки (в 3.3.5 только так)
+    for i = 1, GetNumSkillLines() do
+        -- skillName, isHeader, isExpanded, skillRank, numTempPoints, skillModifier, skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType, skillDescription
+        local skillName, isHeader, _, skillRank, _, skillModifier = GetSkillLineInfo(i)
+        if not isHeader and skillName == skinSpell then
+            -- Формула: (Rank + Modifier) / 5
+            return math.floor((skillRank + skillModifier) / 5)
+        end
+    end
+    return 0
+end)
+
+-- ищем кого можно освежевать
+local function findCorpseForSkin(range)
+    local maxLevel = getSkinningMaxLevel()
+    if maxLevel <= 0 then return end -- навыка нет или он 0
+    return c.bFindCorpse(range, true, maxLevel)
+end
+
 local function waitForCorpseSkin()
     if not st.still then return false end
-    if not allowSkin then return false end
-    -- ищем кого можно освежевать
-    local corpseGUID = c.bFindCorpse(skinDist, true, 20)
+    local corpseGUID = findCorpseForSkin(skinDist)
     if not corpseGUID then return false end
-    if not c.bWithGUID(corpseGUID, c.CanSkinning) then return false end -- TODO: тут будет сбой, если уровень профессии не достаточен
     c.DoActionWithGUID('Свежуем', skinSpell, corpseGUID)
     skinTargetGUID = corpseGUID
     c.TimerStart(skinTimer)
@@ -276,6 +274,7 @@ local function waitForCorpseSkin()
 end
 
 local lastCorpseGUID = nil
+local maxRange = 40
 local function waitForFindCorpse()
     if c.TimerLess('waitForFindCorpse', 1) then return true end
     if not c.flags.move or st.move then return false end
@@ -283,8 +282,9 @@ local function waitForFindCorpse()
     if st.look then return false end
     if lastCorpseGUID and c.bObjectExists(lastCorpseGUID) then return false end
     -- ищем ближайший полезный труп
-    local corpseGUID = c.bFindCorpse(40, false, 20) or c.bFindCorpse(40, true, 20)
-    if corpseGUID and c.bMoveTo(corpseGUID) then
+    local corpseGUID = c.bFindCorpse(maxRange) or findCorpseForSkin(maxRange)
+    if corpseGUID then
+        c.bMoveTo(corpseGUID)
         c.MessageLog('#идем к ' .. c.UnitInfo(corpseGUID), 'Loot', lootIcon)
         c.TimerStart('waitForFindCorpse')
         lastCorpseGUID = corpseGUID

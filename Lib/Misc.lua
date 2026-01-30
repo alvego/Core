@@ -174,7 +174,7 @@ function c.ClearCursor()
     end
 end
 
-local unitInfo = function(unit, token)
+local unitInfo = function(unit)
     if not unit or not UnitExists(unit) then return WrapTextInColorCode('!exists', 'aaff0000') end
     local name = UnitName(unit)
     if not name then return WrapTextInColorCode('!name', 'aaff0000') end
@@ -193,13 +193,13 @@ local unitInfo = function(unit, token)
     if UnitIsDeadOrGhost(unit) then
         name = name .. WrapTextInColorCode('труп', 'ff333333')
     end
-    return name .. '(' .. (token or unit) .. ')'
+    return name
 end
 ---@param unit string unitId
 ---@return string information all about unit
 local getUnitInfo = function(unit)
-    if not UnitExists(unit) and c.bObjectExists(unit) then
-        return c.bWithGUID(unit, unitInfo, unit)
+    if unit and not UnitExists(unit) and c.bObjectExists(unit) then
+        return c.bWithGUID(unit, unitInfo)
     end
     return unitInfo(unit)
 end

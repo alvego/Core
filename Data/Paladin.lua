@@ -235,7 +235,7 @@ local function getTauntGUID(action, checkHand)
 
     wipe(tauntGUIDs)
     --CanAttack|IsInCombat|NotTargetingMe|InLoS
-    c.bFindUnits(tauntGUIDs, 40, 83, 20)
+    c.bFindUnits(tauntGUIDs, 40, 83)
     return c.FindUnitGUID(tauntGUIDs, checkTauntTarget, action, checkHand)
 end
 
@@ -495,7 +495,7 @@ local function updateProto()
 
     reason, action, unit = 'Добивание', 'Молот гнева', 'target'
     if useMana and not st.gcd and c.CanSpell(action) then
-        if c.DoActionWithGUID(reason, action, c.bFindExecuteTarget(30, 19.9, 20)) then
+        if c.DoActionWithGUID(reason, action, c.bFindExecuteTarget(30, 19.9)) then
             return reason -- не частим
         end
     end
@@ -503,7 +503,7 @@ local function updateProto()
     reason, action, unit = 'Сало на троих', 'Щит мстителя', 'target'
     if useMana and c.CanGcdSpell(action) then
         --CanAttack|IsInCombat|IsCasting|NotTappedByOther|InLoS
-        if c.DoActionWithGUID(reason, action, c.bFindUnit(30, 103, 20)) then
+        if c.DoActionWithGUID(reason, action, c.bFindUnit(30, 103)) then
             return reason -- не частим
         end
     end
