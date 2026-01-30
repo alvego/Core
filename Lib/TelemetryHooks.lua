@@ -24,7 +24,7 @@ end)
 
 
 c.Telemetry(function()
-    return format('TAR15: %03d', c.bGetEnemyCount(15, 'player', 20))
+    return format('TAR15: %03d', c.GetEnemyCount(15, 'player'))
 end)
 
 

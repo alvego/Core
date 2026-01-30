@@ -130,7 +130,7 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED',
         end
     end)
 function c.SearchTarget(range, angle)
-    local targetGuid = c.bFindTarget(range, angle, lastGUID, st.combatMode, 20)
+    local targetGuid = c.bFindTarget(range, angle, lastGUID, st.combatMode)
     if not targetGuid then return false end
     c.bTargetUnit(targetGuid)
     local tar = 'target'
@@ -174,5 +174,5 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
 end)
 
 c.GetEnemyCount = c.GetCachedFunc(function(range, aroundUnit)
-    return c.bGetEnemyCount(range, aroundUnit, 20)
+    return c.bGetEnemyCount(range, aroundUnit)
 end)
