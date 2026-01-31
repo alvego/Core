@@ -22,6 +22,7 @@ local UnitGUID = UnitGUID
 ---|"ObjectExists"
 ---|"CheckBobber"
 ---|"FindCorpse"
+---|"LootedCorpse"
 ---|"FindUnits"
 ---|"FindUnit"
 ---|"FindExecuteTarget"
@@ -216,12 +217,19 @@ end
 ---Поиск ближайшего подходящего трупа для обыска или снятия шкур (Взаимодействие возможно, если range: 0 - обыск, 5 - снятие шкур)
 ---@param range? number Default = -1 `range < 0` без ограничений, `range = 0` радиус ближнего боя, `range > 0` фильтр с учетом хитбоксов
 ---@param skining? boolean Default = false (`true` подходит для снятия шкур, иначе для обыска)
----@param maxLevel? number Default = 0 (фильтр по UnitLevel <= maxLevel, `maxLevel<=0` отключен)
 ---@param minMaxHP? number Default = 20 (фильтр по maxHP <= minMaxHP, `-1` отключен)
 ---@return string|nil unitGUID
 function c.bFindCorpse(range, skining, maxLevel, minMaxHP)
     if not bConnected then return nil end
     return cmd('FindCorpse', range, skining, maxLevel, minMaxHP)
+end
+
+---Помечаем труп как уже обысканный/ободранный
+---@param unitGUID string unitGUID (for ignore in FindCorpse)
+---@param skining? boolean Default = false (`true` подходит для снятия шкур, иначе для обыска)
+function c.bLootedCorpse(unitGUID, skining)
+    if not bConnected then return nil end
+    return cmd('LootedCorpse', unitGUID, skining)
 end
 
 ---Поиск юнитов.
