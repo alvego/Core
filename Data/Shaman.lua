@@ -71,7 +71,7 @@ local function updateEnhance()
     end
 
     --[[     reason, action, unit = 'Вешаем дэбаф', 'Удар бури', 'target'
-    if c.InMelee('target') and not c.HasMyBuff('Удар бури', unit) and c.CanGcdSpell(action, unit, 1) then
+    if st.targetMelee and not c.HasMyBuff('Удар бури', unit) and c.CanGcdSpell(action, unit, 1) then
         c.DoAction(reason, action, unit)
         return reason
     end ]]
@@ -119,13 +119,13 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Поджигаем !мили/хп>20000', 'Огненный шок', 'target'
-    if c.CanGcdSpell(action, unit) and not aoe(3) and (UnitHealthMax('target') > 20000 or not c.InMelee('target')) and not c.HasMyDebuff('Огненный шок', unit, 1) then
+    if c.CanGcdSpell(action, unit) and not aoe(3) and (UnitHealthMax('target') > 20000 or not st.targetMelee) and not c.HasMyDebuff('Огненный шок', unit, 1) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'АОЕ или босс', 'Тотем магмы', 'target'
-    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or c.InMelee('target')) and not HasMagmaTotem() then
+    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and not HasMagmaTotem() then
         c.DoAction(reason, action)
         return reason
     end
