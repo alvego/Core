@@ -177,7 +177,7 @@ local function waitForFishing()
             CombatLogClearEntries()
             startFishing()
             c.DoAction('Забрасываем удочку', fish.spell)
-            fish.delay = math_random() * 2.5 -- [0.5 .. 3]
+            fish.delay = 0.5 + math_random() * 2.5 -- [0.5 .. 3.0]
         end
         return true
     end
@@ -213,7 +213,7 @@ local function waitForCorpseSkin()
     c.bUnitClick(corpseGUID, true) --Свежуем
     lootTargetGUID = corpseGUID
     isSkinning = true
-    c.bLootedCorpse(corpseGUID, isSkinning)
+    c.bLootedCorpse(corpseGUID, isSkinning) --TODO
     c.TimerStart(lootTimer)
     c.Log('Skinning', corpseGUID)
     return true
@@ -228,7 +228,11 @@ local function waitForFindCorpse()
     if st.look then return false end
     if lastCorpseGUID and c.bObjectExists(lastCorpseGUID) then return false end
     -- ищем ближайший полезный труп
-    local corpseGUID = c.bFindCorpse(maxRange) or c.bFindCorpse(maxRange, true)
+    local corpseGUID = c.bFindCorpse(maxRange)
+    -- не ходим зря если нет навыка (может вообще убрать?)
+    if not corpseGUID and IsUsableSpell("Снятие шкур") then
+        corpseGUID = c.bFindCorpse(maxRange, true)
+    end
     if corpseGUID then
         c.bMoveTo(corpseGUID)
         c.MessageLog('#идем к ' .. c.UnitInfo(corpseGUID), 'Loot', lootIcon)

@@ -197,14 +197,12 @@ local unitInfo = function(unit)
 end
 ---@param unit string unitId
 ---@return string information all about unit
-local getUnitInfo = function(unit)
+function c.UnitInfo(unit)
     if unit and not UnitExists(unit) and c.bObjectExists(unit) then
         return c.bWithGUID(unit, unitInfo)
     end
     return unitInfo(unit)
 end
-c.UnitInfo = c.GetCachedFunc(getUnitInfo)
-
 
 local function autoButton(btn, btnText)
     if not btn or btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
