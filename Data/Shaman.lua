@@ -90,13 +90,13 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Мейн пока можем', 'Цепная молния', 'target'
-    if isInstant and aoe(1) and c.CanGcdSpell(action, unit) then
+    if isInstant and (not c.IsReadySpell('Выброс лавы') or not c.HasMyDebuff('Огненный шок', unit, 1)) and aoe(1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Заполнитель', 'Молния', 'target'
-    if isInstant and c.CanGcdSpell(action, unit) then
+    if isInstant and (not c.IsReadySpell('Выброс лавы') or not c.HasMyDebuff('Огненный шок', unit, 1)) and not aoe(1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -147,18 +147,6 @@ local function updateEnhance()
         c.DoAction(reason, action, unit)
         return reason
     end
-
-    --[[     reason, action, unit = 'Поджигаем если есть свободное окошко', 'Огненный шок', 'target'
-    if c.CanGcdSpell(action, unit) and not aoe(4) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end ]]
-
-    --[[     reason, action, unit = 'Морозим', 'Ледяной шок', 'target'
-    if c.CanGcdSpell(action, unit) and not c.IsReadySpell('Земной шок') then
-        c.DoAction(reason, action, unit)
-        return reason
-    end ]]
 
     if st.gcd then return '#gcd' end
     return '#none'
