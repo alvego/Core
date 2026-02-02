@@ -132,27 +132,8 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED',
 function c.SearchTarget(range, angle)
     local targetGuid = c.bFindTarget(range, angle, lastGUID, st.combatMode)
     if not targetGuid then return false end
+    searchLastGuid = targetGuid
     c.bTargetUnit(targetGuid)
-    local tar = 'target'
-    if not UnitExists(tar) then return false end
-    c.Message(format('#%s: %s', WrapTextInColorCode(c.name, 'ff00ff00'), c.UnitInfo(tar)), title, icon)
-    c.MessageLog(
-        format('#бой: игрок - %s, цель - %s',
-            st.combatLock and 'да' or 'нет',
-            UnitAffectingCombat(tar) and 'да' or 'нет'
-        ),
-        title, icon)
-    c.MessageLog(
-        format('#comabtMode: %s',
-            st.combatMode and 'да' or 'нет'
-        ),
-        title, icon)
-    c.MessageLog(
-        format('#attack: %s',
-            st.attack and 'да' or 'нет'
-        ),
-        title, icon)
-    searchLastGuid = UnitGUID(tar)
     return true
 end
 
