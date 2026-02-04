@@ -16,6 +16,7 @@ local st = c.state
 local GetTotemInfo = GetTotemInfo
 local UnitHealthMax = UnitHealthMax
 local format = format
+local IsSpellKnown = IsSpellKnown
 -- luacheck: pop
 c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(20, 'player'))
@@ -152,6 +153,40 @@ local function updateEnhance()
     return '#none'
 end
 
+local function updateElemental()
+    local reason, action, unit
+
+    reason = '#cast: %s'
+    if st.playerCasting then return format(reason, st.playerCasting) end
+
+    reason, action, unit = 'Рассовый спелл', 'Пламя дракона', 'target'
+    if not st.pvp and c.CanSpell(action) then
+        c.DoAction(reason, action)
+        return reason
+    end
+
+    reason, action, unit = 'Шокаем боса сразу', 'Огненный шок', 'target'
+    if c.CanGcdSpell(action, unit) and not c.HasMyDebuff('Огненный шок', unit, 1) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
+    if c.CanGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Заполнитель', 'Молния', 'target'
+    if (not c.IsReadySpell('Выброс лавы') or not c.HasMyDebuff('Огненный шок', unit, 1)) and c.CanGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    if st.gcd then return '#gcd' end
+    return '#none'
+end
+
 c.Update(function()
     local stopReason = c.GetStopReason()
     if stopReason then
@@ -159,5 +194,14 @@ c.Update(function()
         return
     end
 
-    c.LogWhatHappend(updateEnhance())
+    local isEnhance = IsSpellKnown(51533, false)   -- наличие спелла 'Дух дикого волка' энх
+    local isElemental = IsSpellKnown(16166, false) -- наличие спелла 'Покорение стихий' элем
+
+    if isEnhance then
+        c.LogWhatHappend(updateEnhance())
+    elseif isElemental then
+        c.LogWhatHappend(updateElemental())
+    else
+        return '#not_dps_spec' -- Restoration хил спек
+    end
 end)
