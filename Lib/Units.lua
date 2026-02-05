@@ -114,6 +114,9 @@ function c.UnitIsMagicImmune(unit)
     return aura and aura or false
 end
 
+---Проверяет на наличие таланта, nil если не взят
+---@param talent string
+---@return number|nil количество взятых талантов
 function c.HasTalent(talent)
     local found = nil
     local numTabs = GetNumTalentTabs()
