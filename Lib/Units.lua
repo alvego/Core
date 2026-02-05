@@ -13,10 +13,12 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitLevel = UnitLevel
 local GetTalentInfo = GetTalentInfo
 local UnitIsFriend = UnitIsFriend
-local GetActiveSpecGroup = GetActiveSpecGroup
 local UnitClass = UnitClass
 local UnitInRaid = UnitInRaid
 local UnitInParty = UnitInParty
+local GetNumTalentTabs = GetNumTalentTabs
+local GetNumTalents = GetNumTalents
+local GetTalentInfo = GetTalentInfo
 -- luacheck: pop
 
 function c.UnitHealth100(unit)
@@ -113,12 +115,14 @@ function c.UnitIsMagicImmune(unit)
 end
 
 function c.HasTalent(talent)
-    local found = false;
-    for i = 1, 7 do
-        for j = 1, 3 do
-            local id, n, x, sel = GetTalentInfo(i, j, GetActiveSpecGroup());
-            if (id == talent or n == talent) and sel then
-                found = true;
+    local found = nil
+    local numTabs = GetNumTalentTabs()
+    for x = 1, numTabs do
+        local numTalents = GetNumTalents(x)
+        for y = 1, numTalents do
+            local talentName, icon, tier, column, rank, maxRank = GetTalentInfo(x, y)
+            if (talentName == talent) and rank > 0 then
+                found = rank;
             end
         end
     end

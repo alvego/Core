@@ -9,8 +9,7 @@ local st = c.state;
 
 c.ActionHook('test', function()
     print('----------------------')
-    local cm = st.combatMode
-    st.combatMode = true
-    print(c.TryTarget(100, 15))
-    st.combatMode = cm
+    --local activeTalentGroup, numTalentGroups = GetActiveTalentGroup(false, false), GetNumTalentGroups(false, false);
+    --print(select(5, GetTalentInfo(2, 29)))
+    print(c.HasTalent('Чистота'))
 end)
