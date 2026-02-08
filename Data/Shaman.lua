@@ -59,7 +59,7 @@ local function updateEnhance()
         return reason
     end
 
-    reason = c.TryTarget(30, st.attack and 15 or (st.look and 30 or 0))
+    reason = c.TryTarget(30, (st.attack or st.look) and 30 or 0)
     -- есть ли причина для остановки?.
     if reason then return reason end
 

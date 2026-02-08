@@ -53,7 +53,7 @@ c.ActionHook('find', function()
         c.Notify('Начинаем  движение к ' .. objName, icon, 3)
         c.bMoveTo(objectGUID)
     end
-    --c.Log('Поиск:', searchName, 'GUID:', objectGUID, 'Name:', objName, 'Range:', objRange)
+    --c.Log('#Поиск:', searchName, 'GUID:', objectGUID, 'Name:', objName, 'Range:', objRange)
 end)
 
 
@@ -64,6 +64,7 @@ c.AfterUpdate(function()
     objectGUID, objName, objRange = c.bFindObject(searchName)
     if not c.IsChanged('bFindObject', objectGUID) then return end
     if not objectGUID then return end
+    if not objName then objName = "nil" end
     PlaySound(SOUNDKIT.AUCTION_WINDOW_OPEN)
     local msg = 'Найден "' .. objName .. '" --> ' .. c.Round(objRange, 1) .. 'м.'
     c.Notify(msg, icon, 10)

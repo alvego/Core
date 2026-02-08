@@ -207,7 +207,7 @@ end
 local function autoButton(btn, btnText)
     if not btn or btn:IsVisible() ~= 1 or btn:IsEnabled() ~= 1 then return false end
     if btn:GetText() ~= btnText then return false end
-    c.Log('Жмем', btnText)
+    c.Log('#Жмем', btnText)
     btn:Click()
     return true
 end
@@ -219,7 +219,7 @@ function c.AutoPopup(messagePart, btnText)
         if popup and popup:IsVisible() and popup.text then
             local text = popup.text:GetText()
             if c.StrContains(popup.text:GetText(), messagePart) then
-                c.Log('Диалог', text)
+                c.Log('#Диалог', text)
                 for j = 1, 3 do
                     if autoButton(_G[popupName .. 'Button' .. j], btnText) then return true end
                 end

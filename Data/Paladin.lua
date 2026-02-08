@@ -447,7 +447,7 @@ local function updateProto()
 
     reason = c.TryTarget(
         st.attack and st.look and 100 or 40,
-        st.attack and 15 or (st.look and 30 or 0)
+        (st.attack or st.look) and 30 or 0
     )
     -- есть ли причина для остановки?
     if reason then return reason end

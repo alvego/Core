@@ -76,7 +76,7 @@ local getMinEquippedItemLevel = c.GetCachedFunc(function()
                 --c.Log(itemLink, itemLevel)
                 if not minLvL or itemLevel < minLvL then
                     minLvL = itemLevel
-                    --c.Log('берем', itemLevel)
+                    --c.Log('#берем', itemLevel)
                 end
             end
         end

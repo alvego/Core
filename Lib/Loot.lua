@@ -201,7 +201,7 @@ local function waitForCorpseLoot()
     isSkinning = false
     c.bLootedCorpse(corpseGUID, isSkinning)
     c.TimerStart(lootTimer)
-    c.Log('Looting', corpseGUID)
+    c.Log('#Looting', corpseGUID)
     return true
 end
 
@@ -215,7 +215,7 @@ local function waitForCorpseSkin()
     isSkinning = true
     c.bLootedCorpse(corpseGUID, isSkinning) --TODO
     c.TimerStart(lootTimer)
-    c.Log('Skinning', corpseGUID)
+    c.Log('#Skinning', corpseGUID)
     return true
 end
 
