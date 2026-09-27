@@ -91,13 +91,19 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Мейн пока можем', 'Цепная молния', 'target'
-    if isInstant and (not c.IsReadySpell('Выброс лавы') or not c.HasMyDebuff('Огненный шок', unit, 1)) and aoe(1) and c.CanGcdSpell(action, unit) then
+    if isInstant and aoe(1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
 
     reason, action, unit = 'Заполнитель', 'Молния', 'target'
-    if isInstant and (not c.IsReadySpell('Выброс лавы') or not c.HasMyDebuff('Огненный шок', unit, 1)) and not aoe(1) and c.CanGcdSpell(action, unit) then
+    if isInstant and not c.IsReadySpell('Выброс лавы') and not aoe(1) and c.CanGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Перевешиваем шок под инстант', 'Огненный шок', 'target'
+    if isInstant and not aoe(3) and not c.HasMyDebuff('Огненный шок', unit, 1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -158,6 +164,9 @@ local function updateElemental()
 
     reason = '#cast: %s'
     if st.playerCasting then return format(reason, st.playerCasting) end
+
+    reason = c.TryTarget(30, (st.attack or st.look) and 30 or 0)
+    if reason then return reason end
 
     reason, action, unit = 'Рассовый спелл', 'Пламя дракона', 'target'
     if not st.pvp and c.CanSpell(action) then
