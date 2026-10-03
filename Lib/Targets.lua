@@ -161,6 +161,7 @@ c.Event('COMBAT_LOG_EVENT_UNFILTERED', function(event, timestamp, subEvent,
                                                 sourceGUID, sourceName, sourceFlags,
                                                 destGUID, destName, destFlags, ...)
     if not st.combatLock then return end -- только в бою
+    -- на случай переодического урона без видимой цели (баги)
     if st.combatMode then return end     -- если нет цели
     -- только направленные на меня
     if not sourceName or not sourceGUID or destGUID ~= st.playerGUID then return end

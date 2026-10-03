@@ -79,12 +79,13 @@ local function updateState()
     st.targetVisible = st.targetExists and c.bUnitInLoS('player', 'target')
     st.targetBehind = st.targetExists and c.bUnitBehind('target')
 
+    -- У нас есть нормальная цель цель, и она в бою (значит и мы в режиме боя)
     if not st.invalidTarget and st.targetCombat then
         c.TimerStart('targetCombat')
     end
 
     st.autoattack = IsCurrentSpell('Автоматическая атака')
-    st.combatMode = st.attack or c.TimerLess('targetCombat', c.updateDelay * 2)
+    st.combatMode = st.attack or c.TimerLess('targetCombat', (c.updateDelay + c.latency) * 2)
 
     st.speed = GetUnitSpeed('player') or 0
     st.falling = IsFalling()
@@ -101,5 +102,5 @@ c.BeforeUpdate(updateState, true)
 updateState() -- for init
 
 c.Event('PLAYER_REGEN_DISABLED', function()
-    c.TimerStart('targetCombat')
+    c.TimerStart('targetCombat') -- Срабатывает при каждом вступлении в бой
 end)
