@@ -71,11 +71,8 @@ local function updateEnhance()
         return reason
     end
 
-    --[[     reason, action, unit = 'Вешаем дэбаф', 'Удар бури', 'target'
-    if st.targetMelee and not c.HasMyBuff('Удар бури', unit) and c.CanGcdSpell(action, unit, 1) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end ]]
+    -- Удар бури: дебаф на цели или прямо сейчас невосстановим (кд/вне мили)
+    local hasSS = c.HasMyDebuff('Удар бури', 'target', 1) or not c.CanGcdSpell('Удар бури', 'target')
 
     reason, action, unit = 'Шокаем боса сразу', 'Огненный шок', 'target'
     if c.CanGcdSpell(action, unit) and not aoe(3) and UnitHealthMax('target') > 500000 and not c.HasMyDebuff('Огненный шок', unit, 1) then
@@ -85,7 +82,7 @@ local function updateEnhance()
 
 
     reason, action, unit = 'Лава по шоку', 'Выброс лавы', 'target'
-    if isInstant and not aoe(3) and c.CanGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) then
+    if hasSS and isInstant and not aoe(3) and c.CanGcdSpell(action, unit) and c.HasMyDebuff('Огненный шок', unit, 1) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -97,7 +94,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Заполнитель', 'Молния', 'target'
-    if isInstant and not c.IsReadySpell('Выброс лавы') and not aoe(1) and c.CanGcdSpell(action, unit) then
+    if hasSS and isInstant and not c.IsReadySpell('Выброс лавы') and not aoe(1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -105,11 +102,6 @@ local function updateEnhance()
     reason, action, unit = 'Перевешиваем шок под инстант', 'Огненный шок', 'target'
     if isInstant and not aoe(3) and not c.HasMyDebuff('Огненный шок', unit, 1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
-        return reason
-    end
-
-    reason = '#instantcast return'
-    if isInstant then
         return reason
     end
 
@@ -122,6 +114,11 @@ local function updateEnhance()
     reason, action, unit = 'Основной мили удар', 'Удар бури', 'target'
     if c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason = '#instantcast return'
+    if isInstant then
         return reason
     end
 
@@ -138,7 +135,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Второй мили удар', 'Вскипание лавы', 'target'
-    if c.CanGcdSpell(action, unit) and not c.IsReadySpell('Удар бури') then
+    if hasSS and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -150,7 +147,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'Приземляем', 'Земной шок', 'target'
-    if c.CanGcdSpell(action, unit) and (c.HasMyDebuff('Огненный шок', unit, 1) or not c.IsReadySpell('Огненный шок')) then
+    if hasSS and c.CanGcdSpell(action, unit) and (c.HasMyDebuff('Огненный шок', unit, 1) or not c.IsReadySpell('Огненный шок')) then
         c.DoAction(reason, action, unit)
         return reason
     end
