@@ -140,7 +140,8 @@ function c.bUseMacro(macroLine)
 end
 
 ---In-flight guard: подавляет повторные прессы до серверного ack (окно: max(c.latency*1.5, 0.15)).
----Окно сбрасывается по своим UNIT_SPELLCAST_SUCCEEDED/FAILED/INTERRUPTED, иначе истекает само при следующем прессе.
+---Окно сбрасывается ТОЛЬКО по своему UNIT_SPELLCAST_SUCCEEDED, иначе истекает само при следующем прессе.
+---FAILED сюда нельзя: он приходит на каждый локальный отказ в кадре отказа и разжимал бы окно каждый кадр.
 local bPressTime = nil
 local function bPressAllowed()
     local t = GetTime()
@@ -156,8 +157,6 @@ local function bPressReset(_, unit)
     end
 end
 c.Event('UNIT_SPELLCAST_SUCCEEDED', bPressReset)
-c.Event('UNIT_SPELLCAST_FAILED', bPressReset)
-c.Event('UNIT_SPELLCAST_INTERRUPTED', bPressReset)
 
 ---Каст спела в цель
 ---@param spellName? string Default = ''

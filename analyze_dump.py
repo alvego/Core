@@ -2,10 +2,11 @@
 
 Записи позиционные: { t, kind, ... }
   M: t, игрок, версия протокола
-  P: t, спелл, слот, цель, source, reason, гкд_активен, гкд_остаток, лаг, FPS
+  P: t, спелл, слот, цель, source, reason, гкд_активен, гкд_остаток, лаг, FPS, FAILED-гейт
   A: t, событие UNIT_SPELLCAST_*, спелл
   C: t, CLEU-таймстемп, SPELL_CAST_*, спелл
   E: t, текст ошибки
+  G: t, спелл, текст ошибки? (nil = 'FAILED:'-таймер взведён, иначе = наполнение буфера)
   R: t, reason
 
 Запуск без аргументов: сводка по каждой сессии (метрики §6 RECORDER.md).
@@ -126,6 +127,12 @@ def summarize(t0, t1, records):
     errors = Counter(r[2] for r in records if r[1] == 'E')
     if errors:
         print("ошибки E:", dict(errors.most_common()))
+    gated = sum(1 for r in presses if len(r) > 11 and r[11] == 'true')
+    print(f"прессов при взведённом FAILED-гейте: {gated} (должно быть 0 — гейт запрещает пресс)")
+    gate_timer = sum(1 for r in records if r[1] == 'G' and (len(r) < 4 or r[3] == 'nil'))
+    gate_buf = sum(1 for r in records if r[1] == 'G' and len(r) > 3 and r[3] != 'nil')
+    if gate_timer or gate_buf:
+        print(f"G-гейт: 'FAILED:'-таймер взведён {gate_timer} раз, буфер наполнен {gate_buf} раз")
     ev = Counter(r[2] for r in records if r[1] == 'A')
     if ev:
         print("A-события:", dict(ev))

@@ -73,7 +73,7 @@ end
 ---@param reason? string reason ротации, если известен
 function c.RecordPress(spellName, slot, unitID, source, reason)
     if not active then return end
-    -- P press: t, спелл, слот, цель, источник, reason, гкд, остаток гкд, лаг, FPS
+    -- P press: t, спелл, слот, цель, источник, reason, гкд, остаток гкд, лаг, FPS, FAILED-гейт
     push {
         GetTime(), 'P',
         spellName,
@@ -85,6 +85,7 @@ function c.RecordPress(spellName, slot, unitID, source, reason)
         c.GetSpellCooldownLeft(c.gcdSpellId),
         c.latency,
         GetFramerate(),
+        spellName and c.IsSpellFailedRecently(spellName) or nil,
     }
 end
 
@@ -95,6 +96,14 @@ function c.RecordDecision(reason)
     lastReason = reason
     -- R decision: t, reason
     push { GetTime(), 'R', reason }
+end
+
+---Инструментация FAILED-гейта SpellError (кейс сервер-лока §11, фикс B).
+---@param spellName string спелл
+---@param message? string текст ошибки при наполнении буфера; nil = 'FAILED:'-таймер реально взведён
+function c.RecordGateEvent(spellName, message)
+    if not active then return end
+    push { GetTime(), 'G', spellName, message }
 end
 
 ---Идёт ли запись

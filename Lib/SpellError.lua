@@ -18,6 +18,9 @@ local function pushError(message, spell)
         spell = type(_spell) == 'string' and spell or true
     end
     errorBuffer[message] = spell
+    if type(spell) == 'string' and c.RecordGateEvent then -- инструментация гейта (RECORDER.md §11 B)
+        c.RecordGateEvent(spell, message)
+    end
 end
 
 local function onCombatLogEvent(event, timestamp, subEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName,
@@ -91,6 +94,9 @@ local function onErrorUpdate()
         if not tContains(skipErrors, message) then
             if type(spellName) == 'string' then
                 c.TimerStart('FAILED:' .. spellName)
+                if c.RecordGateEvent then -- инструментация гейта (RECORDER.md §11 B)
+                    c.RecordGateEvent(spellName)
+                end
                 local spellId = c.GetSpellId(spellName, nil, true)
                 c.Error(format('%s %s', message, GetSpellLink(spellId) or spellName), GetSpellTexture(spellName))
             else
