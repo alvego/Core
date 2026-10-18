@@ -140,6 +140,13 @@ local function updateEnhance()
         return reason
     end
 
+    -- вскипание готово по кд, но нажатие только что отклонено (кд сервера/разворот):
+    -- не отдаем гкд филлерам ниже (кольцо огня, земной шок), пережмем вскипание следующим тиком
+    reason = '#вскипание перезжим после отказа'
+    if hasSS and c.IsReadySpell('Вскипание лавы') and c.IsSpellFailedRecently('Вскипание лавы') then
+        return reason
+    end
+
     reason, action, unit = 'АОЕ', 'Кольцо огня', 'target'
     if aoe(4) and c.CanGcdSpell(action) and HasMagmaTotem() then
         c.DoAction(reason, action)
