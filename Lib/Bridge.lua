@@ -139,17 +139,25 @@ function c.bUseMacro(macroLine)
     return cmd('UseMacro', macroLine)
 end
 
----In-flight guard: подавляет повторные прессы до серверного ack (окно: max(c.latency*1.5, 0.15)).
+---In-flight guard: подавляет повторные прессы до серверного ack. Состояние: bPressTime+bPressWindow,
+---штампуются ВМЕСТЕ в момент разрешённого пресса; manual-пресс не глотается, но тоже штампует окно.
 ---Окно сбрасывается ТОЛЬКО по своему UNIT_SPELLCAST_SUCCEEDED, иначе истекает само при следующем прессе.
 ---FAILED сюда нельзя: он приходит на каждый локальный отказ в кадре отказа и разжимал бы окно каждый кадр.
-local bPressTime = nil
-local function bPressAllowed()
-    local t = GetTime()
-    if bPressTime and (t - bPressTime) <= math_max(c.latency * 1.5, 0.15) then
-        return false
+---Окно фиксируется в момент штампа, а не проверки: иначе gcdLeft уже ≈0 и окно прыгнет на 0.15с, отложив повтор (RECORDER.md §12–13).
+local bPressTime, bPressWindow = nil, 0
+-- штампует окно ТОЛЬКО в момент фактического пресса
+local function bPressStamp()
+    bPressTime = GetTime()
+    local left = c.GetSpellCooldownLeft(c.gcdSpellId)
+    if left > 0 and left <= c.advance * 2 then
+        bPressWindow = left + 0.03 -- хвостовой пресс: до конца ГКД + запас
+    else
+        bPressWindow = math_max(c.latency * 1.5, 0.15) -- вне ГКД: окно по латентности
     end
-    bPressTime = t
-    return true
+end
+-- true, пока elapsed попадает в активное окно (пресс надо глотнуть)
+local function bPressActive()
+    return bPressTime ~= nil and (GetTime() - bPressTime) <= bPressWindow
 end
 local function bPressReset(_, unit)
     if unit == 'player' then
@@ -166,7 +174,11 @@ c.Event('UNIT_SPELLCAST_SUCCEEDED', bPressReset)
 ---@return nil
 function c.bUseSpell(spellName, unitID, source, reason)
     if not bConnected then return end
-    if not bPressAllowed() then return nil end -- in-flight guard: повторный пресс до ack
+    if source ~= 'manual' and bPressActive() then
+        c.ImmediatelyNextUpdate() -- тик следующим кадром: повтор выйдет сразу после конца окна
+        return nil -- in-flight guard: повторный пресс до ack
+    end
+    bPressStamp() -- manual не глотается, но штампует окно (глушит кадровый шторм ротации)
     if c.RecorderActive() then -- имя спелла уже есть, слот не нужен
         c.RecordPress(spellName, nil, unitID, source or 'unknown', reason)
     end
@@ -181,7 +193,11 @@ end
 ---@return nil
 function c.bUseAction(slot, unitID, source, reason)
     if not bConnected then return end
-    if not bPressAllowed() then return nil end -- in-flight guard: повторный пресс до ack
+    if source ~= 'manual' and bPressActive() then
+        c.ImmediatelyNextUpdate() -- тик следующим кадром: повтор выйдет сразу после конца окна
+        return nil -- in-flight guard: повторный пресс до ack
+    end
+    bPressStamp() -- manual не глотается, но штампует окно (глушит кадровый шторм ротации)
     if c.RecorderActive() then -- имя резолвим только при активной записи
         c.RecordPress(c.GetActionSpell(slot), slot, unitID, source or 'unknown', reason)
     end
