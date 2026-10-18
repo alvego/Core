@@ -116,6 +116,14 @@ def summarize(t0, t1, records):
     pa = press_acks(records)
     if pa:
         print(f"press->ack (мс): медиана {pa[0]:.0f}, p90 {pa[1]:.0f}, max {pa[2]:.0f}, n={pa[3]}")
+    cast_t = []
+    for t in sorted(float(r[0]) for r in acks):
+        if not cast_t or t - cast_t[-1] > 0.25:  # A SUCCEEDED + C SUCCESS — один каст
+            cast_t.append(t)
+    if len(cast_t) > 1 and dur > 0:
+        cycles = sorted(b - a for a, b in zip(cast_t, cast_t[1:]))
+        print(f"темп: кастов/мин {len(cast_t) / dur * 60:.1f}, "
+              f"медиана цикла успех->успех {pct(cycles, 0.5) * 1000:.0f}мс")
 
     lat = sorted(float(r[9]) for r in presses if len(r) > 9 and r[9] != 'nil')
     fps = sorted(float(r[10]) for r in presses if len(r) > 10 and r[10] != 'nil')
