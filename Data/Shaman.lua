@@ -211,9 +211,13 @@ c.Update(function()
     local isElemental = IsSpellKnown(16166, false) -- наличие спелла 'Покорение стихий' элем
 
     if isEnhance then
-        c.LogWhatHappend(updateEnhance())
+        local r = updateEnhance()
+        c.RecordDecision(r)
+        c.LogWhatHappend(r)
     elseif isElemental then
-        c.LogWhatHappend(updateElemental())
+        local r = updateElemental()
+        c.RecordDecision(r)
+        c.LogWhatHappend(r)
     else
         return '#not_dps_spec' -- Restoration хил спек
     end

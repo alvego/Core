@@ -133,7 +133,7 @@ local function updateUserAction()
         return
     end
     c.Message('жмем!', userAction.name, userAction.icon)
-    c.bUseAction(userAction.slot, userAction.target)
+    c.bUseAction(userAction.slot, userAction.target, 'manual')
     c.SkipNextUpdate()
 end
 c.BeforeUpdate(updateUserAction, true)

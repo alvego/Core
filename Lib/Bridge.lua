@@ -140,18 +140,28 @@ end
 ---Каст спела в цель
 ---@param spellName? string Default = ''
 ---@param unitID? UnitToken Default = '' (Не поддерживает unitGUID)
+---@param source? string источник нажатия для рекордера (Default = 'unknown')
+---@param reason? string reason ротации для рекордера (в мост НЕ пробрасывается)
 ---@return nil
-function c.bUseSpell(spellName, unitID)
+function c.bUseSpell(spellName, unitID, source, reason)
     if not bConnected then return end
+    if c.RecorderActive() then -- имя спелла уже есть, слот не нужен
+        c.RecordPress(spellName, nil, unitID, source or 'unknown', reason)
+    end
     return cmd('UseSpell', spellName, unitID)
 end
 
 ---Используем слот на юнита левой кнопкой мыши
 ---@param slot? number|string Default = ''
 ---@param unitID? UnitToken Default = '' (Не поддерживает unitGUID)
+---@param source? string источник нажатия для рекордера: 'rotation'|'manual' (Default = 'unknown')
+---@param reason? string reason ротации для рекордера (в мост НЕ пробрасывается)
 ---@return nil
-function c.bUseAction(slot, unitID)
+function c.bUseAction(slot, unitID, source, reason)
     if not bConnected then return end
+    if c.RecorderActive() then -- имя резолвим только при активной записи
+        c.RecordPress(c.GetActionSpell(slot), slot, unitID, source or 'unknown', reason)
+    end
     return cmd('UseAction', slot, unitID)
 end
 

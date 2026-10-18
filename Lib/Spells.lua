@@ -109,7 +109,7 @@ function c.DoSpell(reason, spell, target)
     c.ClearCursor()
     c.Message(reason, spell, GetSpellTexture(spell))
     ConsoleExec('Sound_EnableSFX 0')
-    c.bUseSpell(spell, target)
+    c.bUseSpell(spell, target, 'rotation', reason)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastSpell = spell
 end

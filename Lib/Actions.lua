@@ -175,7 +175,7 @@ function c.DoAction(reason, name, target)
     c.ClearCursor()
     c.Message(reason, name, GetActionTexture(slot), 1, 0.8431, 0) -- permanent gold
     ConsoleExec('Sound_EnableSFX 0')
-    c.bUseAction(slot, target)
+    c.bUseAction(slot, target, 'rotation', reason)
     ConsoleExec('Sound_EnableSFX 1')
     st.lastAction = name
 end

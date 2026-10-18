@@ -27,6 +27,7 @@ Lib\Telemetry.lua
 Lib\TelemetryHooks.lua
 Lib\Minimap.lua
 Lib\CombatLog.lua
+Lib\Recorder.lua
 Lib\Units.lua
 Lib\TimeToDie.lua
 Lib\Actions.lua
