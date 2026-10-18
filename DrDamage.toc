@@ -14,11 +14,11 @@
 
 Core.lua
 
+Lib\Timers.lua
+Lib\Events.lua
 Lib\Bridge.lua
 Lib\TablePool.lua
-Lib\Timers.lua
 Lib\Misc.lua
-Lib\Events.lua
 Lib\Latency.lua
 Lib\Debug.lua
 Lib\Chat.lua

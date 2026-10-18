@@ -3,6 +3,8 @@ local c = Core -- luacheck: ignore -- luacheck: ignore
 -- luacheck: push ignore
 local SecondsToTime = SecondsToTime
 local UnitGUID = UnitGUID
+local GetTime = GetTime
+local math_max = math.max
 -- luacheck: pop
 ---@alias bCmdName "Pulse"
 ---|"Test"
@@ -137,6 +139,26 @@ function c.bUseMacro(macroLine)
     return cmd('UseMacro', macroLine)
 end
 
+---In-flight guard: подавляет повторные прессы до серверного ack (окно: max(c.latency*1.5, 0.15)).
+---Окно сбрасывается по своим UNIT_SPELLCAST_SUCCEEDED/FAILED/INTERRUPTED, иначе истекает само при следующем прессе.
+local bPressTime = nil
+local function bPressAllowed()
+    local t = GetTime()
+    if bPressTime and (t - bPressTime) <= math_max(c.latency * 1.5, 0.15) then
+        return false
+    end
+    bPressTime = t
+    return true
+end
+local function bPressReset(_, unit)
+    if unit == 'player' then
+        bPressTime = nil
+    end
+end
+c.Event('UNIT_SPELLCAST_SUCCEEDED', bPressReset)
+c.Event('UNIT_SPELLCAST_FAILED', bPressReset)
+c.Event('UNIT_SPELLCAST_INTERRUPTED', bPressReset)
+
 ---Каст спела в цель
 ---@param spellName? string Default = ''
 ---@param unitID? UnitToken Default = '' (Не поддерживает unitGUID)
@@ -145,6 +167,7 @@ end
 ---@return nil
 function c.bUseSpell(spellName, unitID, source, reason)
     if not bConnected then return end
+    if not bPressAllowed() then return nil end -- in-flight guard: повторный пресс до ack
     if c.RecorderActive() then -- имя спелла уже есть, слот не нужен
         c.RecordPress(spellName, nil, unitID, source or 'unknown', reason)
     end
@@ -159,6 +182,7 @@ end
 ---@return nil
 function c.bUseAction(slot, unitID, source, reason)
     if not bConnected then return end
+    if not bPressAllowed() then return nil end -- in-flight guard: повторный пресс до ack
     if c.RecorderActive() then -- имя резолвим только при активной записи
         c.RecordPress(c.GetActionSpell(slot), slot, unitID, source or 'unknown', reason)
     end
