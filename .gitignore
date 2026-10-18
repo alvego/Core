@@ -1,3 +1,4 @@
 tmp/
 .*/
 compiled.txt
+__pycache__/
