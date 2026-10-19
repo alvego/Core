@@ -75,7 +75,7 @@ local function updateEnhance()
     local hasSS = c.HasMyDebuff('Удар бури', 'target', 1) or not c.CanGcdSpell('Удар бури', 'target')
 
     reason, action, unit = 'Шокаем боса сразу', 'Огненный шок', 'target'
-    if c.CanGcdSpell(action, unit) and not aoe(3) and UnitHealthMax('target') > 500000 and not c.HasMyDebuff('Огненный шок', unit, 1) then
+    if c.CanGcdSpell(action, unit) and not aoe(3) and UnitHealthMax('target') > 500000 and not c.HasMyDebuff('Огненный шок', unit, 1) and not st.targetMelee then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -100,12 +100,6 @@ local function updateEnhance()
         return reason
     end
 
-    reason, action, unit = 'Перевешиваем шок под инстант', 'Огненный шок', 'target'
-    if isInstant and not aoe(3) and not c.HasMyDebuff('Огненный шок', unit, 1) and c.CanGcdSpell(action, unit) then
-        c.DoAction(reason, action, unit)
-        return reason
-    end
-
     reason, action, unit = 'мало маны', 'Ярость шамана', 'player'
     if st.combatMode and mana100 < 40 and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
@@ -114,6 +108,12 @@ local function updateEnhance()
 
     reason, action, unit = 'Основной мили удар', 'Удар бури', 'target'
     if c.CanGcdSpell(action, unit) then
+        c.DoAction(reason, action, unit)
+        return reason
+    end
+
+    reason, action, unit = 'Перевешиваем шок под инстант', 'Огненный шок', 'target'
+    if isInstant and not aoe(3) and not c.HasMyDebuff('Огненный шок', unit, 1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
@@ -129,8 +129,9 @@ local function updateEnhance()
         return reason
     end
 
+    -- на соло-таргете тотем уступает GCD готовому вскипанию (при 2+ целях наоборот)
     reason, action, unit = 'АОЕ или босс', 'Тотем магмы', 'target'
-    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and not HasMagmaTotem() then
+    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and not HasMagmaTotem() and (aoe(1) or not hasSS or not c.IsReadySpell('Вскипание лавы')) then
         c.DoAction(reason, action)
         return reason
     end
