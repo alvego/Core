@@ -13,6 +13,7 @@ c.PrintLoadClassModuleMessage(className)
 local st = c.state
 --c.updateDelay = 0.25
 -- luacheck: push ignore
+local GetTime = GetTime
 local GetTotemInfo = GetTotemInfo
 local UnitHealthMax = UnitHealthMax
 local format = format
@@ -22,9 +23,10 @@ c.Telemetry(function()
     return format('AOEtar: %d', c.GetEnemyCount(20, 'player'))
 end)
 
-local function HasMagmaTotem()
-    local haveTotem, name = GetTotemInfo(1)
-    return haveTotem and name == 'Тотем магмы VII'
+local function MagmaTotemLeft()
+    local haveTotem, name, startTime, duration = GetTotemInfo(1)
+    if not haveTotem or name ~= 'Тотем магмы VII' then return 0 end
+    return startTime + duration - GetTime()
 end
 
 local function updateEnhance()
@@ -129,9 +131,16 @@ local function updateEnhance()
         return reason
     end
 
-    -- на соло-таргете тотем уступает GCD готовому вскипанию (при 2+ целях наоборот)
+    -- рефреш за 10с до смерти тотема, чтобы GCD филлера не пробивал дыру в аптайме; на соло-таргете тотем уступает GCD готовому вскипанию (при 2+ целях наоборот)
     reason, action, unit = 'АОЕ или босс', 'Тотем магмы', 'target'
-    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and not HasMagmaTotem() and (aoe(1) or not hasSS or not c.IsReadySpell('Вскипание лавы')) then
+    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and MagmaTotemLeft() < 10 and (aoe(1) or not hasSS or not c.IsReadySpell('Вскипание лавы')) then
+        c.DoAction(reason, action)
+        return reason
+    end
+
+    -- дедлайн: за 6с до смерти тотема уступать GCD вскипанию больше нельзя
+    reason, action, unit = 'Тотем: дедлайн', 'Тотем магмы', 'target'
+    if mana100 >= 30 and st.still and (aoe(2) or needMagmaTotem) and c.CanGcdSpell(action) and (dist < 10 or st.targetMelee) and MagmaTotemLeft() < 6 then
         c.DoAction(reason, action)
         return reason
     end
@@ -150,7 +159,7 @@ local function updateEnhance()
     end
 
     reason, action, unit = 'АОЕ', 'Кольцо огня', 'target'
-    if aoe(4) and c.CanGcdSpell(action) and HasMagmaTotem() then
+    if aoe(4) and c.CanGcdSpell(action) and MagmaTotemLeft() > 0 then
         c.DoAction(reason, action)
         return reason
     end
