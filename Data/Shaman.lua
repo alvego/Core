@@ -93,8 +93,9 @@ local function updateEnhance()
         return reason
     end
 
+    -- ЛБ готова, но шока нет и прожать его неоткуда (кд/промах): инстант-Молния вместо простоя в '#instantcast return'
     reason, action, unit = 'Заполнитель', 'Молния', 'target'
-    if hasSS and isInstant and not c.IsReadySpell('Выброс лавы') and not aoe(1) and c.CanGcdSpell(action, unit) then
+    if hasSS and isInstant and (not c.IsReadySpell('Выброс лавы') or (not c.HasMyDebuff('Огненный шок', unit, 1) and not c.CanGcdSpell('Огненный шок', unit))) and not aoe(1) and c.CanGcdSpell(action, unit) then
         c.DoAction(reason, action, unit)
         return reason
     end
